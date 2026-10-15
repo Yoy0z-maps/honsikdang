@@ -1,6 +1,6 @@
 # 혼식당 (Honsikdang) — AI-Native Development Master Plan
 
-Version: 0.1 / 2026-10-15 / Status: Proposed, not approved
+Version: 0.2 / 2026-10-15 / Status: Map-first home confirmed; other choices proposed
 
 ## 0. How to use this document
 This is the source of truth for AI coding agents. Read it before modifying code. Proposed choices are not completed features. When an external API capability or policy is uncertain, verify its current official documentation and record evidence; never fabricate behavior. Keep a decision log and update this file when decisions change.
@@ -93,6 +93,23 @@ E. Moderation: view pending places/reports → verify sources and duplicates →
 - Reliability: fallback search without LLM, bounded retries and timeouts, idempotent async jobs, observable failure states.
 - Cost: log model tokens, embedding jobs, maps requests and storage; quotas, caching and budget alerts.
 - Data provenance: per-field source, observed_at, updated_at, confidence and report mechanisms.
+
+## 5A. Mobile-centric UX specification (P0)
+- **Primary target:** smartphone users. Design at 360–430 CSS px first, then adapt to tablets and desktop. Do not shrink desktop layouts to mobile.
+- **Navigation:** the root route `/` opens the map directly, never a dashboard/feed/list. Saved/profile may be accessible from compact overlay controls or a minimal bottom navigation that does not reduce the map-first experience. Respect safe-area insets and one-handed reachability.
+- **Map discovery:** the map is the full-viewport base layer, behind overlay search, category chips, current-location control, map markers, and a draggable bottom sheet (collapsed/half/full). The sheet initially occupies minimal space; the map remains visually dominant. Marker tap opens a compact restaurant preview; sheet expansion reveals results or details. Preserve map camera and filters. Avoid accidental map gestures while dragging the sheet.
+- **Map interaction contract:** initial camera uses a consented location when available, otherwise a safe default/last explicitly chosen region; location denial must not block browsing. Pan/zoom must not issue requests on every frame: fetch after idle/debounce or explicit “이 지역에서 다시 검색”. Query approved restaurants by map bounds and active filters; cluster dense markers. Search and recommendation results should focus/highlight markers rather than replace the map with a feed.
+- **Overlay layering:** search bar and category chips float at the top; current-location/research controls float over the map; restaurant preview and results use a bottom sheet with iOS/Android safe-area handling. Keyboard opening must not obscure the active input or selected result.
+- **Map-first acceptance:** on mobile opening `/`, the map is immediately the primary surface (loading/permission/error states allowed); users can pan/zoom, tap markers, filter categories, open a preview and expand/collapse the sheet without navigating away. No standalone recommendation feed or list-first landing screen.
+- **Search and filters:** sticky prominent search entry, horizontally scrollable category chips, bottom-sheet filters, clear active filter indicators, one-tap reset. Search must also work without location permission.
+- **Restaurant cards:** concise name, category, approximate distance (when permitted), verified solo-dining attributes, price evidence, review count and freshness. Do not show invented ratings, wait times or opening status.
+- **Details and contribution:** prominent save/directions actions, thumb-friendly controls, 30-second structured review with progressive disclosure, photo uploads optional and compressed. Avoid mandatory long-form typing.
+- **Touch/accessibility:** interactive targets at least 44×44 CSS px where feasible; visible focus states, semantic labels, readable text, screen-reader alternatives to map-only information, reduced-motion support.
+- **Mobile technical:** viewport-fit and safe-area handling, 100dvh where appropriate, on-screen keyboard avoidance, image lazy loading, skeletons, map SDK deferred loading, viewport-bounded marker fetches and clustering at scale.
+- **Network/performance:** test on throttled mobile connections and midrange Android as well as iOS Safari; avoid map rerenders during sheet gestures; provide retry and offline/error states without pretending data is available offline.
+- **PWA:** evaluate installability and caching as a separate decision; never assume background geolocation or push works consistently across browsers.
+- **QA acceptance:** Playwright mobile viewport tests at 360×800 and 390×844, iOS Safari and Android Chrome manual checks, keyboard/gesture/safe-area checks, no horizontal overflow, all primary flows operable by touch and without location permission.
+- **Agent rule:** every UI work package must include mobile screenshots/viewport checks and a short mobile UX acceptance report. Mobile usability is a release blocker, not polish.
 
 ## 6. Architecture
 Browser (Next.js + TypeScript + Tailwind) → Supabase client (Auth, public read/RLS, storage) and server functions (privileged workflows) → PostgreSQL + PostGIS + pgvector. Naver Maps SDK renders map. External place search/geocoding only through verified, licensed API paths. Supabase Edge Functions handle query parsing, embedding orchestration and trusted mutation workflows. AI provider abstracted behind interfaces; provider/model selected by evaluated cost/quality, not hardcoded.
@@ -237,7 +254,7 @@ Read the master plan. Turn P0 into a detailed PRD with personas, numbered user s
 Read the master plan and PRD. Propose an ERD, migrations, indexes, PostGIS queries, review aggregation strategy and per-table RLS policy matrix. Include anonymous, owner, other-user and admin authorization tests; account for safe admin role assignment and SECURITY DEFINER restrictions. Produce SQL migrations and test plan only for approved scope. Never apply production migrations without authorization.
 
 ## Frontend/UI agent
-Read the master plan and PRD. Implement a responsive, accessible map/list discovery experience with restaurant details and 30-second review form. Use reusable components, real typed data contracts, loading/empty/error states, keyboard and mobile interactions. Keep map SDK integration isolated; do not fabricate restaurant data in production. Provide screenshot/e2e verification when available.
+Read the master plan and PRD. Implement a mobile-centric **map-first home at `/`** (full-viewport Naver map as base layer, floating search/filter controls, marker selection and draggable bottom sheet) with restaurant details and 30-second review form. Use reusable components, real typed data contracts, loading/empty/error states, keyboard and mobile interactions. Keep map SDK integration isolated; do not fabricate restaurant data in production. Provide screenshot/e2e verification when available.
 
 ## AI search agent
 Read the master plan and existing schema. Implement a bounded, schema-validated Korean query parser, deterministic filters, lexical/vector retrieval, fusion ranking, evidence-grounded explanations, fallback and evaluation fixtures. Preserve hard constraints, track model/version/cost, and test ambiguous Korean phrases and prompt injection in user reviews. Benchmark before claiming quality improvements.
