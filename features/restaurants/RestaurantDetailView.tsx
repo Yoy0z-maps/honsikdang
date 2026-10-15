@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { AccountMenu } from "@/features/auth/AccountMenu";
 import { SEAT_TYPE_LABELS, formatDate, formatPrice } from "@/lib/domain/format";
 import type {
   RestaurantDetail,
@@ -70,9 +71,12 @@ export function RestaurantDetailView({ detail }: { detail: RestaurantDetail }) {
   return (
     <div className="space-y-6">
       <div>
-        <Link href="/" className="text-sm underline underline-offset-2">
-          ← 목록으로
-        </Link>
+        <div className="flex items-center justify-between">
+          <Link href="/" className="text-sm underline underline-offset-2">
+            ← 목록으로
+          </Link>
+          <AccountMenu />
+        </div>
         <h1 className="mt-2 text-2xl font-bold tracking-tight">
           {detail.name}
         </h1>
@@ -149,9 +153,17 @@ export function RestaurantDetailView({ detail }: { detail: RestaurantDetail }) {
       </section>
 
       <section aria-labelledby="reviews-heading">
-        <h2 id="reviews-heading" className="text-lg font-semibold">
-          방문 리뷰
-        </h2>
+        <div className="flex items-center justify-between gap-2">
+          <h2 id="reviews-heading" className="text-lg font-semibold">
+            방문 리뷰
+          </h2>
+          <Link
+            href={`/restaurants/${detail.id}/review`}
+            className="rounded-md bg-zinc-900 px-3 py-1.5 text-sm text-white dark:bg-zinc-100 dark:text-zinc-900"
+          >
+            리뷰 쓰기
+          </Link>
+        </div>
         <p className="mt-1 text-xs text-zinc-500">
           리뷰는 방문 당시의 경험이라 지금과 다를 수 있어요.
         </p>

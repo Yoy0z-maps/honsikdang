@@ -2,6 +2,7 @@
 
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useCallback, useEffect, useMemo, useState } from "react";
+import { AccountMenu } from "@/features/auth/AccountMenu";
 import { NaverMap } from "@/features/map/NaverMap";
 import {
   filtersToSearchParams,
@@ -236,11 +237,14 @@ export function DiscoveryView() {
       </div>
 
       <div className="flex-1 space-y-4 p-4 md:w-[420px] md:flex-none md:overflow-y-auto">
-        <header>
-          <h1 className="text-2xl font-bold tracking-tight">혼식당</h1>
-          <p className="text-sm text-zinc-600 dark:text-zinc-400">
-            혼자 먹기 편한 식당을 찾아보세요.
-          </p>
+        <header className="flex items-start justify-between gap-2">
+          <div>
+            <h1 className="text-2xl font-bold tracking-tight">혼식당</h1>
+            <p className="text-sm text-zinc-600 dark:text-zinc-400">
+              혼자 먹기 편한 식당을 찾아보세요.
+            </p>
+          </div>
+          <AccountMenu />
         </header>
         <FilterBar
           filters={filters}

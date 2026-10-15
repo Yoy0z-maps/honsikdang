@@ -34,10 +34,11 @@
 \set as_other 'reset role; set local "request.jwt.claims" to ''{"sub":"00000000-0000-4000-8000-000000000002","role":"authenticated"}''; set local role authenticated;'
 \set as_admin 'reset role; set local "request.jwt.claims" to ''{"sub":"00000000-0000-4000-8000-000000000003","role":"authenticated"}''; set local role authenticated;'
 
--- Start from an empty catalogue so local seed data (supabase/seed.sql) cannot
--- affect assertions. Rolled back with the rest of the test transaction.
+-- Start from an empty catalogue and no users so local seed data and accounts
+-- left by e2e runs cannot affect assertions. Rolled back with the rest of the
+-- test transaction.
 delete from public.restaurants;
-delete from auth.users where email like '%@example.invalid';
+delete from auth.users;
 
 insert into auth.users (id, email, aud, role) values
   (:'owner_id', 'owner@test.invalid', 'authenticated', 'authenticated'),

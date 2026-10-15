@@ -311,6 +311,26 @@ export type Database = {
       [_ in never]: never;
     };
     Functions: {
+      my_reviews: {
+        Args: { review_id?: string };
+        Returns: {
+          body: string;
+          created_at: string;
+          id: string;
+          price_paid: number;
+          restaurant_id: string;
+          restaurant_name: string;
+          restaurant_status: Database["public"]["Enums"]["restaurant_status"];
+          seat_type: Database["public"]["Enums"]["seat_type"];
+          solo_comfort: number;
+          solo_order_available: boolean;
+          status: Database["public"]["Enums"]["review_status"];
+          tag_slugs: string[];
+          updated_at: string;
+          visited_at: string;
+          wait_minutes: number;
+        }[];
+      };
       restaurant_detail: { Args: { restaurant_id: string }; Returns: Json };
       search_restaurants: {
         Args: {
@@ -341,6 +361,34 @@ export type Database = {
           tag_review_count: number;
           total_count: number;
         }[];
+      };
+      submit_review: {
+        Args: {
+          body?: string;
+          price_paid?: number;
+          restaurant_id: string;
+          seat_type: Database["public"]["Enums"]["seat_type"];
+          solo_comfort: number;
+          solo_order_available?: boolean;
+          tag_slugs?: string[];
+          visited_at: string;
+          wait_minutes?: number;
+        };
+        Returns: string;
+      };
+      update_my_review: {
+        Args: {
+          body?: string;
+          price_paid?: number;
+          review_id: string;
+          seat_type: Database["public"]["Enums"]["seat_type"];
+          solo_comfort: number;
+          solo_order_available?: boolean;
+          tag_slugs?: string[];
+          visited_at: string;
+          wait_minutes?: number;
+        };
+        Returns: undefined;
       };
     };
     Enums: {
