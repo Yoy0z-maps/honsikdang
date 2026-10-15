@@ -1,6 +1,7 @@
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
 import { z } from "zod";
+import { SAVE_BUTTON_CLASS, SaveButton } from "@/features/saved/SaveButton";
 import { RestaurantDetailView } from "@/features/restaurants/RestaurantDetailView";
 import { fetchRestaurantDetail } from "@/lib/restaurants/detail";
 import { getPublicServerSupabase } from "@/lib/supabase/server";
@@ -17,7 +18,20 @@ async function RestaurantDetailContent({
   const detail = await fetchRestaurantDetail(getPublicServerSupabase(), id);
   if (!detail) notFound();
 
-  return <RestaurantDetailView detail={detail} />;
+  return (
+    <RestaurantDetailView
+      detail={detail}
+      saveSlot={
+        <Suspense
+          fallback={
+            <span aria-hidden className={`${SAVE_BUTTON_CLASS} w-20`} />
+          }
+        >
+          <SaveButton restaurantId={detail.id} />
+        </Suspense>
+      }
+    />
+  );
 }
 
 export default function RestaurantPage({

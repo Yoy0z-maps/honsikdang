@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { DirectionsButton } from "@/features/directions/DirectionsButton";
 import { formatDate, formatPrice } from "@/lib/domain/format";
 import type { RestaurantSummary } from "@/lib/restaurants/search";
 import {
@@ -54,12 +55,19 @@ export function RestaurantPreview({
           <span className="text-zinc-500">아직 승인된 혼밥 리뷰가 없어요.</span>
         )}
       </p>
-      <Link
-        href={`/restaurants/${r.id}`}
-        className="mt-3 flex min-h-11 items-center justify-center rounded-lg bg-zinc-900 px-4 text-sm font-medium text-white dark:bg-zinc-100 dark:text-zinc-900"
-      >
-        상세 보기
-      </Link>
+      <div className="mt-3 grid grid-cols-2 gap-2">
+        <DirectionsButton
+          destination={{ ...r.position, name: r.name }}
+          address={r.address}
+          className="flex min-h-11 items-center justify-center rounded-lg border border-zinc-300 px-4 text-sm font-medium dark:border-zinc-700"
+        />
+        <Link
+          href={`/restaurants/${r.id}`}
+          className="flex min-h-11 items-center justify-center rounded-lg bg-zinc-900 px-4 text-sm font-medium text-white dark:bg-zinc-100 dark:text-zinc-900"
+        >
+          상세 보기
+        </Link>
+      </div>
     </div>
   );
 }

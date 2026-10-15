@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { Suspense } from "react";
+import { ActivityNav } from "@/features/me/ActivityNav";
 import { loginPath } from "@/lib/auth/redirect";
 import { formatDate } from "@/lib/domain/format";
 import {
@@ -85,20 +86,7 @@ async function MyPlacesContent() {
 export default function MyPlacesPage() {
   return (
     <main className="mx-auto w-full max-w-xl space-y-4 px-4 py-6">
-      <nav className="flex gap-4 text-sm">
-        <Link
-          href="/"
-          className="inline-flex min-h-11 items-center underline underline-offset-2"
-        >
-          ← 지도
-        </Link>
-        <Link
-          href="/me/reviews"
-          className="inline-flex min-h-11 items-center underline underline-offset-2"
-        >
-          내 리뷰
-        </Link>
-      </nav>
+      <ActivityNav current="/me/places" />
       <h1 className="text-2xl font-bold tracking-tight">내 장소 제안</h1>
       <Suspense
         fallback={<p className="text-sm text-zinc-500">불러오는 중이에요…</p>}

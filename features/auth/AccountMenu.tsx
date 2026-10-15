@@ -11,8 +11,8 @@ type Session = "unknown" | "signed-out" | "signed-in";
 
 /**
  * Display only. Authorization always happens on the server and in RLS.
- * `compact` (map overlay): a single 44 px control; sign-out lives on
- * /me/reviews.
+ * `compact` (map overlay): a single 44 px control; sign-out lives on the
+ * "내 활동" pages.
  */
 export function AccountMenu({ compact = false }: { compact?: boolean }) {
   const pathname = usePathname();
@@ -56,16 +56,18 @@ export function AccountMenu({ compact = false }: { compact?: boolean }) {
   if (compact) {
     return (
       <Link href="/me/reviews" className={linkClass}>
-        내 리뷰
+        내 활동
       </Link>
     );
   }
 
   return (
     <div className="flex items-center gap-2 text-sm">
-      <Link href="/me/reviews" className={linkClass}>
-        내 리뷰
-      </Link>
+      {!pathname.startsWith("/me/") && (
+        <Link href="/me/reviews" className={linkClass}>
+          내 활동
+        </Link>
+      )}
       <form action={signOut}>
         <button
           type="submit"

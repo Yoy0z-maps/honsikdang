@@ -1,5 +1,7 @@
 import Link from "next/link";
+import type { ReactNode } from "react";
 import { AccountMenu } from "@/features/auth/AccountMenu";
+import { DirectionsButton } from "@/features/directions/DirectionsButton";
 import { ReportButton } from "@/features/reports/ReportButton";
 import { SEAT_TYPE_LABELS, formatDate, formatPrice } from "@/lib/domain/format";
 import type {
@@ -79,13 +81,26 @@ function Review({
   );
 }
 
-export function RestaurantDetailView({ detail }: { detail: RestaurantDetail }) {
+const ACTION_CLASS =
+  "inline-flex min-h-11 items-center justify-center rounded-lg bg-zinc-900 px-4 text-sm font-medium text-white dark:bg-zinc-100 dark:text-zinc-900";
+
+export function RestaurantDetailView({
+  detail,
+  saveSlot,
+}: {
+  detail: RestaurantDetail;
+  /** Save button; streamed separately because it depends on the session. */
+  saveSlot: ReactNode;
+}) {
   const s = detail.summary;
   return (
     <div className="space-y-6">
       <div>
         <div className="flex items-center justify-between">
-          <Link href="/" className="text-sm underline underline-offset-2">
+          <Link
+            href="/"
+            className="-ml-2 inline-flex min-h-11 items-center px-2 text-sm underline underline-offset-2"
+          >
             ← 목록으로
           </Link>
           <AccountMenu />
@@ -100,6 +115,18 @@ export function RestaurantDetailView({ detail }: { detail: RestaurantDetail }) {
           정보 출처: {SOURCE_LABELS[detail.source_type]} · 정보 업데이트{" "}
           {formatDate(detail.updated_at)}
         </p>
+        <div className="mt-3 flex flex-wrap gap-2">
+          <DirectionsButton
+            destination={{
+              lat: detail.lat,
+              lng: detail.lng,
+              name: detail.name,
+            }}
+            address={detail.address}
+            className={ACTION_CLASS}
+          />
+          {saveSlot}
+        </div>
         <ReportButton
           targetType="restaurant"
           targetId={detail.id}

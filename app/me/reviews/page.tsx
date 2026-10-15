@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { Suspense } from "react";
-import { AccountMenu } from "@/features/auth/AccountMenu";
+import { ActivityNav } from "@/features/me/ActivityNav";
 import { DeleteReviewButton } from "@/features/reviews/DeleteReviewButton";
 import { loginPath } from "@/lib/auth/redirect";
 import { formatDate } from "@/lib/domain/format";
@@ -109,23 +109,7 @@ export default function MyReviewsPage({
 }: PageProps<"/me/reviews">) {
   return (
     <main className="mx-auto w-full max-w-xl space-y-4 px-4 py-6">
-      <div className="flex items-center justify-between">
-        <nav className="flex gap-4 text-sm">
-          <Link
-            href="/"
-            className="inline-flex min-h-11 items-center underline underline-offset-2"
-          >
-            ← 지도
-          </Link>
-          <Link
-            href="/me/places"
-            className="inline-flex min-h-11 items-center underline underline-offset-2"
-          >
-            내 장소 제안
-          </Link>
-        </nav>
-        <AccountMenu />
-      </div>
+      <ActivityNav current="/me/reviews" />
       <h1 className="text-2xl font-bold tracking-tight">내 리뷰</h1>
       <Suspense
         fallback={<p className="text-sm text-zinc-500">불러오는 중이에요…</p>}

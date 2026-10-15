@@ -100,3 +100,57 @@ test("capture moderation states (WP-04c)", async ({ browser }, testInfo) => {
   await shot("3-admin-places");
   await context.close();
 });
+
+test("capture save and directions states (WP-04d)", async ({
+  page,
+}, testInfo) => {
+  const shot = (name: string, fullPage = false) =>
+    page.screenshot({
+      path: `${dir}/WP-04d-${testInfo.project.name}-${name}.png`,
+      fullPage,
+    });
+  const detail = "/restaurants/5eed1000-0000-4000-8000-000000000002";
+
+  await page.goto("/?z=14");
+  await page.getByRole("button", { name: "결과 목록 펼치기" }).click();
+  await page
+    .getByRole("button", { name: "[예시] 덕수궁 라멘 지도에서 보기" })
+    .click();
+  await page.getByTestId("restaurant-preview").waitFor();
+  await page.waitForTimeout(300);
+  await shot("1-preview-directions");
+
+  await page.goto(detail);
+  await page.getByRole("link", { name: "저장", exact: true }).click();
+  await signInWithMagicLink(
+    page,
+    uniqueEmail(`shot-saved-${testInfo.project.name}`),
+  );
+  await page.getByRole("button", { name: "저장", exact: true }).click();
+  await page.getByRole("button", { name: "저장됨" }).waitFor();
+  await shot("2-detail-saved");
+
+  await page.goto("/me/saved");
+  await page.getByRole("heading", { name: "저장한 식당" }).waitFor();
+  await page.getByRole("link", { name: "[예시] 덕수궁 라멘" }).waitFor();
+  await shot("3-activity-saved");
+
+  await page.goto("/me/places");
+  await page.getByRole("heading", { name: "내 장소 제안" }).waitFor();
+  await shot("4-activity-places");
+});
+
+test.describe("desktop directions guidance (WP-04d)", () => {
+  test.use({
+    userAgent:
+      "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/124 Safari/537.36",
+  });
+  test("capture", async ({ page }, testInfo) => {
+    await page.goto("/restaurants/5eed1000-0000-4000-8000-000000000002");
+    await page.getByRole("button", { name: "길찾기" }).click();
+    await page.getByRole("region", { name: "길찾기 안내" }).waitFor();
+    await page.screenshot({
+      path: `${dir}/WP-04d-${testInfo.project.name}-5-no-app-guidance.png`,
+    });
+  });
+});
