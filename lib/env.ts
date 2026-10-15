@@ -30,6 +30,16 @@ export function parsePublicEnv(
   return result.data;
 }
 
+/**
+ * NAVER Maps Client ID, sent as the `ncpKeyId` script parameter. Optional:
+ * without it the map shows a fallback and discovery still works. It is public
+ * by design and restricted to the service URLs registered in the NCP console.
+ */
+export function getNaverMapKeyId(): string | null {
+  const value = process.env.NEXT_PUBLIC_NAVER_MAP_CLIENT_ID?.trim();
+  return value && /^[A-Za-z0-9_-]{1,100}$/.test(value) ? value : null;
+}
+
 export function getPublicEnv(): PublicEnv {
   // NEXT_PUBLIC_* values are inlined at build time only when referenced
   // literally, so each variable is listed explicitly.

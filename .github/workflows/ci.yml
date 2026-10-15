@@ -51,6 +51,39 @@ jobs:
       - if: always()
         run: npx supabase stop --no-backup
 
+  e2e:
+    name: Mobile e2e
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version-file: .node-version
+          cache: npm
+      - run: npm ci
+      # API gateway, PostgREST, Auth and Postgres (+ seed.sql) only.
+      - run: npx supabase start -x studio,imgproxy,mailpit,realtime,storage-api,edge-runtime,logflare,vector,supavisor,postgres-meta
+      - name: Write local Supabase env
+        run: |
+          npx supabase status -o env \
+            | grep -E '^(API_URL|PUBLISHABLE_KEY)=' \
+            | sed -E 's/^API_URL=/NEXT_PUBLIC_SUPABASE_URL=/; s/^PUBLISHABLE_KEY=/NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=/' \
+            > .env.local
+          test "$(wc -l < .env.local)" -eq 2
+      - run: npx playwright install --with-deps chromium
+      - run: npm run e2e
+      - if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report
+          path: |
+            playwright-report
+            test-results
+          retention-days: 7
+      - if: always()
+        run: npx supabase stop --no-backup
+
   secrets:
     name: Secret scan
     runs-on: ubuntu-latest

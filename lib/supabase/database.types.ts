@@ -311,7 +311,37 @@ export type Database = {
       [_ in never]: never;
     };
     Functions: {
-      [_ in never]: never;
+      restaurant_detail: { Args: { restaurant_id: string }; Returns: Json };
+      search_restaurants: {
+        Args: {
+          category_slugs?: string[];
+          center_lat: number;
+          center_lng: number;
+          max_price?: number;
+          query?: string;
+          radius_m?: number;
+          result_limit?: number;
+          result_offset?: number;
+          tag_slugs?: string[];
+        };
+        Returns: {
+          address: string;
+          avg_solo_comfort: number;
+          category_label: string;
+          category_slug: string;
+          distance_m: number;
+          excluded_no_price_count: number;
+          id: string;
+          last_visited_at: string;
+          lat: number;
+          lng: number;
+          median_price: number;
+          name: string;
+          review_count: number;
+          tag_review_count: number;
+          total_count: number;
+        }[];
+      };
     };
     Enums: {
       moderation_action:
