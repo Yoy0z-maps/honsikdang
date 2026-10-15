@@ -62,8 +62,9 @@ jobs:
           node-version-file: .node-version
           cache: npm
       - run: npm ci
-      # API gateway, PostgREST, Auth and Postgres (+ seed.sql) only.
-      - run: npx supabase start -x studio,imgproxy,mailpit,realtime,storage-api,edge-runtime,logflare,vector,supavisor,postgres-meta
+      # API gateway, PostgREST, Auth, Mailpit (magic link emails) and
+      # Postgres (+ seed.sql) only.
+      - run: npx supabase start -x studio,imgproxy,realtime,storage-api,edge-runtime,logflare,vector,supavisor,postgres-meta
       - name: Write local Supabase env
         run: |
           npx supabase status -o env \

@@ -16,6 +16,10 @@ npm run db:start             # 로컬 Supabase (Docker 필요)
 npm run dev
 ```
 
+Windows PowerShell에서 `npm`이 실행 정책으로 막히면 `npm.cmd run dev`를 쓰세요.
+
+로컬 로그인 메일은 실제로 발송되지 않고 Mailpit(http://127.0.0.1:54324)에 쌓입니다. 로그인 링크는 http://localhost:3000 에서 엽니다.
+
 ## 스크립트
 
 | 명령               | 내용                                       |
