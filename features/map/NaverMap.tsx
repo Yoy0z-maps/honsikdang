@@ -7,7 +7,8 @@ import type { LatLng } from "@/lib/domain/geo";
 
 export type MapMarker = { id: string; position: LatLng };
 
-type Status = "no-key" | "loading" | "ready" | "failed";
+export type MapStatus = "no-key" | "loading" | "ready" | "failed";
+type Status = MapStatus;
 
 type Props = {
   keyId: string | null;
@@ -20,6 +21,12 @@ type Props = {
   onSelect: (id: string) => void;
   /** Called when the user stops moving the map. */
   onIdle: (camera: Camera) => void;
+  /** Reports SDK state, e.g. to explain a fallback position. */
+  onStatusChange?: (status: MapStatus) => void;
+  /** Accessible name of the map region (context-specific). */
+  label?: string;
+  /** What to do instead when the map cannot load (context-specific). */
+  fallbackHint?: string;
 };
 
 function markerIcon(selected: boolean): naver.maps.HtmlIcon {
@@ -46,6 +53,9 @@ export function NaverMap({
   focus,
   onSelect,
   onIdle,
+  onStatusChange,
+  label = "식당 지도. 같은 결과를 결과 목록에서도 볼 수 있습니다.",
+  fallbackHint = "아래 결과 목록에서 식당을 확인해 주세요.",
 }: Props) {
   const [status, setStatus] = useState<Status>(keyId ? "loading" : "no-key");
   const containerRef = useRef<HTMLDivElement>(null);
@@ -57,6 +67,10 @@ export function NaverMap({
   useEffect(() => {
     callbacks.current = { onSelect, onIdle };
   });
+
+  useEffect(() => {
+    onStatusChange?.(status);
+  }, [status, onStatusChange]);
 
   // NAVER calls this global when Open API authentication fails (documented in
   // the v3 Getting Started guide), e.g. an unregistered service URL.
@@ -169,7 +183,7 @@ export function NaverMap({
       <div
         ref={containerRef}
         role="region"
-        aria-label="식당 지도. 같은 결과를 결과 목록에서도 볼 수 있습니다."
+        aria-label={label}
         data-testid="map"
         className="h-full w-full"
       />
@@ -179,10 +193,8 @@ export function NaverMap({
           role="status"
         >
           {status === "loading" && "지도를 불러오는 중이에요…"}
-          {status === "no-key" &&
-            "지도를 불러올 수 없어요. 아래 결과 목록에서 식당을 확인해 주세요."}
-          {status === "failed" &&
-            "지도 인증에 실패했어요. 아래 결과 목록에서 식당을 확인해 주세요."}
+          {status === "no-key" && `지도를 불러올 수 없어요. ${fallbackHint}`}
+          {status === "failed" && `지도 인증에 실패했어요. ${fallbackHint}`}
         </div>
       )}
     </div>

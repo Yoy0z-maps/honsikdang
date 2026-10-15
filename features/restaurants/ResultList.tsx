@@ -1,3 +1,4 @@
+import Link from "next/link";
 import type { RestaurantSummary } from "@/lib/restaurants/search";
 import { RestaurantCard, type DistanceOrigin } from "./RestaurantCard";
 
@@ -24,6 +25,8 @@ type Props = {
   onLoadMore: () => void;
   onResetFilters: () => void;
   onLocate: (id: string) => void;
+  /** Offered on empty results (journey B: propose a missing place). */
+  suggestHref?: string;
 };
 
 const buttonClass =
@@ -46,6 +49,7 @@ export function ResultList({
   onLoadMore,
   onResetFilters,
   onLocate,
+  suggestHref,
 }: Props) {
   if (state.status === "loading") {
     return (
@@ -113,15 +117,25 @@ export function ResultList({
             지도를 옮기거나 축소한 뒤 &lsquo;이 지역에서 다시 검색&rsquo;을 눌러
             보세요.
           </p>
-          {hasActiveFilters && (
-            <button
-              type="button"
-              onClick={onResetFilters}
-              className={`mt-2 ${buttonClass}`}
-            >
-              필터 초기화
-            </button>
-          )}
+          <div className="mt-2 flex flex-wrap gap-2">
+            {hasActiveFilters && (
+              <button
+                type="button"
+                onClick={onResetFilters}
+                className={buttonClass}
+              >
+                필터 초기화
+              </button>
+            )}
+            {suggestHref && (
+              <Link
+                href={suggestHref}
+                className={`inline-flex items-center ${buttonClass}`}
+              >
+                찾는 식당이 없나요? 장소 제안
+              </Link>
+            )}
+          </div>
         </div>
       ) : (
         <ul className="space-y-2">

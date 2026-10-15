@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { NaverMap } from "@/features/map/NaverMap";
@@ -345,6 +346,16 @@ export function DiscoveryView() {
       ? "me"
       : "map";
   const summary = resultSummary(state);
+  // Suggestions start from the map position the user is looking at.
+  const suggestCamera = mapCamera ?? {
+    center: filters.center,
+    zoom: filters.zoom,
+  };
+  const suggestQuery = new URLSearchParams({
+    lat: suggestCamera.center.lat.toFixed(5),
+    lng: suggestCamera.center.lng.toFixed(5),
+    z: String(suggestCamera.zoom),
+  }).toString();
   const resetFilters = () => replaceFilters(clearFilters(filters));
 
   return (
@@ -396,14 +407,23 @@ export function DiscoveryView() {
         ) : (
           <span aria-hidden />
         )}
-        <button
-          type="button"
-          onClick={useCurrentLocation}
-          aria-label="현재 위치로 검색"
-          className="pointer-events-auto flex h-11 w-11 items-center justify-center rounded-full bg-white text-lg shadow-md dark:bg-zinc-800"
-        >
-          ◎
-        </button>
+        <div className="flex flex-col items-end gap-2">
+          <button
+            type="button"
+            onClick={useCurrentLocation}
+            aria-label="현재 위치로 검색"
+            className="pointer-events-auto flex h-11 w-11 items-center justify-center rounded-full bg-white text-lg shadow-md dark:bg-zinc-800"
+          >
+            ◎
+          </button>
+          <Link
+            href={`/suggest?${suggestQuery}`}
+            aria-label="장소 제안"
+            className="pointer-events-auto flex h-11 w-11 items-center justify-center rounded-full bg-white text-2xl leading-none shadow-md dark:bg-zinc-800"
+          >
+            ＋
+          </Link>
+        </div>
       </div>
 
       {notice && (
@@ -482,6 +502,7 @@ export function DiscoveryView() {
             onLoadMore={loadMore}
             onResetFilters={resetFilters}
             onLocate={locate}
+            suggestHref={`/suggest?${suggestQuery}`}
           />
         )}
       </BottomSheet>
