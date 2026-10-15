@@ -1,7 +1,7 @@
 -- restaurant_categories and restaurants authorization matrix.
 begin;
 \ir _fixtures.psql
-select plan(18);
+select plan(19);
 
 -- categories ---------------------------------------------------------------
 :as_anon
@@ -104,9 +104,11 @@ select throws_ok(
 
 :as_owner
 
-select is_empty(
+select throws_ok(
   $$ update public.restaurants set status = 'approved'
-     where id = 'a0000000-0000-4000-8000-000000000003' returning id $$,
+     where id = 'a0000000-0000-4000-8000-000000000003' $$,
+  '42501',
+  null,
   'owner cannot approve their own proposal'
 );
 
@@ -123,11 +125,17 @@ select is_empty(
 );
 
 :as_admin
-select results_eq(
+select throws_ok(
   $$ update public.restaurants set status = 'approved'
-     where id = 'a0000000-0000-4000-8000-000000000003' returning status::text $$,
-  array['approved'],
-  'admin can approve a pending proposal'
+     where id = 'a0000000-0000-4000-8000-000000000003' $$,
+  '42501',
+  null,
+  'even admins cannot change status directly (only via moderate)'
+);
+
+select lives_ok(
+  $$ select public.moderate('restaurant', 'a0000000-0000-4000-8000-000000000003', 'approve') $$,
+  'admin can approve a pending proposal via moderate'
 );
 
 select results_eq(

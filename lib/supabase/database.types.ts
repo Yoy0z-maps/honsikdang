@@ -357,12 +357,61 @@ export type Database = {
       [_ in never]: never;
     };
     Functions: {
+      admin_open_reports: {
+        Args: Record<PropertyKey, never>;
+        Returns: {
+          created_at: string;
+          id: string;
+          note: string;
+          reason: Database["public"]["Enums"]["report_reason"];
+          target_id: string;
+          target_label: string;
+          target_status: string;
+          target_type: Database["public"]["Enums"]["report_target"];
+        }[];
+      };
+      admin_pending_places: {
+        Args: Record<PropertyKey, never>;
+        Returns: {
+          address: string;
+          candidates: Json;
+          category_label: string;
+          created_at: string;
+          id: string;
+          lat: number;
+          lng: number;
+          name: string;
+        }[];
+      };
+      am_i_admin: { Args: Record<PropertyKey, never>; Returns: boolean };
+      moderate: {
+        Args: {
+          action: Database["public"]["Enums"]["moderation_action"];
+          reason?: string;
+          target_id: string;
+          target_type: Database["public"]["Enums"]["moderation_target"];
+        };
+        Returns: undefined;
+      };
+      my_places: {
+        Args: Record<PropertyKey, never>;
+        Returns: {
+          address: string;
+          category_label: string;
+          created_at: string;
+          id: string;
+          moderation_reason: string;
+          name: string;
+          status: Database["public"]["Enums"]["restaurant_status"];
+        }[];
+      };
       my_reviews: {
         Args: { review_id?: string };
         Returns: {
           body: string;
           created_at: string;
           id: string;
+          moderation_reason: string;
           price_paid: number;
           restaurant_id: string;
           restaurant_name: string;
@@ -376,6 +425,15 @@ export type Database = {
           visited_at: string;
           wait_minutes: number;
         }[];
+      };
+      resolve_report: {
+        Args: {
+          content_action?: string;
+          decision: string;
+          reason?: string;
+          report_id: string;
+        };
+        Returns: undefined;
       };
       restaurant_detail: { Args: { restaurant_id: string }; Returns: Json };
       search_restaurants: {
