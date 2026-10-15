@@ -19,6 +19,8 @@
     "db:stop": "supabase stop",
     "db:reset": "supabase db reset",
     "db:lint": "supabase db lint --schema public --level warning --fail-on warning",
+    "db:test": "supabase test db",
+    "db:types": "supabase gen types --lang typescript --local --schema public > lib/supabase/database.types.ts && prettier --write lib/supabase/database.types.ts",
     "check": "npm run format:check && npm run typecheck && npm run lint && npm run test"
   },
   "dependencies": {

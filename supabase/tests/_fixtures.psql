@@ -1,0 +1,60 @@
+-- Test-only fixtures, included by each *.test.sql via \ir inside its
+-- transaction (rolled back at the end). Synthetic data; never used outside tests.
+--
+-- Users:   owner, other (regular), admin (private.user_roles)
+-- Restaurants:
+--   r_approved_other  approved, created by other
+--   r_approved_admin  approved, created by admin
+--   r_pending_owner   pending, created by owner
+--   r_pending_other   pending, created by other
+-- Reviews:
+--   v_approved_other  other on r_approved_other, approved
+--   v_approved_owner  owner on r_approved_other, approved
+--   v_pending_other   other on r_approved_admin, pending
+--
+-- Role switch macros (psql variables): :as_anon, :as_owner, :as_other,
+-- :as_admin, :as_postgres. They only run SET statements, so they emit no rows.
+
+\set owner_id 00000000-0000-4000-8000-000000000001
+\set other_id 00000000-0000-4000-8000-000000000002
+\set admin_id 00000000-0000-4000-8000-000000000003
+
+\set r_approved_other a0000000-0000-4000-8000-000000000001
+\set r_approved_admin a0000000-0000-4000-8000-000000000002
+\set r_pending_owner a0000000-0000-4000-8000-000000000003
+\set r_pending_other a0000000-0000-4000-8000-000000000004
+
+\set v_approved_other b0000000-0000-4000-8000-000000000001
+\set v_approved_owner b0000000-0000-4000-8000-000000000002
+\set v_pending_other b0000000-0000-4000-8000-000000000003
+
+\set as_postgres 'reset role; set local "request.jwt.claims" to '''';'
+\set as_anon 'reset role; set local "request.jwt.claims" to ''{"role":"anon"}''; set local role anon;'
+\set as_owner 'reset role; set local "request.jwt.claims" to ''{"sub":"00000000-0000-4000-8000-000000000001","role":"authenticated"}''; set local role authenticated;'
+\set as_other 'reset role; set local "request.jwt.claims" to ''{"sub":"00000000-0000-4000-8000-000000000002","role":"authenticated"}''; set local role authenticated;'
+\set as_admin 'reset role; set local "request.jwt.claims" to ''{"sub":"00000000-0000-4000-8000-000000000003","role":"authenticated"}''; set local role authenticated;'
+
+insert into auth.users (id, email, aud, role) values
+  (:'owner_id', 'owner@test.invalid', 'authenticated', 'authenticated'),
+  (:'other_id', 'other@test.invalid', 'authenticated', 'authenticated'),
+  (:'admin_id', 'admin@test.invalid', 'authenticated', 'authenticated');
+
+insert into private.user_roles (user_id, role) values (:'admin_id', 'admin');
+
+insert into public.restaurants (id, name, address, location, category_id, status, source_type, created_by)
+select v.id, v.name, '서울 테스트구 테스트로 1', 'SRID=4326;POINT(126.978 37.566)',
+       (select id from public.restaurant_categories where slug = 'korean'),
+       v.status::public.restaurant_status, v.source::public.restaurant_source, v.created_by
+from (values
+  (:'r_approved_other'::uuid, '테스트 식당 A', 'approved', 'user_submitted', :'other_id'::uuid),
+  (:'r_approved_admin'::uuid, '테스트 식당 B', 'approved', 'admin_entered', :'admin_id'::uuid),
+  (:'r_pending_owner'::uuid, '테스트 식당 C', 'pending', 'user_submitted', :'owner_id'::uuid),
+  (:'r_pending_other'::uuid, '테스트 식당 D', 'pending', 'user_submitted', :'other_id'::uuid)
+) as v (id, name, status, source, created_by);
+
+insert into public.restaurant_reviews
+  (id, restaurant_id, user_id, visited_at, solo_comfort, seat_type, status)
+values
+  (:'v_approved_other', :'r_approved_other', :'other_id', date '2026-10-01', 4, 'counter', 'approved'),
+  (:'v_approved_owner', :'r_approved_other', :'owner_id', date '2026-10-02', 5, 'single_table', 'approved'),
+  (:'v_pending_other', :'r_approved_admin', :'other_id', date '2026-10-03', 3, 'shared_table', 'pending');
