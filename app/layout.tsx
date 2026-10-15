@@ -10,6 +10,11 @@ export const metadata: Metadata = {
 export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
+  // Draw under notches/home indicators; overlays pad with safe-area insets.
+  viewportFit: "cover",
+  // The on-screen keyboard shrinks the layout viewport (and dvh), so the
+  // focused input and bottom sheet stay visible. User zoom stays enabled.
+  interactiveWidget: "resizes-content",
   themeColor: [
     { media: "(prefers-color-scheme: light)", color: "#ffffff" },
     { media: "(prefers-color-scheme: dark)", color: "#0a0a0a" },

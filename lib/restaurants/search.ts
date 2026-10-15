@@ -2,6 +2,7 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 import { z } from "zod";
 import type { Database } from "@/lib/supabase/database.types";
 import { toSearchArgs, type DiscoveryFilters } from "@/lib/domain/filters";
+import type { Bounds } from "@/lib/domain/geo";
 
 // Generated RPC types mark aggregate columns as non-null, but they are null
 // when a restaurant has no approved reviews/prices. Validate at the boundary.
@@ -48,11 +49,12 @@ export class SearchError extends Error {}
 export async function searchRestaurants(
   client: SupabaseClient<Database>,
   filters: DiscoveryFilters,
+  bounds: Bounds,
   offset: number,
 ): Promise<SearchPage> {
   const { data, error } = await client.rpc(
     "search_restaurants",
-    toSearchArgs(filters, offset),
+    toSearchArgs(filters, bounds, offset),
   );
   if (error) throw new SearchError(error.message);
 

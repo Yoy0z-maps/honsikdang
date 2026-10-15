@@ -1,5 +1,5 @@
 import type { RestaurantSummary } from "@/lib/restaurants/search";
-import { RestaurantCard } from "./RestaurantCard";
+import { RestaurantCard, type DistanceOrigin } from "./RestaurantCard";
 
 export type ResultState =
   | { status: "loading" }
@@ -9,6 +9,7 @@ export type ResultState =
       items: RestaurantSummary[];
       total: number;
       excludedNoPrice: number;
+      areaClamped: boolean;
       loadingMore: boolean;
       loadMoreFailed: boolean;
     };
@@ -18,21 +19,33 @@ type Props = {
   selectedId: string | null;
   hasActiveFilters: boolean;
   showTagCount: boolean;
+  distanceOrigin: DistanceOrigin;
   onRetry: () => void;
   onLoadMore: () => void;
   onResetFilters: () => void;
-  onFocusItem: (id: string) => void;
+  onLocate: (id: string) => void;
 };
+
+const buttonClass =
+  "min-h-11 rounded-lg border border-zinc-300 px-4 text-sm dark:border-zinc-700";
+
+/** Result count / status line for the sheet header (announced politely). */
+export function resultSummary(state: ResultState): string {
+  if (state.status === "loading") return "식당을 찾는 중…";
+  if (state.status === "error") return "목록을 불러오지 못했어요";
+  return `식당 ${state.total}곳`;
+}
 
 export function ResultList({
   state,
   selectedId,
   hasActiveFilters,
   showTagCount,
+  distanceOrigin,
   onRetry,
   onLoadMore,
   onResetFilters,
-  onFocusItem,
+  onLocate,
 }: Props) {
   if (state.status === "loading") {
     return (
@@ -44,7 +57,7 @@ export function ResultList({
         {[0, 1, 2].map((i) => (
           <div
             key={i}
-            className="h-24 animate-pulse rounded-lg bg-zinc-100 dark:bg-zinc-800"
+            className="h-24 animate-pulse rounded-xl bg-zinc-100 motion-reduce:animate-none dark:bg-zinc-800"
           />
         ))}
       </div>
@@ -55,13 +68,13 @@ export function ResultList({
     return (
       <div
         role="alert"
-        className="rounded-lg border border-red-200 p-4 text-sm"
+        className="rounded-xl border border-red-200 p-4 text-sm"
       >
         <p>식당 목록을 불러오지 못했어요.</p>
         <button
           type="button"
           onClick={onRetry}
-          className="mt-2 rounded-md bg-zinc-900 px-3 py-2 text-white dark:bg-zinc-100 dark:text-zinc-900"
+          className="mt-2 min-h-11 rounded-lg bg-zinc-900 px-4 text-white dark:bg-zinc-100 dark:text-zinc-900"
         >
           다시 시도
         </button>
@@ -69,32 +82,42 @@ export function ResultList({
     );
   }
 
-  const { items, total, excludedNoPrice, loadingMore, loadMoreFailed } = state;
+  const {
+    items,
+    total,
+    excludedNoPrice,
+    areaClamped,
+    loadingMore,
+    loadMoreFailed,
+  } = state;
 
   return (
-    <section aria-labelledby="result-heading">
-      <div aria-live="polite" className="mb-2 text-sm">
-        <h2 id="result-heading" className="font-semibold">
-          식당 {total}곳
-        </h2>
-        {excludedNoPrice > 0 && (
-          <p className="text-zinc-600 dark:text-zinc-400">
-            가격 정보가 없는 {excludedNoPrice}곳은 예산 필터에서 제외했어요.
-          </p>
-        )}
-      </div>
+    <div className="space-y-2">
+      {(excludedNoPrice > 0 || areaClamped) && (
+        <div className="space-y-1 text-sm text-zinc-600 dark:text-zinc-400">
+          {areaClamped && (
+            <p>지도가 넓어서 화면 중앙 주변만 검색했어요. 확대해 주세요.</p>
+          )}
+          {excludedNoPrice > 0 && (
+            <p>
+              가격 정보가 없는 {excludedNoPrice}곳은 예산 필터에서 제외했어요.
+            </p>
+          )}
+        </div>
+      )}
 
       {items.length === 0 ? (
-        <div className="rounded-lg border border-dashed border-zinc-300 p-4 text-sm dark:border-zinc-700">
+        <div className="rounded-xl border border-dashed border-zinc-300 p-4 text-sm dark:border-zinc-700">
           <p>조건에 맞는 식당이 없어요.</p>
           <p className="mt-1 text-zinc-600 dark:text-zinc-400">
-            검색 반경을 넓히거나 지도를 옮겨 보세요.
+            지도를 옮기거나 축소한 뒤 &lsquo;이 지역에서 다시 검색&rsquo;을 눌러
+            보세요.
           </p>
           {hasActiveFilters && (
             <button
               type="button"
               onClick={onResetFilters}
-              className="mt-2 rounded-md border border-zinc-300 px-3 py-2 dark:border-zinc-700"
+              className={`mt-2 ${buttonClass}`}
             >
               필터 초기화
             </button>
@@ -108,7 +131,8 @@ export function ResultList({
                 restaurant={item}
                 selected={item.id === selectedId}
                 showTagCount={showTagCount}
-                onFocus={() => onFocusItem(item.id)}
+                distanceOrigin={distanceOrigin}
+                onLocate={() => onLocate(item.id)}
               />
             </li>
           ))}
@@ -116,12 +140,12 @@ export function ResultList({
       )}
 
       {items.length < total && (
-        <div className="mt-3">
+        <div className="pt-1">
           <button
             type="button"
             onClick={onLoadMore}
             disabled={loadingMore}
-            className="w-full rounded-md border border-zinc-300 px-3 py-2 text-sm disabled:opacity-50 dark:border-zinc-700"
+            className={`w-full disabled:opacity-50 ${buttonClass}`}
           >
             {loadingMore
               ? "불러오는 중…"
@@ -134,6 +158,6 @@ export function ResultList({
           )}
         </div>
       )}
-    </section>
+    </div>
   );
 }

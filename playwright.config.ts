@@ -5,6 +5,7 @@ const PORT = 3100;
 // Runs against a production build backed by the local Supabase stack and
 // supabase/seed.sql (synthetic data). The NAVER key is blanked so tests never
 // call the external map API; real map behavior is checked manually.
+// Viewports follow master plan §5A QA acceptance: 360×800 and 390×844.
 export default defineConfig({
   testDir: "e2e",
   fullyParallel: false,
@@ -15,7 +16,16 @@ export default defineConfig({
     baseURL: `http://localhost:${PORT}`,
     trace: "retain-on-failure",
   },
-  projects: [{ name: "mobile-chromium", use: { ...devices["Pixel 7"] } }],
+  projects: [
+    {
+      name: "mobile-360",
+      use: { ...devices["Pixel 7"], viewport: { width: 360, height: 800 } },
+    },
+    {
+      name: "mobile-390",
+      use: { ...devices["Pixel 7"], viewport: { width: 390, height: 844 } },
+    },
+  ],
   webServer: {
     command: `npm run build && npm run start -- -p ${PORT}`,
     url: `http://localhost:${PORT}`,

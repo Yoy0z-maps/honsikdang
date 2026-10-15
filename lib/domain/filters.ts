@@ -1,11 +1,13 @@
 import { z } from "zod";
-import type { LatLng } from "./geo";
+import type { Bounds, LatLng } from "./geo";
 
 // Temporary default center: 서울시청 (decision Q7). Change when the launch
 // area is decided (D-01).
 export const DEFAULT_CENTER: LatLng = { lat: 37.5663, lng: 126.9779 };
+export const DEFAULT_ZOOM = 15;
+export const MIN_ZOOM = 6;
+export const MAX_ZOOM = 21;
 export const RADIUS_OPTIONS = [300, 500, 1000, 3000, 5000] as const;
-export const DEFAULT_RADIUS = 1000;
 export const BUDGET_OPTIONS = [7000, 10000, 15000, 20000] as const;
 export const PAGE_SIZE = 20;
 export const MAX_QUERY_LENGTH = 100;
@@ -13,7 +15,9 @@ const MAX_SLUGS = 20;
 
 export type DiscoveryFilters = {
   center: LatLng;
-  radius: number;
+  zoom: number;
+  /** null = search the visible map area (default, decision Q21). */
+  radius: number | null;
   categories: string[];
   maxPrice: number | null;
   tags: string[];
@@ -22,7 +26,8 @@ export type DiscoveryFilters = {
 
 export const DEFAULT_FILTERS: DiscoveryFilters = {
   center: DEFAULT_CENTER,
-  radius: DEFAULT_RADIUS,
+  zoom: DEFAULT_ZOOM,
+  radius: null,
   categories: [],
   maxPrice: null,
   tags: [],
@@ -31,6 +36,7 @@ export const DEFAULT_FILTERS: DiscoveryFilters = {
 
 const latSchema = z.coerce.number().min(-90).max(90);
 const lngSchema = z.coerce.number().min(-180).max(180);
+const zoomSchema = z.coerce.number().int().min(MIN_ZOOM).max(MAX_ZOOM);
 const radiusSchema = z.coerce
   .number()
   .int()
@@ -50,6 +56,14 @@ function parseSlugs(raw: string | null): string[] {
   return [...new Set(slugs)].slice(0, MAX_SLUGS);
 }
 
+/** True when the URL already chooses a map position. */
+export function hasExplicitCenter(params: URLSearchParams): boolean {
+  return (
+    latSchema.safeParse(params.get("lat") ?? undefined).success &&
+    lngSchema.safeParse(params.get("lng") ?? undefined).success
+  );
+}
+
 /**
  * Reads filters from URL search params. Invalid or missing values fall back
  * to defaults field by field; this never throws.
@@ -57,6 +71,7 @@ function parseSlugs(raw: string | null): string[] {
 export function parseFilters(params: URLSearchParams): DiscoveryFilters {
   const lat = latSchema.safeParse(params.get("lat") ?? undefined);
   const lng = lngSchema.safeParse(params.get("lng") ?? undefined);
+  const zoom = zoomSchema.safeParse(params.get("z") ?? undefined);
   const radius = radiusSchema.safeParse(params.get("radius") ?? undefined);
   const maxPrice = priceSchema.safeParse(params.get("max") ?? undefined);
 
@@ -65,7 +80,8 @@ export function parseFilters(params: URLSearchParams): DiscoveryFilters {
       lat.success && lng.success
         ? { lat: lat.data, lng: lng.data }
         : DEFAULT_CENTER,
-    radius: radius.success ? radius.data : DEFAULT_RADIUS,
+    zoom: zoom.success ? zoom.data : DEFAULT_ZOOM,
+    radius: radius.success ? radius.data : null,
     categories: parseSlugs(params.get("cat")),
     maxPrice: maxPrice.success ? maxPrice.data : null,
     tags: parseSlugs(params.get("tags")),
@@ -85,8 +101,8 @@ export function filtersToSearchParams(
     params.set("lat", filters.center.lat.toFixed(5));
     params.set("lng", filters.center.lng.toFixed(5));
   }
-  if (filters.radius !== DEFAULT_RADIUS)
-    params.set("radius", String(filters.radius));
+  if (filters.zoom !== DEFAULT_ZOOM) params.set("z", String(filters.zoom));
+  if (filters.radius !== null) params.set("radius", String(filters.radius));
   if (filters.categories.length > 0)
     params.set("cat", filters.categories.join(","));
   if (filters.maxPrice !== null) params.set("max", String(filters.maxPrice));
@@ -95,12 +111,43 @@ export function filtersToSearchParams(
   return params;
 }
 
-/** Arguments for the public.search_restaurants RPC. */
-export function toSearchArgs(filters: DiscoveryFilters, offset: number) {
+/** Number of user-chosen filters (excluding map position). */
+export function activeFilterCount(filters: DiscoveryFilters): number {
+  return (
+    filters.categories.length +
+    filters.tags.length +
+    (filters.maxPrice !== null ? 1 : 0) +
+    (filters.radius !== null ? 1 : 0) +
+    (filters.query ? 1 : 0)
+  );
+}
+
+export function clearFilters(filters: DiscoveryFilters): DiscoveryFilters {
+  return { ...DEFAULT_FILTERS, center: filters.center, zoom: filters.zoom };
+}
+
+/**
+ * Arguments for the public.search_restaurants RPC. Exactly one area is
+ * sent: the radius when the radius filter is on, otherwise `bounds`.
+ */
+export function toSearchArgs(
+  filters: DiscoveryFilters,
+  bounds: Bounds,
+  offset: number,
+) {
+  const area =
+    filters.radius !== null
+      ? { radius_m: filters.radius }
+      : {
+          min_lat: bounds.minLat,
+          min_lng: bounds.minLng,
+          max_lat: bounds.maxLat,
+          max_lng: bounds.maxLng,
+        };
   return {
     center_lat: filters.center.lat,
     center_lng: filters.center.lng,
-    radius_m: filters.radius,
+    ...area,
     category_slugs:
       filters.categories.length > 0 ? filters.categories : undefined,
     max_price: filters.maxPrice ?? undefined,
