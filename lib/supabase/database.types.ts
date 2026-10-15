@@ -426,6 +426,19 @@ export type Database = {
           wait_minutes: number;
         }[];
       };
+      my_saved: {
+        Args: Record<PropertyKey, never>;
+        Returns: {
+          address: string;
+          category_label: string;
+          id: string;
+          lat: number;
+          lng: number;
+          name: string;
+          saved_at: string;
+          status: Database["public"]["Enums"]["restaurant_status"];
+        }[];
+      };
       resolve_report: {
         Args: {
           content_action?: string;
