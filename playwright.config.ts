@@ -1,0 +1,29 @@
+import { defineConfig, devices } from "@playwright/test";
+
+const PORT = 3100;
+
+// Runs against a production build backed by the local Supabase stack and
+// supabase/seed.sql (synthetic data). The NAVER key is blanked so tests never
+// call the external map API; real map behavior is checked manually.
+export default defineConfig({
+  testDir: "e2e",
+  fullyParallel: false,
+  forbidOnly: !!process.env.CI,
+  retries: process.env.CI ? 1 : 0,
+  reporter: process.env.CI ? [["github"], ["html", { open: "never" }]] : "list",
+  use: {
+    baseURL: `http://localhost:${PORT}`,
+    trace: "retain-on-failure",
+  },
+  projects: [{ name: "mobile-chromium", use: { ...devices["Pixel 7"] } }],
+  webServer: {
+    command: `npm run build && npm run start -- -p ${PORT}`,
+    url: `http://localhost:${PORT}`,
+    reuseExistingServer: !process.env.CI,
+    timeout: 240_000,
+    env: {
+      NEXT_PUBLIC_NAVER_MAP_CLIENT_ID: "",
+      NEXT_TELEMETRY_DISABLED: "1",
+    },
+  },
+});
