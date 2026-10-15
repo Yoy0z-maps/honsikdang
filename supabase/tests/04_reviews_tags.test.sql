@@ -1,7 +1,7 @@
 -- restaurant_reviews, tags, review_tags authorization matrix (Q1, Q2, Q3).
 begin;
 \ir _fixtures.psql
-select plan(27);
+select plan(28);
 
 -- reviews: read ------------------------------------------------------------
 :as_anon
@@ -122,11 +122,17 @@ select is_empty(
 );
 
 :as_admin
-select results_eq(
+select throws_ok(
   $$ update public.restaurant_reviews set status = 'approved'
-     where id = 'b0000000-0000-4000-8000-000000000003' returning status::text $$,
-  array['approved'],
-  'admin can approve a review'
+     where id = 'b0000000-0000-4000-8000-000000000003' $$,
+  '42501',
+  null,
+  'even admins cannot change review status directly'
+);
+
+select lives_ok(
+  $$ select public.moderate('review', 'b0000000-0000-4000-8000-000000000003', 'approve') $$,
+  'admin can approve a review via moderate'
 );
 
 select is_empty(

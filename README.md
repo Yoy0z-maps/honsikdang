@@ -22,14 +22,15 @@ Windows PowerShell에서 `npm`이 실행 정책으로 막히면 `npm.cmd run dev
 
 ## 스크립트
 
-| 명령               | 내용                                       |
-| ------------------ | ------------------------------------------ |
-| `npm run check`    | 포맷 검사 + 타입체크 + 린트 + 단위 테스트  |
-| `npm run build`    | 프로덕션 빌드                              |
-| `npm run db:reset` | 로컬 DB를 마이그레이션 기준으로 재생성     |
-| `npm run e2e`      | Playwright 모바일 e2e (로컬 Supabase 필요) |
-| `npm run db:test`  | pgTAP 권한 테스트 (`supabase/tests`)       |
-| `npm run db:types` | DB 스키마에서 TypeScript 타입 생성         |
-| `npm run format`   | Prettier 적용                              |
+| 명령                                | 내용                                               |
+| ----------------------------------- | -------------------------------------------------- |
+| `npm run check`                     | 포맷 검사 + 타입체크 + 린트 + 단위 테스트          |
+| `npm run build`                     | 프로덕션 빌드                                      |
+| `npm run db:reset`                  | 로컬 DB를 마이그레이션 기준으로 재생성             |
+| `npm run e2e`                       | Playwright 모바일 e2e (로컬 Supabase 필요)         |
+| `npm run db:test`                   | pgTAP 권한 테스트 (`supabase/tests`)               |
+| `npm run db:types`                  | DB 스키마에서 TypeScript 타입 생성                 |
+| `npm run db:grant-admin -- <email>` | 로컬 DB에 관리자 지정 (`specs/ops/grant-admin.md`) |
+| `npm run format`                    | Prettier 적용                                      |
 
 마이그레이션은 `supabase/migrations/`에 있으며, 프로덕션 적용은 승인 없이 하지 않습니다.

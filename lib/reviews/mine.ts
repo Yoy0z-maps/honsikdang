@@ -19,6 +19,8 @@ const myReviewSchema = z.object({
   tag_slugs: z.array(z.string()),
   created_at: z.string(),
   updated_at: z.string(),
+  /** Moderator's reason, only for the author's rejected/removed reviews (Q32). */
+  moderation_reason: z.string().nullable(),
 });
 
 export type MyReview = z.infer<typeof myReviewSchema>;

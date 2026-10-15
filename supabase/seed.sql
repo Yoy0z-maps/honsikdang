@@ -5,10 +5,23 @@
 -- Coordinates cluster around the temporary default center (서울시청, Q7) so
 -- the discovery UI and e2e tests have something to show.
 
-insert into auth.users (id, email, aud, role) values
-  ('5eed0000-0000-4000-8000-000000000001', 'seed-user-1@example.invalid', 'authenticated', 'authenticated'),
-  ('5eed0000-0000-4000-8000-000000000002', 'seed-user-2@example.invalid', 'authenticated', 'authenticated'),
-  ('5eed0000-0000-4000-8000-000000000003', 'seed-user-3@example.invalid', 'authenticated', 'authenticated');
+-- Supabase Auth only signs in seeded users that look like ones it created:
+-- default instance_id, email provider metadata, and empty (not NULL) token
+-- columns. Otherwise magic-link sign-in fails with a 500.
+insert into auth.users (id, instance_id, email, aud, role, email_confirmed_at,
+                        raw_app_meta_data, raw_user_meta_data, created_at, updated_at,
+                        confirmation_token, recovery_token, email_change, email_change_token_new,
+                        email_change_token_current, phone_change, phone_change_token,
+                        reauthentication_token)
+select v.id::uuid, '00000000-0000-0000-0000-000000000000', v.email, 'authenticated', 'authenticated', now(),
+       '{"provider":"email","providers":["email"]}'::jsonb, '{}'::jsonb, now(), now(),
+       '', '', '', '', '', '', '', ''
+from (values
+  ('5eed0000-0000-4000-8000-000000000001', 'seed-user-1@example.invalid'),
+  ('5eed0000-0000-4000-8000-000000000002', 'seed-user-2@example.invalid'),
+  ('5eed0000-0000-4000-8000-000000000003', 'seed-user-3@example.invalid'),
+  ('5eed0000-0000-4000-8000-000000000004', 'seed-admin-2@example.invalid')
+) as v (id, email);
 
 insert into public.restaurants (id, name, address, location, category_id, status, source_type, created_by)
 select v.id::uuid,
@@ -71,3 +84,12 @@ from (values
   ('5eed2000-0000-4000-8000-000000000009', 'quiet')
 ) as v (review_id, slug)
 join public.tags t on t.slug = v.slug;
+
+-- Local/CI-only moderators (decision Q30): seed-user-3@example.invalid and
+-- seed-admin-2@example.invalid sign in through Mailpit and use /admin. Never seed admins in production;
+-- see specs/ops/grant-admin.md.
+-- A second moderator lets parallel e2e projects sign in without
+-- invalidating each other's magic links.
+insert into private.user_roles (user_id, role) values
+  ('5eed0000-0000-4000-8000-000000000003', 'admin'),
+  ('5eed0000-0000-4000-8000-000000000004', 'admin');

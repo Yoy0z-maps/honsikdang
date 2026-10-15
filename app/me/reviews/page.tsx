@@ -76,6 +76,11 @@ async function MyReviewsContent({
                 방문 {formatDate(review.visited_at)} · 혼밥 편안함{" "}
                 {review.solo_comfort}/5
               </p>
+              {review.moderation_reason && (
+                <p className="mt-1 rounded-lg bg-red-50 p-2 text-sm dark:bg-red-950/40">
+                  운영자 사유: {review.moderation_reason}
+                </p>
+              )}
               {review.status !== "removed" && (
                 <div className="mt-2 flex gap-4">
                   <Link

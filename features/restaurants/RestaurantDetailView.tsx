@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { AccountMenu } from "@/features/auth/AccountMenu";
+import { ReportButton } from "@/features/reports/ReportButton";
 import { SEAT_TYPE_LABELS, formatDate, formatPrice } from "@/lib/domain/format";
 import type {
   RestaurantDetail,
@@ -16,7 +17,13 @@ function soloOrderLabel(value: boolean | null): string {
   return value ? "1인 주문 가능" : "1인 주문 불가";
 }
 
-function Review({ review }: { review: RestaurantReview }) {
+function Review({
+  review,
+  returnTo,
+}: {
+  review: RestaurantReview;
+  returnTo: string;
+}) {
   const edited = review.updated_at !== review.created_at;
   return (
     <article className="rounded-lg border border-zinc-200 p-3 dark:border-zinc-800">
@@ -62,6 +69,12 @@ function Review({ review }: { review: RestaurantReview }) {
       {review.body && (
         <p className="mt-2 whitespace-pre-line text-sm">{review.body}</p>
       )}
+      <ReportButton
+        targetType="review"
+        targetId={review.id}
+        returnTo={returnTo}
+        label={`방문일 ${formatDate(review.visited_at)} 리뷰 신고`}
+      />
     </article>
   );
 }
@@ -87,6 +100,12 @@ export function RestaurantDetailView({ detail }: { detail: RestaurantDetail }) {
           정보 출처: {SOURCE_LABELS[detail.source_type]} · 정보 업데이트{" "}
           {formatDate(detail.updated_at)}
         </p>
+        <ReportButton
+          targetType="restaurant"
+          targetId={detail.id}
+          returnTo={`/restaurants/${detail.id}`}
+          label="이 식당 정보 신고"
+        />
       </div>
 
       <section aria-labelledby="summary-heading">
@@ -173,7 +192,10 @@ export function RestaurantDetailView({ detail }: { detail: RestaurantDetail }) {
           <ul className="mt-2 space-y-2">
             {detail.reviews.map((review) => (
               <li key={review.id}>
-                <Review review={review} />
+                <Review
+                  review={review}
+                  returnTo={`/restaurants/${detail.id}`}
+                />
               </li>
             ))}
           </ul>

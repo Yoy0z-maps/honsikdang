@@ -20,15 +20,9 @@ async function MyPlacesContent() {
   const userId = await getVerifiedUserId(supabase);
   if (!userId) redirect(loginPath("/me/places"));
 
-  // RLS: the creator can read their own proposals in any status.
-  const { data, error } = await supabase
-    .from("restaurants")
-    .select(
-      "id, name, address, status, created_at, restaurant_categories(label)",
-    )
-    .eq("created_by", userId)
-    .order("created_at", { ascending: false })
-    .limit(100);
+  // Own proposals in any status, with the moderator's reason when rejected
+  // or archived (Q32).
+  const { data, error } = await supabase.rpc("my_places");
   if (error) throw new Error(`my places failed: ${error.code}`);
 
   if (data.length === 0) {
@@ -64,11 +58,16 @@ async function MyPlacesContent() {
             </span>
           </div>
           <p className="text-sm text-zinc-600 dark:text-zinc-400">
-            {place.restaurant_categories?.label} · {place.address}
+            {place.category_label} · {place.address}
           </p>
           <p className="text-xs text-zinc-500">
             제안 {formatDate(place.created_at)}
           </p>
+          {place.moderation_reason && (
+            <p className="mt-1 rounded-lg bg-red-50 p-2 text-sm dark:bg-red-950/40">
+              운영자 사유: {place.moderation_reason}
+            </p>
+          )}
           {(place.status === "pending" || place.status === "approved") && (
             <Link
               href={`/restaurants/${place.id}/review`}

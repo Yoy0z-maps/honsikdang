@@ -1,7 +1,7 @@
 -- favorites, restaurant_reports, moderation_actions authorization matrix.
 begin;
 \ir _fixtures.psql
-select plan(21);
+select plan(22);
 
 -- favorites ----------------------------------------------------------------
 :as_owner
@@ -97,8 +97,10 @@ select throws_ok(
   'reporter cannot set report status'
 );
 
-select is_empty(
-  $$ update public.restaurant_reports set status = 'dismissed' returning id $$,
+select throws_ok(
+  $$ update public.restaurant_reports set status = 'dismissed' $$,
+  '42501',
+  null,
   'reporter cannot change report status'
 );
 
@@ -117,10 +119,9 @@ select throws_ok(
 );
 
 :as_admin
-select results_eq(
-  $$ update public.restaurant_reports set status = 'resolved' returning status::text $$,
-  array['resolved'],
-  'admin can resolve reports'
+select lives_ok(
+  $$ select public.resolve_report(id, 'resolve') from public.restaurant_reports $$,
+  'admin can resolve reports via resolve_report'
 );
 
 -- moderation_actions -------------------------------------------------------
@@ -134,12 +135,18 @@ select throws_ok(
 );
 
 :as_admin
-select results_eq(
+select throws_ok(
   $$ insert into public.moderation_actions (target_type, target_id, action, reason)
-     values ('restaurant', 'a0000000-0000-4000-8000-000000000003', 'approve', '현장 확인')
-     returning moderator_id $$,
-  array[:'admin_id'::uuid],
-  'admin action is recorded and attributed to the admin'
+     values ('restaurant', 'a0000000-0000-4000-8000-000000000003', 'approve', '현장 확인') $$,
+  '42501',
+  null,
+  'admins cannot write the log directly either'
+);
+
+select results_eq(
+  $$ select moderator_id, action::text from public.moderation_actions where target_type = 'report' $$,
+  $$ values ('00000000-0000-4000-8000-000000000003'::uuid, 'resolve') $$,
+  'resolve_report wrote an audit row attributed to the admin'
 );
 
 select throws_ok(

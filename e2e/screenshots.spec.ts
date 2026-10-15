@@ -65,3 +65,38 @@ test("capture place suggestion states (WP-04b)", async ({ page }, testInfo) => {
   await page.getByRole("heading", { name: "장소를 제안했어요" }).waitFor();
   await shot("4-created");
 });
+
+test("capture moderation states (WP-04c)", async ({ browser }, testInfo) => {
+  const context = await browser.newContext({ ...testInfo.project.use });
+  const page = await context.newPage();
+  const shot = (name: string) =>
+    page.screenshot({
+      path: `${dir}/WP-04c-${testInfo.project.name}-${name}.png`,
+      fullPage: true,
+    });
+
+  // Report form on a seed restaurant (synthetic data).
+  await page.goto(
+    "/login?next=%2Frestaurants%2F5eed1000-0000-4000-8000-000000000001",
+  );
+  await signInWithMagicLink(page, uniqueEmail("shot-report"));
+  const review = page.getByRole("article").first();
+  await review.getByLabel(/리뷰 신고$/).click();
+  await review.getByLabel("신고 사유").waitFor();
+  await shot("1-report-form");
+
+  // Moderator queue (one admin per project, see e2e/moderation.spec.ts).
+  await context.clearCookies();
+  const admin =
+    testInfo.project.name === "mobile-360"
+      ? "seed-user-3@example.invalid"
+      : "seed-admin-2@example.invalid";
+  await page.goto("/login?next=%2Fadmin%3Ftab%3Dreviews");
+  await signInWithMagicLink(page, admin);
+  await page.getByRole("heading", { name: "검수", exact: true }).waitFor();
+  await shot("2-admin-reviews");
+  await page.goto("/admin?tab=places");
+  await page.getByRole("heading", { name: "검수", exact: true }).waitFor();
+  await shot("3-admin-places");
+  await context.close();
+});
