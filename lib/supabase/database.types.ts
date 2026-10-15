@@ -384,6 +384,24 @@ export type Database = {
         }[];
       };
       am_i_admin: { Args: Record<PropertyKey, never>; Returns: boolean };
+      claim_ai_search: {
+        Args: {
+          model: string;
+          monthly_budget_micro_usd: number;
+          prompt_version: string;
+        };
+        Returns: number;
+      };
+      finish_ai_search: {
+        Args: {
+          input_tokens: number;
+          latency_ms: number;
+          outcome: string;
+          output_tokens: number;
+          usage_id: number;
+        };
+        Returns: undefined;
+      };
       moderate: {
         Args: {
           action: Database["public"]["Enums"]["moderation_action"];

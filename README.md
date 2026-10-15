@@ -32,5 +32,6 @@ Windows PowerShell에서 `npm`이 실행 정책으로 막히면 `npm.cmd run dev
 | `npm run db:types`                  | DB 스키마에서 TypeScript 타입 생성                 |
 | `npm run db:grant-admin -- <email>` | 로컬 DB에 관리자 지정 (`specs/ops/grant-admin.md`) |
 | `npm run format`                    | Prettier 적용                                      |
+| `npm run eval:parse`                | AI 검색 해석 실측 평가 (`ANTHROPIC_API_KEY` 필요, 소액 과금) |
 
 마이그레이션은 `supabase/migrations/`에 있으며, 프로덕션 적용은 승인 없이 하지 않습니다.
