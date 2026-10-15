@@ -1,0 +1,210 @@
+# 혼식당 — Decisions & Blockers Log (WP-00)
+
+- 기준 명세: `HONSIKDANG_MASTER_PLAN.md` v0.1 (2026-10-15, status: Proposed)
+- 작성일: 2026-10-15
+- 작성 단계: WP-00 Discovery
+- 상태 표기: **CONFIRMED**(사용자 확정) / **ASSUMED**(가정, 되돌리기 쉬운 최소안) / **OPEN**(사용자 결정 필요) / **UNVERIFIED**(공식 근거 미확보)
+
+---
+
+## 1. 저장소 감사 결과 (2026-10-15)
+
+| 항목 | 결과 |
+|---|---|
+| 기존 코드/마이그레이션/테스트 | 없음. 빈 작업 폴더에서 시작 (그린필드) |
+| git 저장소 | 아님 |
+| 로컬 툴체인 | `node`, `npm`, `pnpm`, `git`, `docker`, `supabase`, `deno`, `gh` 모두 **미설치** (PATH 및 기본 설치 경로 확인). `winget`, `wsl`은 존재 |
+| 작업 위치 | 앱이 만든 임시 세션 폴더. 세션 삭제 시 함께 삭제됨 → WP-01 전 영구 폴더로 이동 필요 |
+
+**결론:** 덮어쓸 기존 작업 없음. WP-01(스캐폴딩)은 툴체인 설치와 영구 프로젝트 폴더 확보 없이는 실행 불가.
+
+---
+
+## 2. 확정 사항 (CONFIRMED)
+
+| ID | 내용 | 근거 |
+|---|---|---|
+| C-01 | `HONSIKDANG_MASTER_PLAN.md`를 프로젝트 기준 명세로 사용 | 사용자 지시 (2026-10-15) |
+| C-02 | WP-00부터 순차 진행, 단계별 테스트·검증 후 다음 단계 | 사용자 지시 |
+| C-03 | 구현 전 작업 계획 제시, 가정/확정 구분 | 사용자 지시 |
+| C-04 | 목표 스택: Next.js + TypeScript + Tailwind, Supabase(Auth/Postgres/PostGIS/pgvector/Storage/Edge Functions), Naver Maps 렌더링 | 명세 §6 + C-01 (명세 자체는 "Proposed"이나 사용자가 기준으로 지정) |
+| C-05 | 프로덕션 마이그레이션·배포·외부 서비스 생성·지출은 사용자 승인 필요 | 명세 §0, §11 |
+| C-06 | **Web/PWA 우선** (D-02 확정, A-01 승격) | 사용자 지시 (2026-10-15) |
+| C-07 | 툴체인 설치 승인: Node 24 LTS, Git, Docker Desktop (winget) (D-10 해소) | 사용자 지시 (2026-10-15) |
+| C-08 | 프로젝트 위치: `C:\Users\ASUS\honsikdang` (사용자가 홈 폴더 선택 → 그 안에 생성) (D-09 부분 해소, GitHub 원격은 미정) | 사용자 선택 (2026-10-15) |
+
+---
+
+## 3. 가정 (ASSUMED) — 최소·가역 선택
+
+| ID | 가정 | 영향 WP | 되돌리기 |
+|---|---|---|---|
+| A-01 | **Web/PWA 우선** (네이티브 앱 아님) | WP-01 | 명세 스택이 Next.js이므로 자연스러운 기본값 |
+| A-02 | 런치 지역은 **서울 1개 상권**으로 시작, 스키마는 지역 비종속 | WP-03 | 지역은 데이터/설정값일 뿐 스키마 변경 없음 |
+| A-03 | Node.js **LTS(24.x)**, 패키지 매니저 **npm**(Node 기본 포함, 추가 도구 최소화) | WP-01 | lockfile 교체로 전환 가능 |
+| A-04 | Next.js는 스캐폴딩 시점의 최신 안정판(App Router)을 정확한 버전으로 고정하고 여기에 기록 | WP-01 | — |
+| A-05 | 좌표: `geography(Point,4326)`, 입력 순서 (lng, lat), 거리 단위 **미터** | WP-02 | — |
+| A-06 | 인증: Supabase Auth **이메일 매직링크**로 시작, 카카오/네이버 OAuth는 후속 | WP-02/04 | Provider 추가는 비파괴적 |
+| A-07 | MVP는 **이미지 업로드 없음**, 프로필은 **비공개**(표시 이름만 노출) | WP-02/04 | Storage 버킷은 나중에 추가 |
+| A-08 | 모더레이션: 신규 장소와 리뷰 **모두 승인 후 공개** (가장 엄격한 기본값) | WP-04 | 정책 완화는 RLS/상태 기본값 변경으로 가능 |
+| A-09 | 가격: 리뷰의 `price_paid` = **1인 실지출(KRW)**, 식당 가격대는 리뷰로부터 파생 | WP-02 | 메뉴 가격 필드는 추가만 하면 됨 |
+| A-10 | Naver는 **지도 렌더링(Web Dynamic Map)만** 사용. 장소 좌표는 사용자가 지도에서 찍은 핀(사용자 저작 데이터)으로 저장. Naver 지역검색·지오코딩 결과는 약관 확인 전까지 **DB에 저장하지 않음** | WP-03/04 | 약관 확인 후 `external_reference` 활성화 |
+| A-11 | AI 제공자는 인터페이스 뒤로 격리, WP-05 전까지 선택 보류 | WP-05 | — |
+| A-12 | 관리자 권한은 `profiles.role`(클라이언트 쓰기 불가) 또는 별도 `admin_users` 테이블 + 서버 측 검사. 클라이언트가 수정 가능한 필드에 의존하지 않음 | WP-02 | — |
+| A-13 | 스테이징 호스팅은 WP-01에서 결정하지 않음. CI는 로컬 검증 위주로 먼저 구성 | WP-01 | — |
+
+---
+
+## 4. 미결정 사항 (OPEN) — 사용자 결정 필요
+
+| ID | 질문 (명세 §16) | 현재 기본값 | 막히는 단계 |
+|---|---|---|---|
+| D-01 | 초기 지역: 서울 한 상권 / 여러 상권 / 전국? 구체적인 상권명? | A-02 | WP-03 (시드·지도 초기 중심) |
+| D-02 | Web/PWA 우선 vs 네이티브 우선? | A-01 | WP-01 (이번에 확인 권장) |
+| D-03 | 초기 50–100곳의 실제 데이터 확보 방법? | 미정 | WP-04 이후 런치 |
+| D-04 | 장소·리뷰 즉시 공개 vs 사전 승인? | A-08 | WP-02 (RLS 기본 상태), WP-04 |
+| D-05 | 인증 제공자, MVP 이미지 업로드, 프로필 공개 여부? | A-06, A-07 | WP-02 |
+| D-06 | AI 제공자와 월 지출 상한? | A-11 | WP-05 |
+| D-07 | 사용할 Naver 상품(Maps / 검색 API)과 허용되는 장소 데이터 저장 범위? | A-10 | WP-03 |
+| D-08 | 가격 표현: 1인 평균 지출 / 메뉴 가격 / 둘 다? | A-09 | WP-02 |
+| D-09 | 영구 프로젝트 폴더 위치, GitHub 원격 저장소 사용 여부 | 미정 | **WP-01** |
+| D-10 | 로컬 툴체인(Node LTS, Git, Docker Desktop 또는 WSL2 기반 런타임, Supabase CLI) 설치 승인 | 미정 | **WP-01** |
+| D-11 | 예산: Supabase 플랜, NCP 사용량 과금 한도 | 미정 | 스테이징/런치 |
+
+---
+
+## 5. 외부 API 근거 (Evidence)
+
+| 항목 | 상태 | 확인 내용 | 출처 |
+|---|---|---|---|
+| NCP Maps 상품 구성 | VERIFIED | Dynamic Map, Static Map, Geocoding, Reverse Geocoding, Directions 5/15 | https://api.ncloud-docs.com/docs/en/application-maps-overview |
+| NCP Maps 인증·쿼터 | VERIFIED | API Gateway 기반 인증 필요, 쿼터 초과·미선택 API는 429 | 위와 동일 |
+| NCP Maps 무료 사용량 | PARTIAL | Web Dynamic Map/Static/Geocoding/Reverse Geocoding 무료 사용량은 **대표 계정에만** 제공, 그 외 계정은 호출 과금 (2023-01부터) | https://guide.ncloud-docs.com/docs/en/maps-overview (검색 결과 요약 경유, 원문 직접 재확인 필요) |
+| NCP Maps 이용 규칙 | VERIFIED | 기능 명칭은 공식 명칭 사용, 공식 호출 경로 우회 시 이용 제한 가능, 사용량 기반 과금 | https://guide.ncloud-docs.com/docs/en/maps-spec |
+| NCP Maps 데이터 저장·캐싱 | **UNVERIFIED** | 개요/스펙 페이지에 저장 관련 문구 없음. 콘솔의 "AI·NAVER API 이용약관"에 데이터 저장·이용 조항이 있다고만 안내됨 | 사용자가 NCP 콘솔에서 약관 원문 확인 필요 |
+| NCP Maps 단가 | **UNVERIFIED** | 2026년 단가표 미확보 | https://www.ncloud.com/product/applicationService/maps |
+| Naver 개발자센터 지역 검색 API | **UNVERIFIED** | developers.naver.com 접근이 이 환경에서 차단됨. 제3자 자료만 확보(엔드포인트 `/v1/search/local.json`, 일 25,000회) — 근거로 사용하지 않음 | 사용자가 약관·가이드 원문 확인 필요 |
+| Supabase 로컬 개발 | VERIFIED | Docker API 호환 컨테이너 런타임 필수, CLI는 npm dev dependency로 설치 가능, `supabase init` → `supabase start` | https://supabase.com/docs/guides/local-development |
+| pgvector 활성화 | VERIFIED | `create extension vector with schema extensions;` | https://supabase.com/docs/guides/ai/vector-columns |
+| PostGIS 활성화 스키마 | **UNVERIFIED** | Supabase 공식 문서에서 WP-02 시점에 재확인 | — |
+
+**원칙:** UNVERIFIED 항목에 의존하는 기능은 인터페이스 뒤로 격리하고, 약관 확인 전까지 외부 장소 데이터를 저장하지 않는다 (A-10).
+
+---
+
+## 6. 블로커
+
+| ID | 블로커 | 해소 조건 |
+|---|---|---|
+| B-01 | 로컬 툴체인 전무 | D-10 승인 후 설치 및 버전 기록 |
+| B-02 | 임시 작업 폴더 | D-09: 영구 폴더로 세션 이동, `git init` |
+| B-03 | Naver 데이터 저장 권한 미확인 | D-07: 약관 원문 확인 (WP-03 전까지) |
+| B-04 | NCP 계정·Client ID 없음 | 사용자가 NCP 콘솔에서 애플리케이션 등록 (WP-03 전까지, 지출 승인 포함) |
+
+---
+
+## 7. WP-00 Gate 판정
+
+> Gate: provider permissions, launch region and data rights recorded.
+
+- 제공자 권한: **기록됨, 단 부분 미검증** (§5)
+- 런치 지역: **가정으로 기록** (A-02), 사용자 확정 대기 (D-01)
+- 데이터 권리: **미검증으로 기록**, 안전한 기본값 채택 (A-10)
+
+**판정: 조건부 통과.** WP-01(스캐폴딩)은 외부 API 권리에 의존하지 않으므로 B-01, B-02 해소 시 진행 가능. B-03, B-04는 WP-03 진입 전 필수.
+
+---
+
+## 8. WP-01 Foundation 기록
+
+### 8.1 설치·고정 버전 (2026-10-15 실측)
+
+| 도구 | 버전 | 비고 |
+|---|---|---|
+| Node.js | 24.20.0 | winget `OpenJS.NodeJS.LTS`, `.node-version` = 24, `engines: >=24 <25` |
+| npm | 11.19.0 | |
+| Git | 2.55.0.windows.5 | winget `Git.Git`. **user.name/email 미설정** → 아직 커밋 없음 |
+| Docker Desktop | 4.95.0 (CLI 29.8.2) | winget `Docker.DockerDesktop`. **WSL 미설치로 엔진 미기동** |
+| Next.js | 16.4.1 (React 19.3.0) | `create-next-app@16.4.1`, App Router, Turbopack, `src/` 없음 |
+| Supabase CLI | 2.121.0 | npm devDependency, Postgres major 17 |
+| Vitest | 5.0.4 | jsdom, `resolve.tsconfigPaths` 내장 옵션 사용 |
+| zod | 4.6.7 | 환경변수 검증 |
+| Prettier | 3.9.10 | 기본 설정 |
+
+### 8.2 결정
+
+| ID | 결정 | 이유 |
+|---|---|---|
+| W1-01 | PostGIS·pgvector를 `extensions` 스키마에 설치 | Supabase 공식 PostGIS 가이드: `public` 설치 시 `spatial_ref_sys`가 Data API로 노출. 함수는 `search_path = ''` + 완전 수식 이름 사용 |
+| W1-02 | 공개 환경변수는 `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`만. `sb_secret_` 접두 키는 스키마에서 거부, 오류 메시지에 값 미포함 | 명세 §11 비밀 노출 방지 |
+| W1-03 | 서버 비밀 모듈은 실제 사용처(WP-04 특권 워크플로)가 생길 때 `server-only`로 추가 | 추측성 코드 회피 (명세 규칙 9) |
+| W1-04 | PWA는 `app/manifest.ts`만. Service Worker·오프라인은 보류 | 최소 범위. 아이콘은 favicon만 → 런치 전 PNG 아이콘 필요 |
+| W1-05 | Geist(Latin 전용) 폰트 제거, 시스템 한글 폰트 스택 사용 | 한글 미지원 폰트 + 빌드 시 외부 폰트 다운로드 제거 |
+| W1-06 | CI: app(format/typecheck/lint/test/build), database(`db start` → `db reset` → `db lint --fail-on warning`), secrets(gitleaks) | 명세 §11 CI 항목 |
+
+### 8.3 검증 결과 (로컬, 2026-10-15)
+
+| 명령 | 결과 |
+|---|---|
+| `npm run format:check` | 통과 |
+| `npm run typecheck` (`next typegen && tsc --noEmit`) | 통과 |
+| `npm run lint` | 통과 (경고 0) |
+| `npm run test` | 통과 — 2 files, 6 tests |
+| `npm run build` | 통과 — `/`, `/_not-found`, `/manifest.webmanifest` 정적 |
+| `npm run db:start` | 통과 (재부팅 후) — Postgres 17.11.0.004 이미지, 마이그레이션 적용 |
+| `npm run db:reset` | 통과 — 빈 DB에서 마이그레이션 재적용. `seed.sql` 없음 안내만 출력 (의도됨) |
+| 확장 설치 위치 (psql) | `postgis 3.3.7` → `extensions`, `vector 0.8.2` → `extensions`, `public.spatial_ref_sys` 없음 |
+| `npm run db:lint` (`--schema public`) | 통과 — 오류 0 |
+| GitHub Actions | **미실행** — 원격 저장소 없음. gitleaks-action은 조직 계정이면 라이선스 필요 (미검증) |
+
+`supabase db lint`를 스키마 지정 없이 실행하면 `extensions` 스키마의 PostGIS 내장 함수(`st_findextent`, `addauth` 등)에서 plpgsql_check 오류가 보고되어 실패한다. 서드파티 코드의 오탐이므로 lint 범위를 우리 스키마(`public`, 이후 추가 스키마)로 한정한다 (W1-07).
+
+### 8.4 알려진 이슈
+
+| ID | 내용 | 조치 |
+|---|---|---|
+| K-01 | `npm audit`: devDependency(eslint-config-next → fast-glob → micromatch → braces) high 5건. 프로덕션 의존성(`--omit=dev`)은 0건 | `audit fix --force`는 eslint-config-next를 14.x로 다운그레이드하므로 미적용. 상위 패치 대기 |
+| K-02 | npm allowScripts: `unrs-resolver` postinstall 미승인 경고 | lint 정상 동작 확인. 필요 시 `npm install-scripts approve unrs-resolver` |
+| K-03 | Next 16.4 빌드 로그상 Cache Components·Partial Prefetching 기본 활성 | 데이터 페칭 도입 시(WP-03) 캐싱 동작 문서 확인 |
+| K-04 | Next 텔레메트리 기본 활성 | CI에서는 비활성. 로컬은 사용자 선택 (`npx next telemetry disable`) |
+
+### 8.5 WP-01 Gate 판정
+
+> Gate: local run, typecheck, test, migration reset pass.
+
+- typecheck / test / lint / build: **통과**
+- local run: 로컬 Supabase 스택 기동 **통과**. `next dev`는 브라우저 수동 확인 미실시 (프로덕션 빌드는 통과)
+- migration reset: **통과**
+
+**판정: 통과 (2026-10-15).** 단, CI는 원격 저장소 연결 후 첫 실행으로 확인 필요.
+
+---
+
+## 9. 추가 블로커
+
+| ID | 블로커 | 해소 조건 |
+|---|---|---|
+| B-05 | WSL2 미설치 → Docker 엔진 미기동 → Supabase 로컬 불가 | **해소.** `wsl --install --no-distribution`(관리자 권한, 비관리자 실행은 안내 문구만 출력하고 exit 1) → WSL 3.0.3.0 / 커널 6.18.54.1-1 → 재부팅 → Docker 29.8.2 엔진 기동 확인 |
+| B-06 | git 사용자 정보 미설정 → 커밋 불가 | **해소.** 사용자 GitHub 계정 `Yoy0z-maps` 지정. 저장소 로컬 설정: `user.name=Yoy0z-maps`, `user.email=165480026+Yoy0z-maps@users.noreply.github.com` (개인 이메일 공개 방지용 GitHub noreply, ID는 공개 API로 조회) |
+| B-07 | GitHub 원격 저장소 `Yoy0z-maps/honsikdang` 없음(공개 API 404, 비공개일 수도 있음), `gh` CLI·인증 없음 | 사용자가 저장소 생성(공개/비공개 결정) 후 push 인증 |
+
+B-01, B-02 해소.
+
+### 9.1 추가 결정
+
+| ID | 결정 | 이유 |
+|---|---|---|
+| W1-07 | `db:lint`는 `--schema public`으로 한정 | PostGIS 내장 함수 오탐 (§8.3) |
+| W1-08 | `.gitattributes`로 LF 고정 (`* text=auto eol=lf`) | Git for Windows `autocrlf`로 CRLF 체크아웃 시 Prettier(LF) 검사 실패 방지 |
+| W1-09 | 첫 커밋은 `main`에 직접 | 빈 저장소의 초기 커밋. 이후 작업은 WP별 브랜치 + PR |
+
+---
+
+## 10. 변경 이력
+
+| 날짜 | 변경 | 작성 |
+|---|---|---|
+| 2026-10-15 | WP-00 최초 작성: 저장소 감사, 가정/확정/미결정 분리, 외부 API 근거, 블로커 | Claude (WP-00) |
+| 2026-10-15 | WP-01: 툴체인 설치, Next.js/Supabase/Vitest/CI 스캐폴딩, 검증 결과, B-05/B-06 추가 | Claude (WP-01) |
+| 2026-10-15 | B-05: WSL 3.0.3.0 설치 완료, 재부팅 대기 | Claude (WP-01) |
+| 2026-10-15 | WP-01 Gate 통과: db:start/reset/lint 검증, B-05/B-06 해소, B-07 추가, W1-07~09 | Claude (WP-01) |

@@ -1,0 +1,9 @@
+.next
+node_modules
+package-lock.json
+next-env.d.ts
+supabase/.temp
+supabase/.branches
+# Hand-maintained specs; keep their formatting stable for diffs.
+HONSIKDANG_MASTER_PLAN.md
+specs/
