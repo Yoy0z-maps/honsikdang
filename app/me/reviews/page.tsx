@@ -105,9 +105,20 @@ export default function MyReviewsPage({
   return (
     <main className="mx-auto w-full max-w-xl space-y-4 px-4 py-6">
       <div className="flex items-center justify-between">
-        <Link href="/" className="text-sm underline underline-offset-2">
-          ← 혼식당
-        </Link>
+        <nav className="flex gap-4 text-sm">
+          <Link
+            href="/"
+            className="inline-flex min-h-11 items-center underline underline-offset-2"
+          >
+            ← 지도
+          </Link>
+          <Link
+            href="/me/places"
+            className="inline-flex min-h-11 items-center underline underline-offset-2"
+          >
+            내 장소 제안
+          </Link>
+        </nav>
         <AccountMenu />
       </div>
       <h1 className="text-2xl font-bold tracking-tight">내 리뷰</h1>

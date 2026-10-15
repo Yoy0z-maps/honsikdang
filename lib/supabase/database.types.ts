@@ -111,6 +111,49 @@ export type Database = {
         };
         Relationships: [];
       };
+      restaurant_duplicate_candidates: {
+        Row: {
+          candidate_id: string;
+          created_at: string;
+          distance_m: number;
+          name_similarity: number;
+          reason: string;
+          restaurant_id: string;
+        };
+        ComputedFields: never;
+        Insert: {
+          candidate_id: string;
+          created_at?: string;
+          distance_m: number;
+          name_similarity: number;
+          reason: string;
+          restaurant_id: string;
+        };
+        Update: {
+          candidate_id?: string;
+          created_at?: string;
+          distance_m?: number;
+          name_similarity?: number;
+          reason?: string;
+          restaurant_id?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "restaurant_duplicate_candidates_candidate_id_fkey";
+            columns: ["candidate_id"];
+            isOneToOne: false;
+            referencedRelation: "restaurants";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "restaurant_duplicate_candidates_restaurant_id_fkey";
+            columns: ["restaurant_id"];
+            isOneToOne: false;
+            referencedRelation: "restaurants";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
       restaurant_reports: {
         Row: {
           created_at: string;
@@ -214,6 +257,7 @@ export type Database = {
           id: string;
           location: unknown;
           name: string;
+          name_normalized: string | null;
           source_type: Database["public"]["Enums"]["restaurant_source"];
           status: Database["public"]["Enums"]["restaurant_status"];
           updated_at: string;
@@ -227,6 +271,7 @@ export type Database = {
           id?: string;
           location: unknown;
           name: string;
+          name_normalized?: never;
           source_type?: Database["public"]["Enums"]["restaurant_source"];
           status?: Database["public"]["Enums"]["restaurant_status"];
           updated_at?: string;
@@ -239,6 +284,7 @@ export type Database = {
           id?: string;
           location?: unknown;
           name?: string;
+          name_normalized?: never;
           source_type?: Database["public"]["Enums"]["restaurant_source"];
           status?: Database["public"]["Enums"]["restaurant_status"];
           updated_at?: string;
@@ -379,6 +425,17 @@ export type Database = {
           wait_minutes?: number;
         };
         Returns: string;
+      };
+      suggest_restaurant: {
+        Args: {
+          address: string;
+          category_slug: string;
+          confirm_not_duplicate?: boolean;
+          lat: number;
+          lng: number;
+          name: string;
+        };
+        Returns: Json;
       };
       update_my_review: {
         Args: {

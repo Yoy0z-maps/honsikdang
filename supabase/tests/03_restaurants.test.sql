@@ -65,13 +65,15 @@ select throws_ok(
   'anon cannot propose restaurants'
 );
 
+-- Since WP-04b, API roles cannot insert directly; suggestions go through
+-- public.suggest_restaurant (dedupe + daily limit, see 09_place_suggestion).
 :as_owner
-select results_eq(
+select throws_ok(
   $$ insert into public.restaurants (name, address, location, category_id)
-     values ('새 제안', '서울 테스트구 2', 'SRID=4326;POINT(127 37.5)', 1)
-     returning status::text, source_type::text, created_by $$,
-  $$ values ('pending', 'user_submitted', '00000000-0000-4000-8000-000000000001'::uuid) $$,
-  'owner proposal is forced to pending, user_submitted and attributed to them'
+     values ('새 제안', '서울 테스트구 2', 'SRID=4326;POINT(127 37.5)', 1) $$,
+  '42501',
+  null,
+  'regular users cannot insert restaurants directly'
 );
 
 select throws_ok(
@@ -82,21 +84,25 @@ select throws_ok(
   'owner cannot insert an approved restaurant'
 );
 
+:as_admin
 select throws_ok(
-  $$ insert into public.restaurants (name, address, location, category_id, created_by)
-     values ('사칭', '서울', 'SRID=4326;POINT(127 37.5)', 1, '00000000-0000-4000-8000-000000000002') $$,
+  $$ insert into public.restaurants (name, address, location, category_id)
+     values ('관리자 직접', '서울', 'SRID=4326;POINT(127 37.5)', 1) $$,
   '42501',
   null,
-  'owner cannot attribute a proposal to another user'
+  'admins cannot insert directly through the API either'
 );
 
+:as_postgres
 select throws_ok(
   $$ insert into public.restaurants (name, address, location, category_id)
      values ('   ', '서울', 'SRID=4326;POINT(127 37.5)', 1) $$,
   '23514',
   null,
-  'blank restaurant name is rejected'
+  'blank restaurant name is rejected by the table constraint'
 );
+
+:as_owner
 
 select is_empty(
   $$ update public.restaurants set status = 'approved'
