@@ -3,6 +3,22 @@
 :root {
   --background: #ffffff;
   --foreground: #171717;
+  /* Map-first layout (master plan §5A). Top overlay: search (44px) + chips
+     (44px) + spacing, below the safe area. */
+  --overlay-top: calc(7rem + env(safe-area-inset-top));
+  /* Collapsed bottom sheet: grabber (44px) + title row (44px) + home
+     indicator. */
+  --sheet-collapsed: calc(5.5rem + env(safe-area-inset-bottom));
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
 }
 
 @theme inline {

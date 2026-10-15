@@ -1,7 +1,8 @@
 // Minimal typings for the parts of NAVER Maps JS API v3 this app uses.
 // Loaded from https://oapi.map.naver.com/openapi/v3/maps.js?ncpKeyId=...
-// Marker/Event/getCenter behavior is to be confirmed against a live key
-// (specs/decisions.md §12, B-04).
+// Map/LatLngBounds members checked against the official reference
+// (navermaps.github.io/maps.js.ncp/docs, 2026-10-15); Marker options and
+// Event were confirmed against a live key (specs/decisions.md §12).
 
 declare namespace naver.maps {
   class LatLng {
@@ -13,12 +14,19 @@ declare namespace naver.maps {
   interface MapOptions {
     center: LatLng;
     zoom?: number;
+    draggable?: boolean;
+    pinchZoom?: boolean;
+    scrollWheel?: boolean;
+    keyboardShortcuts?: boolean;
   }
 
   class Map {
     constructor(element: HTMLElement | string, options: MapOptions);
     getCenter(): LatLng;
+    getZoom(): number;
     setCenter(center: LatLng): void;
+    setZoom(zoom: number, effect?: boolean): void;
+    panTo(coord: LatLng): void;
     destroy(): void;
   }
 

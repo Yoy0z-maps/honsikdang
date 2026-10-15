@@ -52,7 +52,7 @@ join public.tags t on t.slug = v.slug;
 
 -- privileges ---------------------------------------------------------------
 select ok(has_function_privilege('anon',
-  'public.search_restaurants(double precision, double precision, integer, text[], integer, text[], text, integer, integer)',
+  'public.search_restaurants(double precision, double precision, integer, text[], integer, text[], text, integer, integer, double precision, double precision, double precision, double precision)',
   'execute'), 'anon can execute search_restaurants');
 select ok(has_function_privilege('anon', 'public.restaurant_detail(uuid)', 'execute'),
   'anon can execute restaurant_detail');

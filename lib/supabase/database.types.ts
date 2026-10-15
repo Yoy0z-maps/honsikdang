@@ -337,7 +337,11 @@ export type Database = {
           category_slugs?: string[];
           center_lat: number;
           center_lng: number;
+          max_lat?: number;
+          max_lng?: number;
           max_price?: number;
+          min_lat?: number;
+          min_lng?: number;
           query?: string;
           radius_m?: number;
           result_limit?: number;
