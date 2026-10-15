@@ -43,6 +43,11 @@ jobs:
       # Lints our schemas only; the `extensions` schema holds third-party
       # PostGIS functions that plpgsql_check flags as false positives.
       - run: npm run db:lint
+      # pgTAP authorization matrix (supabase/tests).
+      - run: npm run db:test
+      # Generated types must match the migrated schema.
+      - run: npm run db:types
+      - run: git diff --exit-code -- lib/supabase/database.types.ts
       - if: always()
         run: npx supabase stop --no-backup
 

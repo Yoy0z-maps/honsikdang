@@ -31,7 +31,13 @@
 | C-05 | 프로덕션 마이그레이션·배포·외부 서비스 생성·지출은 사용자 승인 필요 | 명세 §0, §11 |
 | C-06 | **Web/PWA 우선** (D-02 확정, A-01 승격) | 사용자 지시 (2026-10-15) |
 | C-07 | 툴체인 설치 승인: Node 24 LTS, Git, Docker Desktop (winget) (D-10 해소) | 사용자 지시 (2026-10-15) |
-| C-08 | 프로젝트 위치: `C:\Users\ASUS\honsikdang` (사용자가 홈 폴더 선택 → 그 안에 생성) (D-09 부분 해소, GitHub 원격은 미정) | 사용자 선택 (2026-10-15) |
+| C-08 | 프로젝트 위치: `C:\Users\ASUS\honsikdang`, GitHub `Yoy0z-maps/honsikdang`(공개) (D-09 해소) | 사용자 선택 (2026-10-15) |
+| C-09 | **Q1** 장소와 리뷰 모두 승인 후 공개 (D-04 해소, A-08 승격) | 사용자 확정 (2026-10-15) |
+| C-10 | **Q2** 사용자당 식당당 리뷰 1개, 재방문은 기존 리뷰 수정 | 사용자 확정 (2026-10-15) |
+| C-11 | **Q3** 작성자 삭제는 즉시 완전 삭제, 관리자 조치는 `removed` 상태 + 감사 기록 | 사용자 확정 (2026-10-15) |
+| C-12 | **Q4** 프로필은 본인만 조회. 리뷰 작성자 이름 공개 방식은 WP-04에서 결정 (D-05 일부) | 사용자 확정 (2026-10-15) |
+| C-13 | **Q5** 초기 카테고리 9개, 태그 6개를 기준 데이터로 마이그레이션에 포함 | 사용자 확정 (2026-10-15) |
+| C-14 | **Q6** `price_paid` = 그날 1인 실지출(원) (D-08 해소, A-09 승격) | 사용자 확정 (2026-10-15) |
 
 ---
 
@@ -50,7 +56,7 @@
 | A-09 | 가격: 리뷰의 `price_paid` = **1인 실지출(KRW)**, 식당 가격대는 리뷰로부터 파생 | WP-02 | 메뉴 가격 필드는 추가만 하면 됨 |
 | A-10 | Naver는 **지도 렌더링(Web Dynamic Map)만** 사용. 장소 좌표는 사용자가 지도에서 찍은 핀(사용자 저작 데이터)으로 저장. Naver 지역검색·지오코딩 결과는 약관 확인 전까지 **DB에 저장하지 않음** | WP-03/04 | 약관 확인 후 `external_reference` 활성화 |
 | A-11 | AI 제공자는 인터페이스 뒤로 격리, WP-05 전까지 선택 보류 | WP-05 | — |
-| A-12 | 관리자 권한은 `profiles.role`(클라이언트 쓰기 불가) 또는 별도 `admin_users` 테이블 + 서버 측 검사. 클라이언트가 수정 가능한 필드에 의존하지 않음 | WP-02 | — |
+| A-12 | 관리자 권한은 비노출 `private.user_roles` + `private.is_admin()` (WP-02에서 구현, §11) | WP-02 | — |
 | A-13 | 스테이징 호스팅은 WP-01에서 결정하지 않음. CI는 로컬 검증 위주로 먼저 구성 | WP-01 | — |
 
 ---
@@ -62,13 +68,13 @@
 | D-01 | 초기 지역: 서울 한 상권 / 여러 상권 / 전국? 구체적인 상권명? | A-02 | WP-03 (시드·지도 초기 중심) |
 | D-02 | Web/PWA 우선 vs 네이티브 우선? | A-01 | WP-01 (이번에 확인 권장) |
 | D-03 | 초기 50–100곳의 실제 데이터 확보 방법? | 미정 | WP-04 이후 런치 |
-| D-04 | 장소·리뷰 즉시 공개 vs 사전 승인? | A-08 | WP-02 (RLS 기본 상태), WP-04 |
-| D-05 | 인증 제공자, MVP 이미지 업로드, 프로필 공개 여부? | A-06, A-07 | WP-02 |
+| D-04 | ~~장소·리뷰 즉시 공개 vs 사전 승인?~~ | **해소 (C-09)** | — |
+| D-05 | 인증 제공자, MVP 이미지 업로드, 리뷰 작성자 이름 공개 방식? (프로필 비공개는 C-12로 확정) | A-06, A-07 | WP-04 |
 | D-06 | AI 제공자와 월 지출 상한? | A-11 | WP-05 |
 | D-07 | 사용할 Naver 상품(Maps / 검색 API)과 허용되는 장소 데이터 저장 범위? | A-10 | WP-03 |
-| D-08 | 가격 표현: 1인 평균 지출 / 메뉴 가격 / 둘 다? | A-09 | WP-02 |
-| D-09 | 영구 프로젝트 폴더 위치, GitHub 원격 저장소 사용 여부 | 미정 | **WP-01** |
-| D-10 | 로컬 툴체인(Node LTS, Git, Docker Desktop 또는 WSL2 기반 런타임, Supabase CLI) 설치 승인 | 미정 | **WP-01** |
+| D-08 | ~~가격 표현~~ | **해소 (C-14)** | — |
+| D-09 | ~~영구 프로젝트 폴더, GitHub 원격~~ | **해소 (C-08)** | — |
+| D-10 | ~~로컬 툴체인 설치 승인~~ | **해소 (C-07)** | — |
 | D-11 | 예산: Supabase 플랜, NCP 사용량 과금 한도 | 미정 | 스테이징/런치 |
 
 ---
@@ -155,7 +161,7 @@
 | `npm run db:reset` | 통과 — 빈 DB에서 마이그레이션 재적용. `seed.sql` 없음 안내만 출력 (의도됨) |
 | 확장 설치 위치 (psql) | `postgis 3.3.7` → `extensions`, `vector 0.8.2` → `extensions`, `public.spatial_ref_sys` 없음 |
 | `npm run db:lint` (`--schema public`) | 통과 — 오류 0 |
-| GitHub Actions | **미실행** — 원격 저장소 없음. gitleaks-action은 조직 계정이면 라이선스 필요 (미검증) |
+| GitHub Actions | **통과** — run 38658736150 (커밋 2ca29e6): app / database(db start·reset·lint) / secrets(gitleaks, 개인 계정이라 라이선스 불필요) 3개 job 모두 success |
 
 `supabase db lint`를 스키마 지정 없이 실행하면 `extensions` 스키마의 PostGIS 내장 함수(`st_findextent`, `addauth` 등)에서 plpgsql_check 오류가 보고되어 실패한다. 서드파티 코드의 오탐이므로 lint 범위를 우리 스키마(`public`, 이후 추가 스키마)로 한정한다 (W1-07).
 
@@ -176,7 +182,7 @@
 - local run: 로컬 Supabase 스택 기동 **통과**. `next dev`는 브라우저 수동 확인 미실시 (프로덕션 빌드는 통과)
 - migration reset: **통과**
 
-**판정: 통과 (2026-10-15).** 단, CI는 원격 저장소 연결 후 첫 실행으로 확인 필요.
+**판정: 통과 (2026-10-15).** 로컬과 CI 모두 확인.
 
 ---
 
@@ -186,7 +192,7 @@
 |---|---|---|
 | B-05 | WSL2 미설치 → Docker 엔진 미기동 → Supabase 로컬 불가 | **해소.** `wsl --install --no-distribution`(관리자 권한, 비관리자 실행은 안내 문구만 출력하고 exit 1) → WSL 3.0.3.0 / 커널 6.18.54.1-1 → 재부팅 → Docker 29.8.2 엔진 기동 확인 |
 | B-06 | git 사용자 정보 미설정 → 커밋 불가 | **해소.** 사용자 GitHub 계정 `Yoy0z-maps` 지정. 저장소 로컬 설정: `user.name=Yoy0z-maps`, `user.email=165480026+Yoy0z-maps@users.noreply.github.com` (개인 이메일 공개 방지용 GitHub noreply, ID는 공개 API로 조회) |
-| B-07 | GitHub 원격 저장소 `Yoy0z-maps/honsikdang` 없음(공개 API 404, 비공개일 수도 있음), `gh` CLI·인증 없음 | 사용자가 저장소 생성(공개/비공개 결정) 후 push 인증 |
+| B-07 | GitHub 원격 저장소 없음 | **해소.** 사용자가 `Yoy0z-maps/honsikdang`(공개) 생성 → `main` push 완료 |
 
 B-01, B-02 해소.
 
@@ -200,7 +206,81 @@ B-01, B-02 해소.
 
 ---
 
-## 10. 변경 이력
+## 11. WP-02 Database/Security 기록
+
+### 11.1 마이그레이션
+
+| 파일 | 내용 |
+|---|---|
+| `20261015005829_security_baseline.sql` | `public`의 기본 자동 권한 회수(테이블·시퀀스·함수), `PUBLIC` 함수 실행권 전역 회수(postgres 생성분), `private` 스키마, `user_roles`, `is_admin()`, `set_updated_at()` |
+| `20261015005832_profiles_restaurants.sql` | profiles(+가입 트리거), restaurant_categories(+9개), restaurants |
+| `20261015005836_reviews_tags.sql` | restaurant_reviews(+검증·상태 보호 트리거), tags(+6개), review_tags(+재검토 트리거) |
+| `20261015005839_favorites_reports_moderation.sql` | favorites, restaurant_reports(+대상 검증 트리거), moderation_actions |
+
+각 파일 머리에 로컬용 rollback SQL 주석. 프로덕션 미적용.
+
+### 11.2 권한 표 (구현·테스트 완료)
+
+| 테이블 | anon | owner | other | admin |
+|---|---|---|---|---|
+| profiles | ✗ (42501) | 본인 조회, `display_name`만 수정 | ✗ | 전체 조회 |
+| restaurant_categories | 조회 | 조회 | 조회 | 조회·추가·수정·삭제 |
+| restaurants | approved 조회 | approved + 본인 제안 조회, 제안(pending·user_submitted·본인 귀속 강제) | approved 조회 | 전체 조회·수정·삭제 |
+| restaurant_reviews | approved 조회 | approved + 본인 조회, 작성(pending), 수정(→pending), 완전 삭제 | approved 조회 | 전체 조회, 상태 변경. **완전 삭제 불가** |
+| tags | 조회 | 조회 | 조회 | 조회·추가·수정·삭제 |
+| review_tags | 보이는 리뷰의 태그 조회 | 본인 리뷰 태그 추가·삭제(→pending) | 보이는 리뷰의 태그 조회 | 보이는 리뷰의 태그 조회 |
+| favorites | ✗ (42501) | 본인 조회·추가·삭제 | ✗ | ✗ |
+| restaurant_reports | ✗ (42501) | 보이는 대상 신고(open), 본인 신고 조회 | ✗ | 전체 조회, 상태 변경 |
+| moderation_actions | ✗ (42501) | ✗ | ✗ | 조회·추가(본인 귀속). 수정·삭제 권한 없음 |
+
+`postgres`·`service_role`(서버 측)은 트리거 제한을 받지 않음 (W2-03).
+
+### 11.3 결정
+
+| ID | 결정 | 이유 |
+|---|---|---|
+| W2-01 | 권한은 테이블별 `revoke all` 후 필요한 것만 `grant`, 쓰기는 컬럼 단위 | 로컬은 여전히 자동 부여 기본값을 가짐(확인함), 호스티드는 2026-10-30부터 자동 부여 없음 → 양쪽 동일 동작 |
+| W2-02 | 상태값은 클라이언트가 바꾸지 못함: insert 시 RLS `with check`, update 시 트리거(`guard_review_update`) | 컬럼 grant만으로는 관리자/일반 구분 불가 |
+| W2-03 | 상태 보호·재검토 트리거는 `current_user`가 `anon`/`authenticated`일 때만 적용 | 첫 구현이 `postgres`의 상태 변경까지 막는 것을 테스트가 발견. 서버 측 검수 흐름(WP-04)에 필요 |
+| W2-04 | 관리자도 리뷰 완전 삭제 불가 (계획 표의 "전체"에서 축소) | 감사 증거 보존. 관리자는 `removed` 상태 사용 (Q3) |
+| W2-05 | 관리자도 favorites 조회 불가 | 개인 정보, 운영상 필요 없음 |
+| W2-06 | 신고 대상 존재 확인은 신고자 권한(RLS)으로 수행 | 보이지 않는 대상의 존재 여부 노출 방지 (23503으로 동일 응답) |
+| W2-07 | 사용자가 거절된 리뷰를 수정하거나 상태를 `pending`으로 되돌려 재제출할 수 있음 | 의도된 동작. 남용 시 WP-04 요청 제한으로 대응 |
+| W2-08 | 리뷰 본문 컬럼명은 `body` (명세의 `text`) | SQL 타입명과 혼동 방지 |
+| W2-09 | 타입 생성: `npm run db:types` (생성 + Prettier). CI에서 생성 후 `git diff --exit-code`로 불일치 검사 | 명세 규칙 7 |
+
+### 11.4 검증 결과 (로컬, 2026-10-15)
+
+| 명령 | 결과 |
+|---|---|
+| `npm run db:reset` | 통과 — 마이그레이션 5개 적용 |
+| `npm run db:lint` | 통과 — 오류 0 |
+| `npm run db:test` | 통과 — 5 files, **83 tests** |
+| 변이 검사 | 정책 2개를 일부러 `using (true)`로 완화 → 3개 테스트 실패 확인 → reset으로 복구 |
+| `npm run db:types` | 통과, 2회 생성 해시 동일 |
+| `npm run check` | 통과 — 6 tests |
+| `npm run build` | 통과 |
+
+### 11.5 알려진 한계 (WP-04 이후)
+
+| ID | 내용 | 해당 WP |
+|---|---|---|
+| K-05 | 상태 변경과 `moderation_actions` 기록이 원자적이지 않음 (별도 insert) | WP-04: 검수 RPC로 묶기 |
+| K-06 | 장소 중복 탐지, 제출 요청 제한 없음 | WP-04 |
+| K-07 | `removed` 리뷰도 Q2 고유 제약에 남아 해당 사용자는 같은 식당에 다시 리뷰 불가 | WP-04에서 정책 확인 |
+| K-08 | 생성 타입에서 `location`(geography)이 `unknown` | WP-03: 좌표 입출력 함수/뷰 |
+| K-09 | 리뷰 작성자 이름 표시 불가 (프로필 비공개, Q4) | WP-04 |
+| K-10 | `restaurant_aggregates`, `restaurant_embeddings` 미구현 | WP-04 / WP-05 |
+
+### 11.6 WP-02 Gate 판정
+
+> Gate: unauthorized read/write matrix verified.
+
+**판정: 통과 (로컬).** §11.2의 모든 칸이 pgTAP 테스트로 확인됨. CI 실행은 PR에서 확인.
+
+---
+
+## 변경 이력
 
 | 날짜 | 변경 | 작성 |
 |---|---|---|
@@ -208,3 +288,5 @@ B-01, B-02 해소.
 | 2026-10-15 | WP-01: 툴체인 설치, Next.js/Supabase/Vitest/CI 스캐폴딩, 검증 결과, B-05/B-06 추가 | Claude (WP-01) |
 | 2026-10-15 | B-05: WSL 3.0.3.0 설치 완료, 재부팅 대기 | Claude (WP-01) |
 | 2026-10-15 | WP-01 Gate 통과: db:start/reset/lint 검증, B-05/B-06 해소, B-07 추가, W1-07~09 | Claude (WP-01) |
+| 2026-10-15 | WP-01 CI 통과 기록, B-07 해소 | Claude (WP-01) |
+| 2026-10-15 | WP-02: Q1–Q6 확정(C-09~C-14), 스키마·RLS·pgTAP 83건, W2-01~09, K-05~10 | Claude (WP-02) |
