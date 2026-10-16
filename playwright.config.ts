@@ -55,6 +55,7 @@ export default defineConfig({
       // Rule-based test fixture instead of the model: no key, no spend.
       AI_PROVIDER: "fixture",
       ANTHROPIC_API_KEY: "",
+      OPENAI_API_KEY: "",
       EMBEDDING_PROVIDER: "fixture",
       VOYAGE_API_KEY: "",
       SUPABASE_SECRET_KEY: process.env.E2E_SUPABASE_SECRET_KEY ?? "",

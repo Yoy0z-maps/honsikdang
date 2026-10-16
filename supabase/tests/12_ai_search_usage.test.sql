@@ -1,7 +1,7 @@
 -- WP-05a: AI search quota, monthly budget, usage log privacy (Q41/Q42).
 begin;
 \ir _fixtures.psql
-select plan(15);
+select plan(17);
 
 select ok(not has_function_privilege('anon', 'public.claim_ai_search(bigint, text, text)', 'execute'),
   'anon cannot claim AI searches');
@@ -62,6 +62,16 @@ select lives_ok(
 select throws_ok(
   $$ select public.claim_ai_search(3000000, 'claude-haiku-5-5', 'parse-v1') $$,
   'HS429', null, 'the 31st AI search within 24 hours is rejected');
+
+-- OpenAI parser pricing (decision C-59): 1000×0.1 + 100×0.5 = 150 µUSD
+:as_other
+select lives_ok(
+  $$ select public.finish_ai_search(public.claim_ai_search(3000000, 'gpt-6-luna', 'parse-v2'), 'ok', 1000, 100, 500) $$,
+  'an OpenAI parser call is logged');
+:as_postgres
+select results_eq(
+  $$ select cost_micro_usd from private.ai_usage where model = 'gpt-6-luna' $$,
+  array[150], 'gpt-6-luna is priced at $0.10 / $0.50 per million tokens');
 
 select * from finish();
 rollback;

@@ -12,6 +12,7 @@ import { createClient } from "@supabase/supabase-js";
 import { describe, expect, it } from "vitest";
 import {
   FixtureEmbedder,
+  RetryingEmbedder,
   VoyageEmbedder,
   toVectorLiteral,
   type Embedder,
@@ -56,8 +57,17 @@ function secretKey(): string {
   }
 }
 
+// Free-tier accounts are rate limited: retry 429s after a pause, embed the
+// corpus in large batches and all queries in one request.
 const embedder: Embedder | null = process.env.VOYAGE_API_KEY
-  ? new VoyageEmbedder(process.env.VOYAGE_API_KEY, process.env.VOYAGE_API_BASE)
+  ? new RetryingEmbedder(
+      new VoyageEmbedder(
+        process.env.VOYAGE_API_KEY,
+        process.env.VOYAGE_API_BASE,
+      ),
+      4,
+      21_000,
+    )
   : process.env.EVAL_EMBEDDER === "fixture"
     ? new FixtureEmbedder()
     : null;
@@ -147,7 +157,7 @@ describe.skipIf(!embedder || !local)("retrieval evaluation (local)", () => {
         // API on purpose (no user flows, no API-role privileges needed).
         psql(corpusSql());
 
-        const work = await runEmbeddingJobs(admin, embedder!, 20);
+        const work = await runEmbeddingJobs(admin, embedder!, 5, 50, 300_000);
         expect(work.failed).toBe(0);
 
         const byDistance = [...corpus.restaurants]
@@ -166,12 +176,13 @@ describe.skipIf(!embedder || !local)("retrieval evaluation (local)", () => {
           ndcg: Scores;
           top5: string[];
         }[] = [];
-        for (const q of corpus.queries) {
-          const { vectors } = await embedder!.embed(
-            [q.text],
-            "query",
-            AbortSignal.timeout(10_000),
-          );
+        const { vectors: queryVectors } = await embedder!.embed(
+          corpus.queries.map((q) => q.text),
+          "query",
+          AbortSignal.timeout(300_000),
+        );
+        for (const [qi, q] of corpus.queries.entries()) {
+          const vectors = [queryVectors[qi]];
           const rank = async (vector: string | null, text: string | null) => {
             const { data, error } = await admin.rpc("rank_restaurants", {
               candidate_ids: byDistance.map((x) => x.id),

@@ -10,6 +10,8 @@ export type Interpretation = {
   parsed: ParsedQuery | null;
   usage: ParserUsage;
   latencyMs: number;
+  /** Provider error summary (status only, never response bodies). */
+  detail?: string;
 };
 
 /**
@@ -50,6 +52,7 @@ export async function interpretQuery(
       parsed: null,
       usage,
       latencyMs: elapsed(),
+      detail: error instanceof Error ? error.message.slice(0, 80) : undefined,
     };
   }
 }

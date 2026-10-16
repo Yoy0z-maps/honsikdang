@@ -21,11 +21,13 @@ export async function runEmbeddingJobs(
   client: SupabaseClient<Database>,
   embedder: Embedder,
   maxBatches = 10,
+  batchSize = EMBED_BATCH,
+  timeoutMs = EMBED_TIMEOUT_MS,
 ): Promise<WorkerReport> {
   const report: WorkerReport = { claimed: 0, stored: 0, failed: 0, tokens: 0 };
   for (let i = 0; i < maxBatches; i++) {
     const { data: jobs, error } = await client.rpc("embedding_jobs_claim", {
-      batch: EMBED_BATCH,
+      batch: batchSize,
       model: embedder.model,
     });
     if (error) throw new Error(`claim failed: ${error.code}`);
@@ -36,7 +38,7 @@ export async function runEmbeddingJobs(
       const { vectors, tokens } = await embedder.embed(
         jobs.map((job) => job.content),
         "document",
-        AbortSignal.timeout(EMBED_TIMEOUT_MS),
+        AbortSignal.timeout(timeoutMs),
       );
       report.tokens += tokens;
       const { data: stored, error: storeError } = await client.rpc(

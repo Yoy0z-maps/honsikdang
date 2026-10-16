@@ -114,3 +114,39 @@ export function fixtureVector(text: string): number[] {
 export function toVectorLiteral(vector: number[]): string {
   return `[${vector.join(",")}]`;
 }
+
+const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
+
+/**
+ * Retries rate-limited (429) and server (5xx) failures after a pause. For
+ * background work and evaluations only; request paths stay fail-fast.
+ */
+export class RetryingEmbedder implements Embedder {
+  constructor(
+    private readonly inner: Embedder,
+    private readonly retries = 3,
+    private readonly delayMs = 21_000,
+  ) {}
+
+  get model() {
+    return this.inner.model;
+  }
+
+  async embed(
+    texts: string[],
+    inputType: EmbedInputType,
+    signal: AbortSignal,
+  ): Promise<EmbedResult> {
+    for (let attempt = 0; ; attempt++) {
+      try {
+        return await this.inner.embed(texts, inputType, signal);
+      } catch (error) {
+        const retryable =
+          error instanceof EmbeddingError &&
+          /^embeddings (429|5\d\d)$/.test(error.message);
+        if (!retryable || attempt >= this.retries) throw error;
+        await sleep(this.delayMs * (attempt + 1));
+      }
+    }
+  }
+}

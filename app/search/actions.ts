@@ -20,7 +20,7 @@ export type AiSearchResult =
   | { status: "invalid_query" };
 
 // ≈ ₩5,000/month (decision Q38). Stored in micro-USD; override with
-// AI_MONTHLY_BUDGET_USD. The Anthropic console spend limit is the hard cap.
+// AI_MONTHLY_BUDGET_USD. The provider dashboard spend limit is the hard cap.
 const DEFAULT_BUDGET_USD = 3;
 
 function monthlyBudgetMicroUsd(): number {

@@ -2,6 +2,7 @@ import "server-only";
 import { AnthropicQueryParser } from "./anthropic";
 import { FixtureEmbedder, VoyageEmbedder, type Embedder } from "./embeddings";
 import { FixtureQueryParser } from "./fixture";
+import { OpenAIQueryParser } from "./openai";
 import type { QueryParser } from "./types";
 
 const LOCAL_HOSTS = new Set(["127.0.0.1", "localhost", "[::1]"]);
@@ -21,13 +22,20 @@ function isLocalSupabase(): boolean {
  * never answer real users.
  */
 export function getQueryParser(): QueryParser | null {
-  const provider = process.env.AI_PROVIDER?.trim() || "anthropic";
+  // OpenAI by default (decision C-59); Anthropic stays selectable.
+  const provider = process.env.AI_PROVIDER?.trim() || "openai";
   if (provider === "fixture") {
     return isLocalSupabase() ? new FixtureQueryParser() : null;
   }
-  if (provider !== "anthropic") return null;
-  const key = process.env.ANTHROPIC_API_KEY?.trim();
-  return key ? new AnthropicQueryParser(key) : null;
+  if (provider === "openai") {
+    const key = process.env.OPENAI_API_KEY?.trim();
+    return key ? new OpenAIQueryParser(key) : null;
+  }
+  if (provider === "anthropic") {
+    const key = process.env.ANTHROPIC_API_KEY?.trim();
+    return key ? new AnthropicQueryParser(key) : null;
+  }
+  return null;
 }
 
 /**

@@ -86,3 +86,39 @@ describe("toVectorLiteral", () => {
     expect(toVectorLiteral([0.5, -1, 0])).toBe("[0.5,-1,0]");
   });
 });
+
+describe("RetryingEmbedder", () => {
+  it("retries rate limits and passes other errors through", async () => {
+    const { RetryingEmbedder, EmbeddingError } = await import("./embeddings");
+    let calls = 0;
+    const flaky = {
+      model: "m",
+      embed: async () => {
+        calls++;
+        if (calls < 3) throw new EmbeddingError("embeddings 429");
+        return { vectors: [[1]], tokens: 1 };
+      },
+    };
+    const result = await new RetryingEmbedder(flaky, 3, 1).embed(
+      ["a"],
+      "query",
+      AbortSignal.timeout(1000),
+    );
+    expect(result.tokens).toBe(1);
+    expect(calls).toBe(3);
+
+    const broken = {
+      model: "m",
+      embed: async () => {
+        throw new EmbeddingError("embeddings 400");
+      },
+    };
+    await expect(
+      new RetryingEmbedder(broken, 3, 1).embed(
+        ["a"],
+        "query",
+        AbortSignal.timeout(1000),
+      ),
+    ).rejects.toThrow("400");
+  });
+});

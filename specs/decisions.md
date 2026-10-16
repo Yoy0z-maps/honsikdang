@@ -82,6 +82,7 @@
 | C-56 | **Q47** 관련도순은 AI 검색에서만, 하드 필터를 통과한 결과 안에서 순서만 바꿈. 일반 검색은 거리순 | 사용자 확정 (2026-10-16) |
 | C-57 | **Q48** 합성 평가 코퍼스와 검색 평가(recall@10, NDCG@10을 거리순과 비교) | 사용자 확정 (2026-10-16) |
 | C-58 | **Q49** WP-05b를 PR #8 위에 이어서 진행 | 사용자 확정 (2026-10-16) |
+| C-59 | AI 검색 해석 제공자를 Anthropic에서 **OpenAI `gpt-6-luna`**로 변경 (C-47의 제공자 부분 대체, 월 한도 ₩5,000 유지). Anthropic은 `AI_PROVIDER=anthropic`으로 선택 가능하게 남김. 임베딩은 Voyage 유지(C-53) | 사용자 확정 (2026-10-16) |
 
 ---
 
@@ -110,7 +111,7 @@
 | ID | 질문 (명세 §16) | 현재 기본값 | 막히는 단계 |
 |---|---|---|---|
 | D-01 | 초기 지역: 서울 한 상권 / 여러 상권 / 전국? 구체적인 상권명? | A-02 | WP-03 (시드·지도 초기 중심) |
-| D-02 | Web/PWA 우선 vs 네이티브 우선? | A-01 | WP-01 (이번에 확인 권장) |
+| D-02 | ~~Web/PWA 우선 vs 네이티브 우선?~~ → Web/PWA 우선으로 해소 (사용자 확정, WP-01) | A-01 | — |
 | D-03 | 초기 50–100곳의 실제 데이터 확보 방법? | 미정 | WP-04 이후 런치 |
 | D-04 | ~~장소·리뷰 즉시 공개 vs 사전 승인?~~ | **해소 (C-09)** | — |
 | D-05 | ~~인증 제공자, 리뷰 작성자 공개~~ **해소 (C-21, C-22)**. 이미지 업로드는 A-07(없음) 유지 | — | — |
@@ -732,6 +733,43 @@ B-01, B-02 해소.
 | K-42 | 운영에서 대기열을 주기적으로 처리하는 스케줄 없음 | WP-07 (Vercel Cron 등) |
 | K-43 | 평가 코퍼스는 합성이라 실제 리뷰 분포와 다름 | 실제 데이터 확보 후(D-03) 라벨 추가 |
 
+## 20. 제공자 변경(OpenAI)과 실측 평가 기록
+
+### 20.1 외부 API 근거 (2026-10-16 확인)
+
+| 항목 | 상태 | 근거 |
+|---|---|---|
+| `gpt-6-luna`: 입력 $0.10 / 출력 $0.50 (백만 토큰당), Responses·Chat Completions 지원, Structured Outputs 지원, reasoning effort `none`~`max`(기본 `medium`) | VERIFIED | https://developers.openai.com/api/docs/models/gpt-6-luna |
+| Structured Outputs: `text.format` = `{type: "json_schema", name, strict: true, schema}`, 모든 필드 required, `additionalProperties: false`, `anyOf` 지원(루트 제외), 거절은 `refusal` 콘텐츠, `status: "incomplete"`는 잘린 출력 | VERIFIED | https://developers.openai.com/api/docs/guides/structured-outputs |
+| 429는 `rate_limit_exceeded`와 `insufficient_quota` 둘 다에 쓰임 → 오류 코드만 기록(메시지 원문은 기록 안 함) | VERIFIED(실측) | 실제 응답 |
+
+### 20.2 변경
+
+| 영역 | 내용 |
+|---|---|
+| 해석기 | `lib/ai/openai.ts`(Responses API, `reasoning.effort: "none"`, `store: false`, max_output_tokens 400), 기본 제공자 `openai` |
+| DB | `20261016020000_openai_pricing.sql`: 사용 기록 비용에 `gpt-6-luna` 단가 추가(없으면 의도적으로 비싸게 계산되어 월 예산이 빨리 소진됨) |
+| 환경 변수 | `OPENAI_API_KEY`(사용자 `.env`의 `OPEN_AI_API_KEY` 이름만 변경, 값은 그대로), 평가 스크립트는 `.env`와 `.env.local`을 모두 읽음 |
+| 평가 | 실패 이유(상태·오류 코드)를 결과에 남김, 임베딩 429·5xx 재시도(`RetryingEmbedder`, 작업·평가 전용), 질의 임베딩을 한 번에 요청 |
+| 브랜치 | PR #9가 `main`이 아닌 05a 브랜치로 병합되어, 05b 코드는 이 PR로 `main`에 들어감 |
+
+### 20.3 실측 결과
+
+| 평가 | 결과 |
+|---|---|
+| `npm run eval:retrieval` (voyage-4) | **통과 — WP-05b 관문 통과.** recall@10 0.88(기준 0.8), NDCG@10 0.88 vs 거리순 0.15(+0.73, 기준 +0.1). 벡터만 0.93/0.88, 어휘만 0.76/0.82. 임베딩 1,919 토큰 |
+| `npm run eval:parse` (gpt-6-luna) | **측정 불가 — WP-05a 관문 보류.** 48건 중 30건(재실행 시 45건)이 `429 rate_limit_exceeded`. 응답을 받은 18건은 모두 통과(주입 1건 포함), p95 2.9초. 비용 약 $0.002 |
+
+### 20.4 알려진 한계
+
+| ID | 내용 | 조치 |
+|---|---|---|
+| K-35 | (갱신) OpenAI 계정 사용량 제한으로 실측 불가 | 사용자: OpenAI 결제 수단 등록·사용 등급 확인 후 `npm run eval:parse` 재실행 |
+| K-40 | ~~실제 임베딩 품질 미측정~~ **해소 (20.3)** | — |
+| K-44 | 부정 표현을 이해하지 못함: "기다리지 않는 곳" 1위가 "웨이팅이 길다"는 식당 | 05c에서 근거 문장을 보여 줘 사용자가 판단하게 하고, 부정 표현은 해석기에서 `unsupported` 처리 검토 |
+| K-45 | 합친 순위(RRF)의 recall(0.88)이 벡터만(0.93)보다 낮음 | 데이터가 늘면 가중치 조정 재평가 |
+| K-46 | 운영 중 OpenAI 429가 잦으면 AI 검색이 계속 일반 검색으로 대체됨(화면은 정상) | 사용량 기록의 `error` 비율을 WP-07 모니터링에 포함 |
+
 ---
 
 ## 변경 이력
@@ -752,3 +790,4 @@ B-01, B-02 해소.
 | 2026-10-15 | WP-04d: Q33–Q37(C-42~C-46), 저장·길찾기·내 활동 탭, 저장은 공개 식당만, pgTAP 223건, e2e 52건, W4d-01~05, K-31 해소, K-32~34 | Claude (WP-04d) |
 | 2026-10-15 | WP-05a: Q38–Q43(C-47~C-52, 월 한도 ₩5,000), D-06 해소, 자연어 해석·대체·사용량 기록·평가 세트, pgTAP 238건, Vitest 108건, e2e 62건, W5a-01~08, K-35~38. 실측 평가는 키 발급 후 | Claude (WP-05a) |
 | 2026-10-16 | WP-05b: Q44–Q49(C-53~C-58), 임베딩 대기열·관련도순 재정렬·검색 평가 도구, pgTAP 264건, Vitest 122건, e2e 70건, W5b-01~07, K-39~43. 실측 평가는 키 발급 후 | Claude (WP-05b) |
+| 2026-10-16 | 해석 제공자 OpenAI로 변경(C-59), 실측 평가: 05b 관문 통과, 05a는 OpenAI 사용량 제한으로 보류, D-02 해소 표기, K-44~46 | Claude |
