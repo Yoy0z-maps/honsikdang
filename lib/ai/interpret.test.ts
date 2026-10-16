@@ -70,3 +70,16 @@ describe("prompt", () => {
     }
   });
 });
+
+describe("fixture negation", () => {
+  it("routes negations to unsupported, not the soft preference", async () => {
+    const result = await interpretQuery(
+      fixture,
+      "혼자 먹기 편한데 시끄럽지 않은 곳",
+    );
+    expect(result.parsed).toMatchObject({
+      semantic: "",
+      unsupported: ["부정 조건"],
+    });
+  });
+});

@@ -1,4 +1,5 @@
 import Link from "next/link";
+import type { Evidence } from "@/lib/domain/evidence";
 import type { RestaurantSummary } from "@/lib/restaurants/search";
 import { RestaurantCard, type DistanceOrigin } from "./RestaurantCard";
 
@@ -13,7 +14,19 @@ export type ResultState =
       areaClamped: boolean;
       loadingMore: boolean;
       loadMoreFailed: boolean;
+      /** AI search preference ordering (WP-05b); absent = distance order. */
+      relevance?: RelevanceInfo;
     };
+
+export type RelevanceInfo = {
+  text: string;
+  /** False when relevance ordering could not be applied. */
+  applied: boolean;
+  /** Only the nearest results were re-ranked. */
+  capped: boolean;
+  /** Verbatim review evidence per restaurant id (WP-05c). */
+  evidence: Record<string, Evidence>;
+};
 
 type Props = {
   state: ResultState;
@@ -27,6 +40,7 @@ type Props = {
   onLocate: (id: string) => void;
   /** Offered on empty results (journey B: propose a missing place). */
   suggestHref?: string;
+  onClearRelevance?: () => void;
 };
 
 const buttonClass =
@@ -50,6 +64,7 @@ export function ResultList({
   onResetFilters,
   onLocate,
   suggestHref,
+  onClearRelevance,
 }: Props) {
   if (state.status === "loading") {
     return (
@@ -93,10 +108,42 @@ export function ResultList({
     areaClamped,
     loadingMore,
     loadMoreFailed,
+    relevance,
   } = state;
 
   return (
     <div className="space-y-2">
+      {relevance && (
+        <div
+          data-testid="relevance-note"
+          className="flex items-start justify-between gap-2 rounded-lg bg-orange-50 p-2 text-sm dark:bg-orange-950/40"
+        >
+          <p className="min-w-0">
+            {relevance.applied ? (
+              <>
+                <span className="font-medium">관련도순</span> · &lsquo;
+                {relevance.text}&rsquo;에 가까운 리뷰가 있는 곳부터 보여 줘요.
+                {relevance.capped &&
+                  " 조건에 맞는 가까운 50곳 안에서 골랐어요."}
+              </>
+            ) : (
+              <>
+                &lsquo;{relevance.text}&rsquo; 관련도순을 지금 쓸 수 없어
+                거리순으로 보여 줘요.
+              </>
+            )}
+          </p>
+          {onClearRelevance && (
+            <button
+              type="button"
+              onClick={onClearRelevance}
+              className="min-h-11 shrink-0 px-1 underline underline-offset-2"
+            >
+              거리순
+            </button>
+          )}
+        </div>
+      )}
       {(excludedNoPrice > 0 || areaClamped) && (
         <div className="space-y-1 text-sm text-zinc-600 dark:text-zinc-400">
           {areaClamped && (
@@ -147,6 +194,11 @@ export function ResultList({
                 showTagCount={showTagCount}
                 distanceOrigin={distanceOrigin}
                 onLocate={() => onLocate(item.id)}
+                evidence={
+                  relevance?.applied
+                    ? (relevance.evidence[item.id] ?? null)
+                    : undefined
+                }
               />
             </li>
           ))}

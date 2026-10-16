@@ -103,7 +103,7 @@ function OkBody({
   return (
     <>
       <p className="font-medium">
-        {applied.length > 0
+        {applied.length > 0 || parsed.semantic
           ? "AI가 이렇게 이해했어요"
           : "적용할 조건을 찾지 못했어요"}
       </p>
@@ -118,6 +118,11 @@ function OkBody({
             </li>
           ))}
         </ul>
+      )}
+      {parsed.semantic && (
+        <p className="text-zinc-600 dark:text-zinc-300">
+          &lsquo;{parsed.semantic}&rsquo;에 가까운 곳부터 보여 줘요.
+        </p>
       )}
       {parsed.placeMention && (
         <p className="text-zinc-600 dark:text-zinc-300">

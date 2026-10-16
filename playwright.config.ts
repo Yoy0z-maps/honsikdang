@@ -1,11 +1,29 @@
+import { execSync } from "node:child_process";
 import { defineConfig, devices } from "@playwright/test";
 
 const PORT = 3100;
 
+// The embedding job route needs the local stack's secret key. Read it once
+// (workers inherit process.env) and never print it.
+function localSecretKey(): string {
+  try {
+    const out = execSync("npx supabase status -o env", {
+      encoding: "utf8",
+      stdio: ["ignore", "pipe", "ignore"],
+    });
+    return /^SECRET_KEY="?([^"\r\n]+)"?\r?$/m.exec(out)?.[1] ?? "";
+  } catch {
+    return "";
+  }
+}
+process.env.E2E_SUPABASE_SECRET_KEY ??= localSecretKey();
+export const E2E_JOB_SECRET = "e2e-embedding-job-secret-0123456789";
+
 // Runs against a production build backed by the local Supabase stack and
 // supabase/seed.sql (synthetic data). The NAVER key is blanked so tests never
 // call the external map API; real map behavior is checked manually. AI
-// search uses the fixture parser (lib/ai/fixture.ts).
+// search uses the fixture parser and embedder (lib/ai/fixture.ts,
+// lib/ai/embeddings.ts).
 // Viewports follow master plan §5A QA acceptance: 360×800 and 390×844.
 export default defineConfig({
   testDir: "e2e",
@@ -37,6 +55,11 @@ export default defineConfig({
       // Rule-based test fixture instead of the model: no key, no spend.
       AI_PROVIDER: "fixture",
       ANTHROPIC_API_KEY: "",
+      OPENAI_API_KEY: "",
+      EMBEDDING_PROVIDER: "fixture",
+      VOYAGE_API_KEY: "",
+      SUPABASE_SECRET_KEY: process.env.E2E_SUPABASE_SECRET_KEY ?? "",
+      EMBEDDING_JOB_SECRET: E2E_JOB_SECRET,
       NEXT_TELEMETRY_DISABLED: "1",
     },
   },

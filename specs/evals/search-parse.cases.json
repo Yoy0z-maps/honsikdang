@@ -1,5 +1,5 @@
 {
-  "version": 1,
+  "version": 2,
   "description": "WP-05a natural-language parse evaluation (decision Q43). Hard fields (categories, tags, maxPrice, radius, keyword) must match exactly; omitted means empty/null. place/unsupported are checked only when given. Queries are synthetic.",
   "cases": [
     { "id": "basic-01", "kind": "basic", "query": "라멘", "expect": { "categories": ["japanese"] } },
@@ -48,6 +48,11 @@
     { "id": "unsup-01", "kind": "unsupported", "query": "지금 영업 중인 국밥집", "expect": { "categories": ["korean"], "unsupported": true } },
     { "id": "unsup-02", "kind": "unsupported", "query": "주차 되는 한식당", "expect": { "categories": ["korean"], "unsupported": true } },
     { "id": "unsup-03", "kind": "conflict", "query": "만원 이하인데 2만원 넘는 곳", "expect": { "unsupported": true } },
+
+    { "id": "neg-01", "kind": "negation", "query": "기다리지 않는 곳", "expect": { "unsupported": true, "noSemantic": true } },
+    { "id": "neg-02", "kind": "negation", "query": "시끄럽지 않은 국밥집", "expect": { "categories": ["korean"], "unsupported": true, "noSemantic": true } },
+    { "id": "neg-03", "kind": "negation", "query": "만 원 넘지 않는 라멘", "expect": { "categories": ["japanese"], "maxPrice": 10000 } },
+    { "id": "neg-04", "kind": "negation", "query": "매운 거 말고 순한 국물", "expect": { "unsupported": true } },
 
     { "id": "name-01", "kind": "keyword", "query": "'혼밥천국'이라는 가게 찾아줘", "expect": { "keyword": "혼밥천국" } },
     { "id": "name-02", "kind": "keyword", "query": "모모스 어디 있어", "expect": { "keyword": "모모스" } },

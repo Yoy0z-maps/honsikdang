@@ -5,6 +5,7 @@ const CATEGORY_RULES: [RegExp, string][] = [
   [/국밥|백반|한식/, "korean"],
   [/김밥|떡볶이|분식/, "bunsik"],
 ];
+const NEGATION = /않는|않은|없는|말고|빼고/;
 const TAG_RULES: [RegExp, string][] = [
   [/1인석/, "solo_seat"],
   [/조용/, "quiet"],
@@ -48,7 +49,14 @@ export class FixtureQueryParser implements QueryParser {
         radius_m: /걸어서/.test(query) ? 400 : null,
         keyword: null,
         place_mention: query.match(/([가-힣]+역)/)?.[1] ?? null,
-        unsupported: /영업/.test(query) ? ["영업 중"] : [],
+        semantic_query: NEGATION.test(query)
+          ? null
+          : (query.match(/(혼자 먹기 편한|따뜻한 국물|분위기 좋은)/)?.[1] ??
+            null),
+        unsupported: [
+          ...(/영업/.test(query) ? ["영업 중"] : []),
+          ...(NEGATION.test(query) ? ["부정 조건"] : []),
+        ],
       },
       usage,
       model: this.model,

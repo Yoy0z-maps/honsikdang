@@ -1,0 +1,2153 @@
+{
+  "summary": {
+    "date": "2026-10-16T02:33:42.236Z",
+    "model": "fixture-embed",
+    "measurement": "harness check only (fixture vectors), not a quality measurement",
+    "queries": 18,
+    "recallAt10": {
+      "fused": 0.789814814814815,
+      "vector": 0.7916666666666666,
+      "lexical": 0.7648148148148147,
+      "distance": 0.23796296296296296
+    },
+    "ndcgAt10": {
+      "fused": 0.8271560319557293,
+      "vector": 0.7878611662857464,
+      "lexical": 0.8200152718939977,
+      "distance": 0.15151193450192596
+    },
+    "embeddingTokens": 0,
+    "reviewVectors": 66,
+    "thresholds": {
+      "k": 10,
+      "recall": 0.8,
+      "ndcgGainOverDistance": 0.1
+    },
+    "evidence": {
+      "configured": {
+        "threshold": 0.3,
+        "supportRate": 0.4642857142857143,
+        "falseEvidenceRate": 0.022388059701492536
+      },
+      "calibrated": null,
+      "verbatimRate": 1,
+      "thresholds": {
+        "supportRate": 0.8,
+        "verbatimRate": 1
+      }
+    }
+  },
+  "queries": [
+    {
+      "id": "q01",
+      "text": "조용해서 혼자 있기 편한 곳",
+      "recall": {
+        "fused": 0.8,
+        "vector": 1,
+        "lexical": 0.6,
+        "distance": 0.2
+      },
+      "ndcg": {
+        "fused": 0.8791822136948579,
+        "vector": 0.9765208012626863,
+        "lexical": 0.7248116019708803,
+        "distance": 0.04623004205810281
+      },
+      "top5": [
+        "1",
+        "13",
+        "6",
+        "21",
+        "17"
+      ]
+    },
+    {
+      "id": "q02",
+      "text": "혼자 와도 어색하지 않은 곳",
+      "recall": {
+        "fused": 0.5,
+        "vector": 0.5,
+        "lexical": 0.5,
+        "distance": 0.16666666666666666
+      },
+      "ndcg": {
+        "fused": 0.5841279246062797,
+        "vector": 0.5841279246062797,
+        "lexical": 0.5850435915666756,
+        "distance": 0.10289593457983445
+      },
+      "top5": [
+        "15",
+        "30",
+        "10",
+        "3",
+        "8"
+      ]
+    },
+    {
+      "id": "q03",
+      "text": "따뜻한 국물",
+      "recall": {
+        "fused": 1,
+        "vector": 0.8333333333333334,
+        "lexical": 1,
+        "distance": 0.5
+      },
+      "ndcg": {
+        "fused": 0.8395621209933255,
+        "vector": 0.901209203643074,
+        "lexical": 0.7785699917618708,
+        "distance": 0.3182953789357754
+      },
+      "top5": [
+        "17",
+        "30",
+        "4",
+        "15",
+        "20"
+      ]
+    },
+    {
+      "id": "q04",
+      "text": "빨리 먹고 나올 수 있는 점심",
+      "recall": {
+        "fused": 1,
+        "vector": 1,
+        "lexical": 1,
+        "distance": 0.25
+      },
+      "ndcg": {
+        "fused": 0.9413045508496032,
+        "vector": 0.8985066997317587,
+        "lexical": 0.9796808707575757,
+        "distance": 0.27739411480640186
+      },
+      "top5": [
+        "18",
+        "28",
+        "5",
+        "16",
+        "12"
+      ]
+    },
+    {
+      "id": "q05",
+      "text": "매운 음식",
+      "recall": {
+        "fused": 1,
+        "vector": 1,
+        "lexical": 1,
+        "distance": 0.6666666666666666
+      },
+      "ndcg": {
+        "fused": 1,
+        "vector": 1,
+        "lexical": 1,
+        "distance": 0.6713860725233042
+      },
+      "top5": [
+        "7",
+        "20",
+        "25",
+        "6",
+        "1"
+      ]
+    },
+    {
+      "id": "q06",
+      "text": "속 편한 순한 맛",
+      "recall": {
+        "fused": 1,
+        "vector": 1,
+        "lexical": 0.6666666666666666,
+        "distance": 0
+      },
+      "ndcg": {
+        "fused": 0.8902684239190904,
+        "vector": 0.6280017356551967,
+        "lexical": 0.7958830702855284,
+        "distance": 0
+      },
+      "top5": [
+        "8",
+        "4",
+        "30",
+        "3",
+        "24"
+      ]
+    },
+    {
+      "id": "q07",
+      "text": "늦은 밤 야식",
+      "recall": {
+        "fused": 1,
+        "vector": 1,
+        "lexical": 1,
+        "distance": 1
+      },
+      "ndcg": {
+        "fused": 1,
+        "vector": 0.8065735963827292,
+        "lexical": 1,
+        "distance": 0.430624116386567
+      },
+      "top5": [
+        "21",
+        "9",
+        "7",
+        "18",
+        "4"
+      ]
+    },
+    {
+      "id": "q08",
+      "text": "사장님이 친절한",
+      "recall": {
+        "fused": 1,
+        "vector": 1,
+        "lexical": 1,
+        "distance": 0
+      },
+      "ndcg": {
+        "fused": 1,
+        "vector": 1,
+        "lexical": 1,
+        "distance": 0
+      },
+      "top5": [
+        "10",
+        "26",
+        "2",
+        "1",
+        "15"
+      ]
+    },
+    {
+      "id": "q09",
+      "text": "양 많고 든든한",
+      "recall": {
+        "fused": 1,
+        "vector": 0.6666666666666666,
+        "lexical": 1,
+        "distance": 0
+      },
+      "ndcg": {
+        "fused": 0.8884990574692628,
+        "vector": 0.6361599521541359,
+        "lexical": 0.7031666714374551,
+        "distance": 0
+      },
+      "top5": [
+        "28",
+        "23",
+        "13",
+        "12",
+        "11"
+      ]
+    },
+    {
+      "id": "q10",
+      "text": "가볍고 건강한 한 끼",
+      "recall": {
+        "fused": 0.5,
+        "vector": 0.5,
+        "lexical": 0.5,
+        "distance": 0
+      },
+      "ndcg": {
+        "fused": 0.8262346571285599,
+        "vector": 0.8262346571285599,
+        "lexical": 0.8262346571285599,
+        "distance": 0
+      },
+      "top5": [
+        "12",
+        "18",
+        "11",
+        "17",
+        "22"
+      ]
+    },
+    {
+      "id": "q11",
+      "text": "노트북 들고 혼자 작업",
+      "recall": {
+        "fused": 0.5,
+        "vector": 0.5,
+        "lexical": 0.5,
+        "distance": 0
+      },
+      "ndcg": {
+        "fused": 0.8262346571285599,
+        "vector": 0.8262346571285599,
+        "lexical": 0.8262346571285599,
+        "distance": 0
+      },
+      "top5": [
+        "13",
+        "15",
+        "21",
+        "17",
+        "25"
+      ]
+    },
+    {
+      "id": "q12",
+      "text": "기다리지 않는 곳",
+      "recall": {
+        "fused": 0.3333333333333333,
+        "vector": 0.6666666666666666,
+        "lexical": 0.6666666666666666,
+        "distance": 0.3333333333333333
+      },
+      "ndcg": {
+        "fused": 0.45819933371607996,
+        "vector": 0.3573101908143646,
+        "lexical": 0.8025953174147523,
+        "distance": 0.15273311123869335
+      },
+      "top5": [
+        "14",
+        "5",
+        "29",
+        "15",
+        "8"
+      ]
+    },
+    {
+      "id": "q13",
+      "text": "다른 사람 신경 안 쓰고 먹기",
+      "recall": {
+        "fused": 0.3333333333333333,
+        "vector": 0.3333333333333333,
+        "lexical": 0.3333333333333333,
+        "distance": 0
+      },
+      "ndcg": {
+        "fused": 0.4692787260227565,
+        "vector": 0.4692787260227565,
+        "lexical": 0.4692787260227565,
+        "distance": 0
+      },
+      "top5": [
+        "27",
+        "12",
+        "10",
+        "1",
+        "5"
+      ]
+    },
+    {
+      "id": "q14",
+      "text": "말 안 하고 주문하기",
+      "recall": {
+        "fused": 1,
+        "vector": 1,
+        "lexical": 1,
+        "distance": 0
+      },
+      "ndcg": {
+        "fused": 1,
+        "vector": 1,
+        "lexical": 0.9832843142264166,
+        "distance": 0
+      },
+      "top5": [
+        "3",
+        "16",
+        "5",
+        "12",
+        "15"
+      ]
+    },
+    {
+      "id": "q15",
+      "text": "혼자 고기 구워 먹기",
+      "recall": {
+        "fused": 1,
+        "vector": 1,
+        "lexical": 1,
+        "distance": 0
+      },
+      "ndcg": {
+        "fused": 1,
+        "vector": 1,
+        "lexical": 1,
+        "distance": 0
+      },
+      "top5": [
+        "24",
+        "27",
+        "1",
+        "25",
+        "21"
+      ]
+    },
+    {
+      "id": "q16",
+      "text": "차분한 분위기에서 천천히",
+      "recall": {
+        "fused": 0.75,
+        "vector": 0.75,
+        "lexical": 0.75,
+        "distance": 0.25
+      },
+      "ndcg": {
+        "fused": 0.9368830196397312,
+        "vector": 0.9368830196397312,
+        "lexical": 0.9368830196397312,
+        "distance": 0.14655308996296207
+      },
+      "top5": [
+        "22",
+        "6",
+        "19",
+        "23",
+        "25"
+      ]
+    },
+    {
+      "id": "q17",
+      "text": "해장하기 좋은 국물",
+      "recall": {
+        "fused": 1,
+        "vector": 1,
+        "lexical": 1,
+        "distance": 0.6666666666666666
+      },
+      "ndcg": {
+        "fused": 0.6280017356551967,
+        "vector": 0.6076402285354808,
+        "lexical": 0.690945337173089,
+        "distance": 0.5177338737413085
+      },
+      "top5": [
+        "13",
+        "20",
+        "15",
+        "8",
+        "4"
+      ]
+    },
+    {
+      "id": "q18",
+      "text": "카운터석",
+      "recall": {
+        "fused": 0.5,
+        "vector": 0.5,
+        "lexical": 0.25,
+        "distance": 0.25
+      },
+      "ndcg": {
+        "fused": 0.7210321543798236,
+        "vector": 0.7268196004381227,
+        "lexical": 0.6576630675781056,
+        "distance": 0.06336908680171814
+      },
+      "top5": [
+        "3",
+        "13",
+        "19",
+        "26",
+        "2"
+      ]
+    }
+  ],
+  "evidence": [
+    {
+      "queryId": "q01",
+      "rank": 0,
+      "grade": 2,
+      "supporting": [
+        0,
+        1
+      ],
+      "reviewIndex": 0,
+      "similarity": 0.471404550755296,
+      "verbatim": true
+    },
+    {
+      "queryId": "q01",
+      "rank": 1,
+      "grade": 2,
+      "supporting": [
+        0,
+        1
+      ],
+      "reviewIndex": 0,
+      "similarity": 0.421637041021497,
+      "verbatim": true
+    },
+    {
+      "queryId": "q01",
+      "rank": 2,
+      "grade": 1,
+      "supporting": [],
+      "reviewIndex": 0,
+      "similarity": 0.210818520510749,
+      "verbatim": true
+    },
+    {
+      "queryId": "q01",
+      "rank": 3,
+      "grade": 0,
+      "supporting": [],
+      "reviewIndex": 0,
+      "similarity": 0.210818520510749,
+      "verbatim": true
+    },
+    {
+      "queryId": "q01",
+      "rank": 4,
+      "grade": 0,
+      "supporting": [],
+      "reviewIndex": 0,
+      "similarity": 0.113227710127831,
+      "verbatim": true
+    },
+    {
+      "queryId": "q01",
+      "rank": 5,
+      "grade": 0,
+      "supporting": [],
+      "reviewIndex": 1,
+      "similarity": 0.154303361603718,
+      "verbatim": true
+    },
+    {
+      "queryId": "q01",
+      "rank": 6,
+      "grade": 0,
+      "supporting": [],
+      "reviewIndex": 0,
+      "similarity": 0.117851134176586,
+      "verbatim": true
+    },
+    {
+      "queryId": "q01",
+      "rank": 7,
+      "grade": 2,
+      "supporting": [
+        0
+      ],
+      "reviewIndex": 0,
+      "similarity": 0.113227710127831,
+      "verbatim": true
+    },
+    {
+      "queryId": "q01",
+      "rank": 8,
+      "grade": 0,
+      "supporting": [],
+      "reviewIndex": 0,
+      "similarity": 0.113227710127831,
+      "verbatim": true
+    },
+    {
+      "queryId": "q01",
+      "rank": 9,
+      "grade": 0,
+      "supporting": [],
+      "reviewIndex": 1,
+      "similarity": 0.144337569008397,
+      "verbatim": true
+    },
+    {
+      "queryId": "q02",
+      "rank": 0,
+      "grade": 2,
+      "supporting": [
+        0
+      ],
+      "reviewIndex": 0,
+      "similarity": 0.396059048058362,
+      "verbatim": true
+    },
+    {
+      "queryId": "q02",
+      "rank": 1,
+      "grade": 1,
+      "supporting": [],
+      "reviewIndex": 1,
+      "similarity": 0.288675138016794,
+      "verbatim": true
+    },
+    {
+      "queryId": "q02",
+      "rank": 2,
+      "grade": 0,
+      "supporting": [],
+      "reviewIndex": 0,
+      "similarity": 0.19245009124279,
+      "verbatim": true
+    },
+    {
+      "queryId": "q02",
+      "rank": 3,
+      "grade": 2,
+      "supporting": [
+        0
+      ],
+      "reviewIndex": 0,
+      "similarity": 0.226455420255661,
+      "verbatim": true
+    },
+    {
+      "queryId": "q02",
+      "rank": 4,
+      "grade": 0,
+      "supporting": [],
+      "reviewIndex": 1,
+      "similarity": 0.16666667163372,
+      "verbatim": true
+    },
+    {
+      "queryId": "q02",
+      "rank": 5,
+      "grade": 0,
+      "supporting": [],
+      "reviewIndex": 0,
+      "similarity": 0.105409260255374,
+      "verbatim": true
+    },
+    {
+      "queryId": "q02",
+      "rank": 6,
+      "grade": 0,
+      "supporting": [],
+      "reviewIndex": 0,
+      "similarity": 0.113227710127831,
+      "verbatim": true
+    },
+    {
+      "queryId": "q02",
+      "rank": 7,
+      "grade": 0,
+      "supporting": [],
+      "reviewIndex": 1,
+      "similarity": 0.154303361603718,
+      "verbatim": true
+    },
+    {
+      "queryId": "q02",
+      "rank": 8,
+      "grade": 0,
+      "supporting": [],
+      "reviewIndex": 0,
+      "similarity": 0.117851134176586,
+      "verbatim": true
+    },
+    {
+      "queryId": "q02",
+      "rank": 9,
+      "grade": 0,
+      "supporting": [],
+      "reviewIndex": 0,
+      "similarity": 0.113227710127831,
+      "verbatim": true
+    },
+    {
+      "queryId": "q03",
+      "rank": 0,
+      "grade": 1,
+      "supporting": [],
+      "reviewIndex": 1,
+      "similarity": 0.408248299851912,
+      "verbatim": true
+    },
+    {
+      "queryId": "q03",
+      "rank": 1,
+      "grade": 2,
+      "supporting": [
+        0
+      ],
+      "reviewIndex": 0,
+      "similarity": 0.365148376379859,
+      "verbatim": true
+    },
+    {
+      "queryId": "q03",
+      "rank": 2,
+      "grade": 2,
+      "supporting": [
+        0,
+        1
+      ],
+      "reviewIndex": 0,
+      "similarity": 0.333333333333333,
+      "verbatim": true
+    },
+    {
+      "queryId": "q03",
+      "rank": 3,
+      "grade": 1,
+      "supporting": [],
+      "reviewIndex": 1,
+      "similarity": 0.3849001939565,
+      "verbatim": true
+    },
+    {
+      "queryId": "q03",
+      "rank": 4,
+      "grade": 0,
+      "supporting": [],
+      "reviewIndex": 0,
+      "similarity": 0.174077665033271,
+      "verbatim": true
+    },
+    {
+      "queryId": "q03",
+      "rank": 5,
+      "grade": 1,
+      "supporting": [],
+      "reviewIndex": 0,
+      "similarity": 0.19245009697825,
+      "verbatim": true
+    },
+    {
+      "queryId": "q03",
+      "rank": 6,
+      "grade": 1,
+      "supporting": [],
+      "reviewIndex": 0,
+      "similarity": 0,
+      "verbatim": true
+    },
+    {
+      "queryId": "q03",
+      "rank": 7,
+      "grade": 0,
+      "supporting": [],
+      "reviewIndex": 1,
+      "similarity": 0,
+      "verbatim": true
+    },
+    {
+      "queryId": "q03",
+      "rank": 8,
+      "grade": 0,
+      "supporting": [],
+      "reviewIndex": 0,
+      "similarity": 0,
+      "verbatim": true
+    },
+    {
+      "queryId": "q03",
+      "rank": 9,
+      "grade": 0,
+      "supporting": [],
+      "reviewIndex": 0,
+      "similarity": 0,
+      "verbatim": true
+    },
+    {
+      "queryId": "q04",
+      "rank": 0,
+      "grade": 2,
+      "supporting": [
+        0,
+        1
+      ],
+      "reviewIndex": 0,
+      "similarity": 0.298142412249518,
+      "verbatim": true
+    },
+    {
+      "queryId": "q04",
+      "rank": 1,
+      "grade": 1,
+      "supporting": [],
+      "reviewIndex": 1,
+      "similarity": 0.365148406182182,
+      "verbatim": true
+    },
+    {
+      "queryId": "q04",
+      "rank": 2,
+      "grade": 2,
+      "supporting": [
+        0,
+        1
+      ],
+      "reviewIndex": 0,
+      "similarity": 0.230940117295988,
+      "verbatim": true
+    },
+    {
+      "queryId": "q04",
+      "rank": 3,
+      "grade": 2,
+      "supporting": [
+        1
+      ],
+      "reviewIndex": 1,
+      "similarity": 0.223606801736558,
+      "verbatim": true
+    },
+    {
+      "queryId": "q04",
+      "rank": 4,
+      "grade": 0,
+      "supporting": [],
+      "reviewIndex": 1,
+      "similarity": 0.169030855240277,
+      "verbatim": true
+    },
+    {
+      "queryId": "q04",
+      "rank": 5,
+      "grade": 0,
+      "supporting": [],
+      "reviewIndex": 1,
+      "similarity": 0,
+      "verbatim": true
+    },
+    {
+      "queryId": "q04",
+      "rank": 6,
+      "grade": 0,
+      "supporting": [],
+      "reviewIndex": 0,
+      "similarity": 0,
+      "verbatim": true
+    },
+    {
+      "queryId": "q04",
+      "rank": 7,
+      "grade": 0,
+      "supporting": [],
+      "reviewIndex": 1,
+      "similarity": 0,
+      "verbatim": true
+    },
+    {
+      "queryId": "q04",
+      "rank": 8,
+      "grade": 0,
+      "supporting": [],
+      "reviewIndex": 0,
+      "similarity": 0.115470058647994,
+      "verbatim": true
+    },
+    {
+      "queryId": "q04",
+      "rank": 9,
+      "grade": 0,
+      "supporting": [],
+      "reviewIndex": 1,
+      "similarity": 0,
+      "verbatim": true
+    },
+    {
+      "queryId": "q05",
+      "rank": 0,
+      "grade": 2,
+      "supporting": [
+        0
+      ],
+      "reviewIndex": 0,
+      "similarity": 0.204124143842582,
+      "verbatim": true
+    },
+    {
+      "queryId": "q05",
+      "rank": 1,
+      "grade": 2,
+      "supporting": [
+        0
+      ],
+      "reviewIndex": 0,
+      "similarity": 0.213200724518321,
+      "verbatim": true
+    },
+    {
+      "queryId": "q05",
+      "rank": 2,
+      "grade": 2,
+      "supporting": [
+        0
+      ],
+      "reviewIndex": 0,
+      "similarity": 0.213200724518321,
+      "verbatim": true
+    },
+    {
+      "queryId": "q05",
+      "rank": 3,
+      "grade": 0,
+      "supporting": [],
+      "reviewIndex": 1,
+      "similarity": 0.267261252836064,
+      "verbatim": true
+    },
+    {
+      "queryId": "q05",
+      "rank": 4,
+      "grade": 0,
+      "supporting": [],
+      "reviewIndex": 1,
+      "similarity": 0,
+      "verbatim": true
+    },
+    {
+      "queryId": "q05",
+      "rank": 5,
+      "grade": 0,
+      "supporting": [],
+      "reviewIndex": 1,
+      "similarity": 0,
+      "verbatim": true
+    },
+    {
+      "queryId": "q05",
+      "rank": 6,
+      "grade": 0,
+      "supporting": [],
+      "reviewIndex": 1,
+      "similarity": 0,
+      "verbatim": true
+    },
+    {
+      "queryId": "q05",
+      "rank": 7,
+      "grade": 0,
+      "supporting": [],
+      "reviewIndex": 1,
+      "similarity": 0,
+      "verbatim": true
+    },
+    {
+      "queryId": "q05",
+      "rank": 8,
+      "grade": 0,
+      "supporting": [],
+      "reviewIndex": 1,
+      "similarity": 0,
+      "verbatim": true
+    },
+    {
+      "queryId": "q05",
+      "rank": 9,
+      "grade": 0,
+      "supporting": [],
+      "reviewIndex": 1,
+      "similarity": 0,
+      "verbatim": true
+    },
+    {
+      "queryId": "q06",
+      "rank": 0,
+      "grade": 2,
+      "supporting": [
+        0,
+        1
+      ],
+      "reviewIndex": 1,
+      "similarity": 0,
+      "verbatim": true
+    },
+    {
+      "queryId": "q06",
+      "rank": 1,
+      "grade": 0,
+      "supporting": [],
+      "reviewIndex": 0,
+      "similarity": 0.204124149925956,
+      "verbatim": true
+    },
+    {
+      "queryId": "q06",
+      "rank": 2,
+      "grade": 2,
+      "supporting": [
+        0
+      ],
+      "reviewIndex": 0,
+      "similarity": 0.223606801736558,
+      "verbatim": true
+    },
+    {
+      "queryId": "q06",
+      "rank": 3,
+      "grade": 0,
+      "supporting": [],
+      "reviewIndex": 1,
+      "similarity": 0.196116140369062,
+      "verbatim": true
+    },
+    {
+      "queryId": "q06",
+      "rank": 4,
+      "grade": 0,
+      "supporting": [],
+      "reviewIndex": 1,
+      "similarity": 0,
+      "verbatim": true
+    },
+    {
+      "queryId": "q06",
+      "rank": 5,
+      "grade": 0,
+      "supporting": [],
+      "reviewIndex": 0,
+      "similarity": 0.213200724518321,
+      "verbatim": true
+    },
+    {
+      "queryId": "q06",
+      "rank": 6,
+      "grade": 0,
+      "supporting": [],
+      "reviewIndex": 0,
+      "similarity": 0.213200724518321,
+      "verbatim": true
+    },
+    {
+      "queryId": "q06",
+      "rank": 7,
+      "grade": 0,
+      "supporting": [],
+      "reviewIndex": 0,
+      "similarity": 0.204124143842582,
+      "verbatim": true
+    },
+    {
+      "queryId": "q06",
+      "rank": 8,
+      "grade": 1,
+      "supporting": [],
+      "reviewIndex": 0,
+      "similarity": 0.223606801736558,
+      "verbatim": true
+    },
+    {
+      "queryId": "q06",
+      "rank": 9,
+      "grade": 0,
+      "supporting": [],
+      "reviewIndex": 0,
+      "similarity": 0.171498591989195,
+      "verbatim": true
+    },
+    {
+      "queryId": "q07",
+      "rank": 0,
+      "grade": 2,
+      "supporting": [
+        0
+      ],
+      "reviewIndex": 0,
+      "similarity": 0.182574193631065,
+      "verbatim": true
+    },
+    {
+      "queryId": "q07",
+      "rank": 1,
+      "grade": 2,
+      "supporting": [
+        0
+      ],
+      "reviewIndex": 1,
+      "similarity": 0,
+      "verbatim": true
+    },
+    {
+      "queryId": "q07",
+      "rank": 2,
+      "grade": 0,
+      "supporting": [],
+      "reviewIndex": 1,
+      "similarity": 0,
+      "verbatim": true
+    },
+    {
+      "queryId": "q07",
+      "rank": 3,
+      "grade": 0,
+      "supporting": [],
+      "reviewIndex": 0,
+      "similarity": 0,
+      "verbatim": true
+    },
+    {
+      "queryId": "q07",
+      "rank": 4,
+      "grade": 0,
+      "supporting": [],
+      "reviewIndex": 1,
+      "similarity": 0,
+      "verbatim": true
+    },
+    {
+      "queryId": "q07",
+      "rank": 5,
+      "grade": 0,
+      "supporting": [],
+      "reviewIndex": 1,
+      "similarity": 0,
+      "verbatim": true
+    },
+    {
+      "queryId": "q07",
+      "rank": 6,
+      "grade": 0,
+      "supporting": [],
+      "reviewIndex": 1,
+      "similarity": 0,
+      "verbatim": true
+    },
+    {
+      "queryId": "q07",
+      "rank": 7,
+      "grade": 0,
+      "supporting": [],
+      "reviewIndex": 1,
+      "similarity": 0,
+      "verbatim": true
+    },
+    {
+      "queryId": "q07",
+      "rank": 8,
+      "grade": 0,
+      "supporting": [],
+      "reviewIndex": 1,
+      "similarity": 0,
+      "verbatim": true
+    },
+    {
+      "queryId": "q07",
+      "rank": 9,
+      "grade": 0,
+      "supporting": [],
+      "reviewIndex": 1,
+      "similarity": 0,
+      "verbatim": true
+    },
+    {
+      "queryId": "q08",
+      "rank": 0,
+      "grade": 2,
+      "supporting": [
+        0
+      ],
+      "reviewIndex": 0,
+      "similarity": 0.534522489742115,
+      "verbatim": true
+    },
+    {
+      "queryId": "q08",
+      "rank": 1,
+      "grade": 0,
+      "supporting": [],
+      "reviewIndex": 1,
+      "similarity": 0.267261252836064,
+      "verbatim": true
+    },
+    {
+      "queryId": "q08",
+      "rank": 2,
+      "grade": 0,
+      "supporting": [],
+      "reviewIndex": 0,
+      "similarity": 0.209656974961071,
+      "verbatim": true
+    },
+    {
+      "queryId": "q08",
+      "rank": 3,
+      "grade": 0,
+      "supporting": [],
+      "reviewIndex": 0,
+      "similarity": 0.218217899043968,
+      "verbatim": true
+    },
+    {
+      "queryId": "q08",
+      "rank": 4,
+      "grade": 0,
+      "supporting": [],
+      "reviewIndex": 0,
+      "similarity": 0.183339711030704,
+      "verbatim": true
+    },
+    {
+      "queryId": "q08",
+      "rank": 5,
+      "grade": 0,
+      "supporting": [],
+      "reviewIndex": 1,
+      "similarity": 0,
+      "verbatim": true
+    },
+    {
+      "queryId": "q08",
+      "rank": 6,
+      "grade": 0,
+      "supporting": [],
+      "reviewIndex": 1,
+      "similarity": 0.251976318716297,
+      "verbatim": true
+    },
+    {
+      "queryId": "q08",
+      "rank": 7,
+      "grade": 0,
+      "supporting": [],
+      "reviewIndex": 1,
+      "similarity": 0.338061710480554,
+      "verbatim": true
+    },
+    {
+      "queryId": "q08",
+      "rank": 8,
+      "grade": 0,
+      "supporting": [],
+      "reviewIndex": 0,
+      "similarity": 0.227921164867913,
+      "verbatim": true
+    },
+    {
+      "queryId": "q08",
+      "rank": 9,
+      "grade": 0,
+      "supporting": [],
+      "reviewIndex": 0,
+      "similarity": 0.209656974961071,
+      "verbatim": true
+    },
+    {
+      "queryId": "q09",
+      "rank": 0,
+      "grade": 2,
+      "supporting": [
+        0
+      ],
+      "reviewIndex": 0,
+      "similarity": 0.160128151182179,
+      "verbatim": true
+    },
+    {
+      "queryId": "q09",
+      "rank": 1,
+      "grade": 1,
+      "supporting": [],
+      "reviewIndex": 1,
+      "similarity": 0.333333333333333,
+      "verbatim": true
+    },
+    {
+      "queryId": "q09",
+      "rank": 2,
+      "grade": 0,
+      "supporting": [],
+      "reviewIndex": 0,
+      "similarity": 0.149071210567427,
+      "verbatim": true
+    },
+    {
+      "queryId": "q09",
+      "rank": 3,
+      "grade": 0,
+      "supporting": [],
+      "reviewIndex": 1,
+      "similarity": 0,
+      "verbatim": true
+    },
+    {
+      "queryId": "q09",
+      "rank": 4,
+      "grade": 2,
+      "supporting": [
+        0,
+        1
+      ],
+      "reviewIndex": 1,
+      "similarity": 0,
+      "verbatim": true
+    },
+    {
+      "queryId": "q09",
+      "rank": 5,
+      "grade": 0,
+      "supporting": [],
+      "reviewIndex": 0,
+      "similarity": 0,
+      "verbatim": true
+    },
+    {
+      "queryId": "q09",
+      "rank": 6,
+      "grade": 0,
+      "supporting": [],
+      "reviewIndex": 0,
+      "similarity": 0,
+      "verbatim": true
+    },
+    {
+      "queryId": "q09",
+      "rank": 7,
+      "grade": 0,
+      "supporting": [],
+      "reviewIndex": 1,
+      "similarity": 0,
+      "verbatim": true
+    },
+    {
+      "queryId": "q09",
+      "rank": 8,
+      "grade": 0,
+      "supporting": [],
+      "reviewIndex": 0,
+      "similarity": 0.149071210567427,
+      "verbatim": true
+    },
+    {
+      "queryId": "q09",
+      "rank": 9,
+      "grade": 0,
+      "supporting": [],
+      "reviewIndex": 1,
+      "similarity": 0.160128151182179,
+      "verbatim": true
+    },
+    {
+      "queryId": "q10",
+      "rank": 0,
+      "grade": 2,
+      "supporting": [
+        0,
+        1
+      ],
+      "reviewIndex": 1,
+      "similarity": 0.188982239037223,
+      "verbatim": true
+    },
+    {
+      "queryId": "q10",
+      "rank": 1,
+      "grade": 0,
+      "supporting": [],
+      "reviewIndex": 1,
+      "similarity": 0,
+      "verbatim": true
+    },
+    {
+      "queryId": "q10",
+      "rank": 2,
+      "grade": 0,
+      "supporting": [],
+      "reviewIndex": 1,
+      "similarity": 0.223606801736558,
+      "verbatim": true
+    },
+    {
+      "queryId": "q10",
+      "rank": 3,
+      "grade": 0,
+      "supporting": [],
+      "reviewIndex": 1,
+      "similarity": 0,
+      "verbatim": true
+    },
+    {
+      "queryId": "q10",
+      "rank": 4,
+      "grade": 0,
+      "supporting": [],
+      "reviewIndex": 1,
+      "similarity": 0.223606801736558,
+      "verbatim": true
+    },
+    {
+      "queryId": "q10",
+      "rank": 5,
+      "grade": 0,
+      "supporting": [],
+      "reviewIndex": 1,
+      "similarity": 0,
+      "verbatim": true
+    },
+    {
+      "queryId": "q10",
+      "rank": 6,
+      "grade": 0,
+      "supporting": [],
+      "reviewIndex": 1,
+      "similarity": 0,
+      "verbatim": true
+    },
+    {
+      "queryId": "q10",
+      "rank": 7,
+      "grade": 0,
+      "supporting": [],
+      "reviewIndex": 1,
+      "similarity": 0,
+      "verbatim": true
+    },
+    {
+      "queryId": "q10",
+      "rank": 8,
+      "grade": 0,
+      "supporting": [],
+      "reviewIndex": 1,
+      "similarity": 0,
+      "verbatim": true
+    },
+    {
+      "queryId": "q10",
+      "rank": 9,
+      "grade": 0,
+      "supporting": [],
+      "reviewIndex": 1,
+      "similarity": 0,
+      "verbatim": true
+    },
+    {
+      "queryId": "q11",
+      "rank": 0,
+      "grade": 2,
+      "supporting": [
+        0
+      ],
+      "reviewIndex": 0,
+      "similarity": 0.461880234591975,
+      "verbatim": true
+    },
+    {
+      "queryId": "q11",
+      "rank": 1,
+      "grade": 0,
+      "supporting": [],
+      "reviewIndex": 0,
+      "similarity": 0.216930461939005,
+      "verbatim": true
+    },
+    {
+      "queryId": "q11",
+      "rank": 2,
+      "grade": 0,
+      "supporting": [],
+      "reviewIndex": 0,
+      "similarity": 0.115470058647994,
+      "verbatim": true
+    },
+    {
+      "queryId": "q11",
+      "rank": 3,
+      "grade": 0,
+      "supporting": [],
+      "reviewIndex": 0,
+      "similarity": 0.124034736276708,
+      "verbatim": true
+    },
+    {
+      "queryId": "q11",
+      "rank": 4,
+      "grade": 0,
+      "supporting": [],
+      "reviewIndex": 1,
+      "similarity": 0.169030855240277,
+      "verbatim": true
+    },
+    {
+      "queryId": "q11",
+      "rank": 5,
+      "grade": 0,
+      "supporting": [],
+      "reviewIndex": 0,
+      "similarity": 0.129099451249805,
+      "verbatim": true
+    },
+    {
+      "queryId": "q11",
+      "rank": 6,
+      "grade": 0,
+      "supporting": [],
+      "reviewIndex": 0,
+      "similarity": 0.124034736276708,
+      "verbatim": true
+    },
+    {
+      "queryId": "q11",
+      "rank": 7,
+      "grade": 0,
+      "supporting": [],
+      "reviewIndex": 1,
+      "similarity": 0.158113891369932,
+      "verbatim": true
+    },
+    {
+      "queryId": "q11",
+      "rank": 8,
+      "grade": 0,
+      "supporting": [],
+      "reviewIndex": 0,
+      "similarity": 0.105409260255374,
+      "verbatim": true
+    },
+    {
+      "queryId": "q11",
+      "rank": 9,
+      "grade": 0,
+      "supporting": [],
+      "reviewIndex": 1,
+      "similarity": 0.223606801736558,
+      "verbatim": true
+    },
+    {
+      "queryId": "q12",
+      "rank": 0,
+      "grade": 0,
+      "supporting": [],
+      "reviewIndex": 0,
+      "similarity": 0.150755678139796,
+      "verbatim": true
+    },
+    {
+      "queryId": "q12",
+      "rank": 1,
+      "grade": 2,
+      "supporting": [
+        0,
+        1
+      ],
+      "reviewIndex": 1,
+      "similarity": 0.176776697539589,
+      "verbatim": true
+    },
+    {
+      "queryId": "q12",
+      "rank": 2,
+      "grade": 0,
+      "supporting": [],
+      "reviewIndex": 1,
+      "similarity": 0,
+      "verbatim": true
+    },
+    {
+      "queryId": "q12",
+      "rank": 3,
+      "grade": 0,
+      "supporting": [],
+      "reviewIndex": 1,
+      "similarity": 0,
+      "verbatim": true
+    },
+    {
+      "queryId": "q12",
+      "rank": 4,
+      "grade": 0,
+      "supporting": [],
+      "reviewIndex": 1,
+      "similarity": 0,
+      "verbatim": true
+    },
+    {
+      "queryId": "q12",
+      "rank": 5,
+      "grade": 0,
+      "supporting": [],
+      "reviewIndex": 1,
+      "similarity": 0,
+      "verbatim": true
+    },
+    {
+      "queryId": "q12",
+      "rank": 6,
+      "grade": 0,
+      "supporting": [],
+      "reviewIndex": 1,
+      "similarity": 0,
+      "verbatim": true
+    },
+    {
+      "queryId": "q12",
+      "rank": 7,
+      "grade": 0,
+      "supporting": [],
+      "reviewIndex": 1,
+      "similarity": 0,
+      "verbatim": true
+    },
+    {
+      "queryId": "q12",
+      "rank": 8,
+      "grade": 0,
+      "supporting": [],
+      "reviewIndex": 1,
+      "similarity": 0,
+      "verbatim": true
+    },
+    {
+      "queryId": "q12",
+      "rank": 9,
+      "grade": 0,
+      "supporting": [],
+      "reviewIndex": 0,
+      "similarity": 0,
+      "verbatim": true
+    },
+    {
+      "queryId": "q13",
+      "rank": 0,
+      "grade": 2,
+      "supporting": [
+        0
+      ],
+      "reviewIndex": 0,
+      "similarity": 0.346410175943981,
+      "verbatim": true
+    },
+    {
+      "queryId": "q13",
+      "rank": 1,
+      "grade": 0,
+      "supporting": [],
+      "reviewIndex": 0,
+      "similarity": 0.282842704142413,
+      "verbatim": true
+    },
+    {
+      "queryId": "q13",
+      "rank": 2,
+      "grade": 0,
+      "supporting": [],
+      "reviewIndex": 0,
+      "similarity": 0.210818520510749,
+      "verbatim": true
+    },
+    {
+      "queryId": "q13",
+      "rank": 3,
+      "grade": 0,
+      "supporting": [],
+      "reviewIndex": 0,
+      "similarity": 0.129099455097269,
+      "verbatim": true
+    },
+    {
+      "queryId": "q13",
+      "rank": 4,
+      "grade": 0,
+      "supporting": [],
+      "reviewIndex": 0,
+      "similarity": 0.115470058647994,
+      "verbatim": true
+    },
+    {
+      "queryId": "q13",
+      "rank": 5,
+      "grade": 0,
+      "supporting": [],
+      "reviewIndex": 0,
+      "similarity": 0.13483997091174,
+      "verbatim": true
+    },
+    {
+      "queryId": "q13",
+      "rank": 6,
+      "grade": 0,
+      "supporting": [],
+      "reviewIndex": 0,
+      "similarity": 0.129099447402342,
+      "verbatim": true
+    },
+    {
+      "queryId": "q13",
+      "rank": 7,
+      "grade": 0,
+      "supporting": [],
+      "reviewIndex": 0,
+      "similarity": 0.108465230969502,
+      "verbatim": true
+    },
+    {
+      "queryId": "q13",
+      "rank": 8,
+      "grade": 0,
+      "supporting": [],
+      "reviewIndex": 0,
+      "similarity": 0.124034736276708,
+      "verbatim": true
+    },
+    {
+      "queryId": "q13",
+      "rank": 9,
+      "grade": 0,
+      "supporting": [],
+      "reviewIndex": 0,
+      "similarity": 0.115470058647994,
+      "verbatim": true
+    },
+    {
+      "queryId": "q14",
+      "rank": 0,
+      "grade": 2,
+      "supporting": [
+        1
+      ],
+      "reviewIndex": 1,
+      "similarity": 0.416025161743164,
+      "verbatim": true
+    },
+    {
+      "queryId": "q14",
+      "rank": 1,
+      "grade": 2,
+      "supporting": [
+        0
+      ],
+      "reviewIndex": 0,
+      "similarity": 0.387298357108186,
+      "verbatim": true
+    },
+    {
+      "queryId": "q14",
+      "rank": 2,
+      "grade": 1,
+      "supporting": [],
+      "reviewIndex": 0,
+      "similarity": 0.258198894804683,
+      "verbatim": true
+    },
+    {
+      "queryId": "q14",
+      "rank": 3,
+      "grade": 1,
+      "supporting": [],
+      "reviewIndex": 0,
+      "similarity": 0.15811388194561,
+      "verbatim": true
+    },
+    {
+      "queryId": "q14",
+      "rank": 4,
+      "grade": 0,
+      "supporting": [],
+      "reviewIndex": 1,
+      "similarity": 0.16666667163372,
+      "verbatim": true
+    },
+    {
+      "queryId": "q14",
+      "rank": 5,
+      "grade": 0,
+      "supporting": [],
+      "reviewIndex": 1,
+      "similarity": 0.25,
+      "verbatim": true
+    },
+    {
+      "queryId": "q14",
+      "rank": 6,
+      "grade": 0,
+      "supporting": [],
+      "reviewIndex": 0,
+      "similarity": 0.129099447402342,
+      "verbatim": true
+    },
+    {
+      "queryId": "q14",
+      "rank": 7,
+      "grade": 0,
+      "supporting": [],
+      "reviewIndex": 0,
+      "similarity": 0.150755673646927,
+      "verbatim": true
+    },
+    {
+      "queryId": "q14",
+      "rank": 8,
+      "grade": 0,
+      "supporting": [],
+      "reviewIndex": 1,
+      "similarity": 0.150755673646927,
+      "verbatim": true
+    },
+    {
+      "queryId": "q14",
+      "rank": 9,
+      "grade": 0,
+      "supporting": [],
+      "reviewIndex": 0,
+      "similarity": 0.144337569008397,
+      "verbatim": true
+    },
+    {
+      "queryId": "q15",
+      "rank": 0,
+      "grade": 2,
+      "supporting": [
+        0
+      ],
+      "reviewIndex": 0,
+      "similarity": 0.474341602662707,
+      "verbatim": true
+    },
+    {
+      "queryId": "q15",
+      "rank": 1,
+      "grade": 0,
+      "supporting": [],
+      "reviewIndex": 1,
+      "similarity": 0.5,
+      "verbatim": true
+    },
+    {
+      "queryId": "q15",
+      "rank": 2,
+      "grade": 0,
+      "supporting": [],
+      "reviewIndex": 0,
+      "similarity": 0.288675146619985,
+      "verbatim": true
+    },
+    {
+      "queryId": "q15",
+      "rank": 3,
+      "grade": 0,
+      "supporting": [],
+      "reviewIndex": 1,
+      "similarity": 0.188982239037223,
+      "verbatim": true
+    },
+    {
+      "queryId": "q15",
+      "rank": 4,
+      "grade": 0,
+      "supporting": [],
+      "reviewIndex": 0,
+      "similarity": 0.129099447402342,
+      "verbatim": true
+    },
+    {
+      "queryId": "q15",
+      "rank": 5,
+      "grade": 0,
+      "supporting": [],
+      "reviewIndex": 0,
+      "similarity": 0.138675048947334,
+      "verbatim": true
+    },
+    {
+      "queryId": "q15",
+      "rank": 6,
+      "grade": 0,
+      "supporting": [],
+      "reviewIndex": 0,
+      "similarity": 0.144337569008397,
+      "verbatim": true
+    },
+    {
+      "queryId": "q15",
+      "rank": 7,
+      "grade": 0,
+      "supporting": [],
+      "reviewIndex": 0,
+      "similarity": 0.138675048947334,
+      "verbatim": true
+    },
+    {
+      "queryId": "q15",
+      "rank": 8,
+      "grade": 0,
+      "supporting": [],
+      "reviewIndex": 1,
+      "similarity": 0.176776697539589,
+      "verbatim": true
+    },
+    {
+      "queryId": "q15",
+      "rank": 9,
+      "grade": 0,
+      "supporting": [],
+      "reviewIndex": 0,
+      "similarity": 0.15811388194561,
+      "verbatim": true
+    },
+    {
+      "queryId": "q16",
+      "rank": 0,
+      "grade": 2,
+      "supporting": [
+        0
+      ],
+      "reviewIndex": 0,
+      "similarity": 0.514495761066422,
+      "verbatim": true
+    },
+    {
+      "queryId": "q16",
+      "rank": 1,
+      "grade": 2,
+      "supporting": [
+        0
+      ],
+      "reviewIndex": 1,
+      "similarity": 0.267261252836064,
+      "verbatim": true
+    },
+    {
+      "queryId": "q16",
+      "rank": 2,
+      "grade": 2,
+      "supporting": [
+        0
+      ],
+      "reviewIndex": 0,
+      "similarity": 0.294174203103012,
+      "verbatim": true
+    },
+    {
+      "queryId": "q16",
+      "rank": 3,
+      "grade": 0,
+      "supporting": [],
+      "reviewIndex": 1,
+      "similarity": 0.204124149925956,
+      "verbatim": true
+    },
+    {
+      "queryId": "q16",
+      "rank": 4,
+      "grade": 0,
+      "supporting": [],
+      "reviewIndex": 1,
+      "similarity": 0.133630626418032,
+      "verbatim": true
+    },
+    {
+      "queryId": "q16",
+      "rank": 5,
+      "grade": 0,
+      "supporting": [],
+      "reviewIndex": 0,
+      "similarity": 0,
+      "verbatim": true
+    },
+    {
+      "queryId": "q16",
+      "rank": 6,
+      "grade": 0,
+      "supporting": [],
+      "reviewIndex": 0,
+      "similarity": 0,
+      "verbatim": true
+    },
+    {
+      "queryId": "q16",
+      "rank": 7,
+      "grade": 0,
+      "supporting": [],
+      "reviewIndex": 1,
+      "similarity": 0,
+      "verbatim": true
+    },
+    {
+      "queryId": "q16",
+      "rank": 8,
+      "grade": 0,
+      "supporting": [],
+      "reviewIndex": 0,
+      "similarity": 0.0980580701845309,
+      "verbatim": true
+    },
+    {
+      "queryId": "q16",
+      "rank": 9,
+      "grade": 0,
+      "supporting": [],
+      "reviewIndex": 1,
+      "similarity": 0,
+      "verbatim": true
+    },
+    {
+      "queryId": "q17",
+      "rank": 0,
+      "grade": 0,
+      "supporting": [],
+      "reviewIndex": 0,
+      "similarity": 0.115470058647994,
+      "verbatim": true
+    },
+    {
+      "queryId": "q17",
+      "rank": 1,
+      "grade": 2,
+      "supporting": [
+        0
+      ],
+      "reviewIndex": 0,
+      "similarity": 0.269679941823481,
+      "verbatim": true
+    },
+    {
+      "queryId": "q17",
+      "rank": 2,
+      "grade": 0,
+      "supporting": [],
+      "reviewIndex": 1,
+      "similarity": 0.149071206124759,
+      "verbatim": true
+    },
+    {
+      "queryId": "q17",
+      "rank": 3,
+      "grade": 0,
+      "supporting": [],
+      "reviewIndex": 0,
+      "similarity": 0.149071206124759,
+      "verbatim": true
+    },
+    {
+      "queryId": "q17",
+      "rank": 4,
+      "grade": 2,
+      "supporting": [
+        0
+      ],
+      "reviewIndex": 0,
+      "similarity": 0.129099451249805,
+      "verbatim": true
+    },
+    {
+      "queryId": "q17",
+      "rank": 5,
+      "grade": 0,
+      "supporting": [],
+      "reviewIndex": 1,
+      "similarity": 0.158113891369932,
+      "verbatim": true
+    },
+    {
+      "queryId": "q17",
+      "rank": 6,
+      "grade": 1,
+      "supporting": [],
+      "reviewIndex": 0,
+      "similarity": 0.141421352071206,
+      "verbatim": true
+    },
+    {
+      "queryId": "q17",
+      "rank": 7,
+      "grade": 0,
+      "supporting": [],
+      "reviewIndex": 0,
+      "similarity": 0,
+      "verbatim": true
+    },
+    {
+      "queryId": "q17",
+      "rank": 8,
+      "grade": 0,
+      "supporting": [],
+      "reviewIndex": 0,
+      "similarity": 0,
+      "verbatim": true
+    },
+    {
+      "queryId": "q17",
+      "rank": 9,
+      "grade": 0,
+      "supporting": [],
+      "reviewIndex": 0,
+      "similarity": 0,
+      "verbatim": true
+    },
+    {
+      "queryId": "q18",
+      "rank": 0,
+      "grade": 2,
+      "supporting": [
+        0
+      ],
+      "reviewIndex": 0,
+      "similarity": 0.480384453546538,
+      "verbatim": true
+    },
+    {
+      "queryId": "q18",
+      "rank": 1,
+      "grade": 0,
+      "supporting": [],
+      "reviewIndex": 0,
+      "similarity": 0.149071210567427,
+      "verbatim": true
+    },
+    {
+      "queryId": "q18",
+      "rank": 2,
+      "grade": 0,
+      "supporting": [],
+      "reviewIndex": 1,
+      "similarity": 0,
+      "verbatim": true
+    },
+    {
+      "queryId": "q18",
+      "rank": 3,
+      "grade": 0,
+      "supporting": [],
+      "reviewIndex": 1,
+      "similarity": 0,
+      "verbatim": true
+    },
+    {
+      "queryId": "q18",
+      "rank": 4,
+      "grade": 0,
+      "supporting": [],
+      "reviewIndex": 1,
+      "similarity": 0.348155330066542,
+      "verbatim": true
+    },
+    {
+      "queryId": "q18",
+      "rank": 5,
+      "grade": 0,
+      "supporting": [],
+      "reviewIndex": 0,
+      "similarity": 0.19245009697825,
+      "verbatim": true
+    },
+    {
+      "queryId": "q18",
+      "rank": 6,
+      "grade": 0,
+      "supporting": [],
+      "reviewIndex": 1,
+      "similarity": 0.235702268353172,
+      "verbatim": true
+    },
+    {
+      "queryId": "q18",
+      "rank": 7,
+      "grade": 0,
+      "supporting": [],
+      "reviewIndex": 0,
+      "similarity": 0.160128151182179,
+      "verbatim": true
+    },
+    {
+      "queryId": "q18",
+      "rank": 8,
+      "grade": 0,
+      "supporting": [],
+      "reviewIndex": 1,
+      "similarity": 0.204124149925956,
+      "verbatim": true
+    },
+    {
+      "queryId": "q18",
+      "rank": 9,
+      "grade": 1,
+      "supporting": [],
+      "reviewIndex": 0,
+      "similarity": 0.140028008224249,
+      "verbatim": true
+    }
+  ]
+}

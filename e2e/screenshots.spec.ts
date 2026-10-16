@@ -1,4 +1,5 @@
 import { test } from "@playwright/test";
+import { E2E_JOB_SECRET } from "../playwright.config";
 import { signInWithMagicLink, uniqueEmail } from "./helpers/auth";
 
 // Mobile UX evidence for specs/mobile-ux (master plan §5A agent rule).
@@ -188,4 +189,68 @@ test("capture AI search states (WP-05a)", async ({ page }, testInfo) => {
   await page.getByTestId("ai-notice").getByText("AI 해석에 실패해").waitFor();
   await page.waitForTimeout(300);
   await shot("3-ai-fallback");
+});
+
+test("capture relevance ordering (WP-05b)", async ({
+  page,
+  request,
+}, testInfo) => {
+  const shot = (name: string) =>
+    page.screenshot({
+      path: `${dir}/WP-05b-${testInfo.project.name}-${name}.png`,
+    });
+  await request.post("/api/jobs/embeddings", {
+    headers: { authorization: `Bearer ${E2E_JOB_SECRET}` },
+  });
+  await page.goto("/login?next=/?z=14");
+  await signInWithMagicLink(
+    page,
+    uniqueEmail(`shot-rel-${testInfo.project.name}`),
+  );
+  await page.locator("#sheet-title").filter({ hasText: "식당" }).waitFor();
+
+  await page.getByRole("button", { name: "AI로 찾기" }).click();
+  await page
+    .getByLabel("AI 검색: 원하는 식당을 문장으로 입력")
+    .fill("혼자 먹기 편한 곳");
+  await page.getByRole("button", { name: "검색", exact: true }).click();
+  await page.getByTestId("ai-notice").getByText("가까운 곳부터").waitFor();
+  await page.waitForTimeout(300);
+  await shot("1-ai-semantic");
+
+  await page.goto("/?z=14&sem=" + encodeURIComponent("조용한 편이다"));
+  await page.getByRole("button", { name: "결과 목록 펼치기" }).click();
+  await page.getByTestId("relevance-note").waitFor();
+  await page.waitForTimeout(300);
+  await shot("2-relevance-list");
+});
+
+test("capture grounded evidence (WP-05c)", async ({
+  page,
+  request,
+}, testInfo) => {
+  const shot = (name: string) =>
+    page.screenshot({
+      path: `${dir}/WP-05c-${testInfo.project.name}-${name}.png`,
+    });
+  await request.post("/api/jobs/embeddings", {
+    headers: { authorization: `Bearer ${E2E_JOB_SECRET}` },
+  });
+  await page.goto("/login?next=/?z=14");
+  await signInWithMagicLink(
+    page,
+    uniqueEmail(`shot-ev-${testInfo.project.name}`),
+  );
+  await page.locator("#sheet-title").filter({ hasText: "식당" }).waitFor();
+
+  await page.goto("/?z=14&sem=" + encodeURIComponent("조용한 편이다"));
+  await page.getByRole("button", { name: "결과 목록 펼치기" }).click();
+  await page.getByTestId("evidence").first().waitFor();
+  await page.waitForTimeout(300);
+  await shot("1-evidence-list");
+
+  await page.getByTestId("evidence").first().getByRole("link").click();
+  await page.waitForURL(/#review-/);
+  await page.waitForTimeout(300);
+  await shot("2-evidence-review");
 });

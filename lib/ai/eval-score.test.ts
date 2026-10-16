@@ -11,6 +11,7 @@ const base: ParsedQuery = {
   radius: null,
   keyword: "",
   placeMention: null,
+  semantic: "",
   unsupported: [],
 };
 
@@ -76,6 +77,7 @@ describe("evaluation cases", () => {
         radius_m: e.radius ?? null,
         keyword: e.keyword ?? null,
         place_mention: e.place ?? null,
+        semantic_query: null,
         unsupported: e.unsupported ? ["x"] : [],
       };
       expect(scoreCase(e, parseModelOutput(raw)), c.id).toEqual({
@@ -83,5 +85,15 @@ describe("evaluation cases", () => {
         problems: [],
       });
     }
+  });
+});
+
+describe("noSemantic", () => {
+  it("fails when a negation leaks into the soft preference", () => {
+    expect(
+      scoreCase({ noSemantic: true }, { ...base, semantic: "기다리지 않는" })
+        .pass,
+    ).toBe(false);
+    expect(scoreCase({ noSemantic: true }, base).pass).toBe(true);
   });
 });

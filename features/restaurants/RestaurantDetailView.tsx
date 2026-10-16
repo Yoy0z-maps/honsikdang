@@ -2,6 +2,7 @@ import Link from "next/link";
 import type { ReactNode } from "react";
 import { AccountMenu } from "@/features/auth/AccountMenu";
 import { DirectionsButton } from "@/features/directions/DirectionsButton";
+import { HighlightHashTarget } from "@/features/restaurants/HighlightHashTarget";
 import { ReportButton } from "@/features/reports/ReportButton";
 import { SEAT_TYPE_LABELS, formatDate, formatPrice } from "@/lib/domain/format";
 import type {
@@ -28,7 +29,10 @@ function Review({
 }) {
   const edited = review.updated_at !== review.created_at;
   return (
-    <article className="rounded-lg border border-zinc-200 p-3 dark:border-zinc-800">
+    <article
+      id={`review-${review.id}`}
+      className="scroll-mt-4 rounded-lg border border-zinc-200 p-3 data-[highlighted]:border-orange-500 data-[highlighted]:ring-2 data-[highlighted]:ring-orange-400 dark:border-zinc-800"
+    >
       <header className="flex flex-wrap items-baseline justify-between gap-x-3 text-sm">
         <p className="font-medium">방문 {formatDate(review.visited_at)}</p>
         <p className="text-zinc-500">
@@ -227,6 +231,7 @@ export function RestaurantDetailView({
             ))}
           </ul>
         )}
+        <HighlightHashTarget />
         {s.review_count > detail.reviews.length && (
           <p className="mt-2 text-xs text-zinc-500">
             최근 {detail.reviews.length}개만 표시했어요.

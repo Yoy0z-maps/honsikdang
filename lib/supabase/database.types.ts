@@ -392,6 +392,22 @@ export type Database = {
         };
         Returns: number;
       };
+      embedding_jobs_claim: {
+        Args: { batch: number; model: string };
+        Returns: {
+          content: string;
+          content_hash: string;
+          restaurant_id: string;
+        }[];
+      };
+      embedding_jobs_complete: {
+        Args: { items: Json; model: string };
+        Returns: number;
+      };
+      embedding_jobs_fail: {
+        Args: { error: string; restaurant_id: string };
+        Returns: undefined;
+      };
       finish_ai_search: {
         Args: {
           input_tokens: number;
@@ -457,6 +473,20 @@ export type Database = {
           status: Database["public"]["Enums"]["restaurant_status"];
         }[];
       };
+      rank_restaurants: {
+        Args: {
+          candidate_ids: string[];
+          model: string;
+          query_embedding: string;
+          semantic_text: string;
+        };
+        Returns: {
+          id: string;
+          lexical_rank: number;
+          score: number;
+          vector_rank: number;
+        }[];
+      };
       resolve_report: {
         Args: {
           content_action?: string;
@@ -467,6 +497,33 @@ export type Database = {
         Returns: undefined;
       };
       restaurant_detail: { Args: { restaurant_id: string }; Returns: Json };
+      restaurant_evidence: {
+        Args: {
+          min_similarity: number;
+          model: string;
+          query_embedding: string;
+          restaurant_ids: string[];
+        };
+        Returns: {
+          body: string;
+          restaurant_id: string;
+          review_id: string;
+          similarity: number;
+          visited_at: string;
+        }[];
+      };
+      review_embedding_backlog: {
+        Args: { batch: number; model: string };
+        Returns: {
+          content: string;
+          content_hash: string;
+          review_id: string;
+        }[];
+      };
+      review_embeddings_store: {
+        Args: { items: Json; model: string };
+        Returns: number;
+      };
       search_restaurants: {
         Args: {
           category_slugs?: string[];
