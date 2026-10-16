@@ -22,6 +22,11 @@ export type DiscoveryFilters = {
   maxPrice: number | null;
   tags: string[];
   query: string;
+  /**
+   * Soft preference from AI search; orders results by relevance instead of
+   * distance and never filters them (WP-05b). "" = distance order.
+   */
+  semantic: string;
 };
 
 export const DEFAULT_FILTERS: DiscoveryFilters = {
@@ -32,6 +37,7 @@ export const DEFAULT_FILTERS: DiscoveryFilters = {
   maxPrice: null,
   tags: [],
   query: "",
+  semantic: "",
 };
 
 const latSchema = z.coerce.number().min(-90).max(90);
@@ -86,6 +92,7 @@ export function parseFilters(params: URLSearchParams): DiscoveryFilters {
     maxPrice: maxPrice.success ? maxPrice.data : null,
     tags: parseSlugs(params.get("tags")),
     query: (params.get("q") ?? "").trim().slice(0, MAX_QUERY_LENGTH),
+    semantic: (params.get("sem") ?? "").trim().slice(0, MAX_QUERY_LENGTH),
   };
 }
 
@@ -108,6 +115,7 @@ export function filtersToSearchParams(
   if (filters.maxPrice !== null) params.set("max", String(filters.maxPrice));
   if (filters.tags.length > 0) params.set("tags", filters.tags.join(","));
   if (filters.query) params.set("q", filters.query);
+  if (filters.semantic) params.set("sem", filters.semantic);
   return params;
 }
 
@@ -134,6 +142,7 @@ export function toSearchArgs(
   filters: DiscoveryFilters,
   bounds: Bounds,
   offset: number,
+  limit: number = PAGE_SIZE,
 ) {
   const area =
     filters.radius !== null
@@ -153,7 +162,7 @@ export function toSearchArgs(
     max_price: filters.maxPrice ?? undefined,
     tag_slugs: filters.tags.length > 0 ? filters.tags : undefined,
     query: filters.query || undefined,
-    result_limit: PAGE_SIZE,
+    result_limit: limit,
     result_offset: offset,
   };
 }

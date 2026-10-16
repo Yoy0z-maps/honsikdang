@@ -48,6 +48,8 @@ export class FixtureQueryParser implements QueryParser {
         radius_m: /걸어서/.test(query) ? 400 : null,
         keyword: null,
         place_mention: query.match(/([가-힣]+역)/)?.[1] ?? null,
+        semantic_query:
+          query.match(/(혼자 먹기 편한|따뜻한 국물|분위기 좋은)/)?.[1] ?? null,
         unsupported: /영업/.test(query) ? ["영업 중"] : [],
       },
       usage,

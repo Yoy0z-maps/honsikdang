@@ -17,6 +17,7 @@ const empty = {
   radius_m: null,
   keyword: null,
   place_mention: null,
+  semantic_query: null,
   unsupported: [],
 };
 
@@ -38,6 +39,7 @@ describe("parseModelOutput", () => {
       radius: 500,
       keyword: "라멘",
       placeMention: null,
+      semantic: "",
       unsupported: [],
     });
   });
@@ -143,5 +145,20 @@ describe("slug lists", () => {
     for (const slug of [...CATEGORY_SLUGS, ...TAG_SLUGS]) {
       expect(sql).toContain(`('${slug}', '`);
     }
+  });
+});
+
+describe("semantic preference", () => {
+  it("is cleaned, bounded and carried into filters", () => {
+    const parsed = parseModelOutput({
+      ...empty,
+      semantic_query: "  혼자 먹기\n편한  ",
+    })!;
+    expect(parsed.semantic).toBe("혼자 먹기 편한");
+    expect(toFilters(parsed, DEFAULT_FILTERS).semantic).toBe("혼자 먹기 편한");
+    expect(
+      parseModelOutput({ ...empty, semantic_query: "가".repeat(300) })!
+        .semantic,
+    ).toHaveLength(100);
   });
 });
