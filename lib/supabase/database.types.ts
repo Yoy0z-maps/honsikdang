@@ -497,6 +497,33 @@ export type Database = {
         Returns: undefined;
       };
       restaurant_detail: { Args: { restaurant_id: string }; Returns: Json };
+      restaurant_evidence: {
+        Args: {
+          min_similarity: number;
+          model: string;
+          query_embedding: string;
+          restaurant_ids: string[];
+        };
+        Returns: {
+          body: string;
+          restaurant_id: string;
+          review_id: string;
+          similarity: number;
+          visited_at: string;
+        }[];
+      };
+      review_embedding_backlog: {
+        Args: { batch: number; model: string };
+        Returns: {
+          content: string;
+          content_hash: string;
+          review_id: string;
+        }[];
+      };
+      review_embeddings_store: {
+        Args: { items: Json; model: string };
+        Returns: number;
+      };
       search_restaurants: {
         Args: {
           category_slugs?: string[];

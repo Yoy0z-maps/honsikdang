@@ -9,7 +9,7 @@ if (!secret) {
   process.exit(1);
 }
 
-let total = { claimed: 0, stored: 0, failed: 0, tokens: 0 };
+let total = { claimed: 0, stored: 0, failed: 0, tokens: 0, reviews: 0 };
 for (let round = 0; round < 50; round++) {
   const res = await fetch(`${base}/api/jobs/embeddings`, {
     method: "POST",
@@ -21,6 +21,6 @@ for (let round = 0; round < 50; round++) {
     process.exit(1);
   }
   for (const key of Object.keys(total)) total[key] += body[key] ?? 0;
-  if (body.claimed === 0 || body.failed > 0) break;
+  if ((body.claimed === 0 && !body.reviews) || body.failed > 0) break;
 }
 console.log(JSON.stringify(total));

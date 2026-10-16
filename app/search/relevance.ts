@@ -3,6 +3,11 @@
 import { z } from "zod";
 import { getEmbedder } from "@/lib/ai";
 import { toVectorLiteral } from "@/lib/ai/embeddings";
+import {
+  EVIDENCE_MIN_SIMILARITY,
+  toQuote,
+  type Evidence,
+} from "@/lib/domain/evidence";
 import { PAGE_SIZE, parseFilters } from "@/lib/domain/filters";
 import { RELEVANCE_CANDIDATES, orderByRelevance } from "@/lib/domain/relevance";
 import { searchRestaurants, type SearchPage } from "@/lib/restaurants/search";
@@ -17,6 +22,11 @@ export type RelevancePage = SearchPage & {
   reason?: "login_required" | "unavailable";
   /** Only the nearest RELEVANCE_CANDIDATES results were re-ranked. */
   capped: boolean;
+  /**
+   * Per restaurant id on this page: a verbatim approved-review excerpt
+   * supporting the preference (WP-05c). Missing id = no evidence.
+   */
+  evidence?: Record<string, Evidence>;
 };
 
 const boundsSchema = z.object({
@@ -112,11 +122,47 @@ export async function searchByRelevance(
 
   const ordered = orderByRelevance(candidates.items, ranks);
   const total = Math.min(candidates.total, RELEVANCE_CANDIDATES);
+  const items = ordered.slice(offset, offset + PAGE_SIZE);
   return {
-    items: ordered.slice(offset, offset + PAGE_SIZE),
+    items,
     total,
     excludedNoPrice: candidates.excludedNoPrice,
     ordering: "relevance",
     capped: candidates.total > RELEVANCE_CANDIDATES,
+    evidence: await findEvidence(
+      supabase,
+      items.map((item) => item.id),
+      vector,
+    ),
   };
+}
+
+/** Evidence is optional: any failure just shows "no evidence". */
+async function findEvidence(
+  supabase: Awaited<ReturnType<typeof createUserServerSupabase>>,
+  restaurantIds: string[],
+  vector: { model: string; literal: string },
+): Promise<Record<string, Evidence>> {
+  const threshold = EVIDENCE_MIN_SIMILARITY[vector.model];
+  if (threshold === undefined || restaurantIds.length === 0) return {};
+  const { data, error } = await supabase.rpc("restaurant_evidence", {
+    restaurant_ids: restaurantIds,
+    query_embedding: vector.literal,
+    model: vector.model,
+    min_similarity: threshold,
+  });
+  if (error) {
+    console.error("restaurant_evidence failed", error.code);
+    return {};
+  }
+  return Object.fromEntries(
+    data.map((row) => [
+      row.restaurant_id,
+      {
+        reviewId: row.review_id,
+        quote: toQuote(row.body),
+        visitedAt: row.visited_at,
+      },
+    ]),
+  );
 }

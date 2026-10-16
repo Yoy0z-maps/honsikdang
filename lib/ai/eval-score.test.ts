@@ -87,3 +87,13 @@ describe("evaluation cases", () => {
     }
   });
 });
+
+describe("noSemantic", () => {
+  it("fails when a negation leaks into the soft preference", () => {
+    expect(
+      scoreCase({ noSemantic: true }, { ...base, semantic: "기다리지 않는" })
+        .pass,
+    ).toBe(false);
+    expect(scoreCase({ noSemantic: true }, base).pass).toBe(true);
+  });
+});

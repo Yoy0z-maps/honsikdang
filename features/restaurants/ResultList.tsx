@@ -1,4 +1,5 @@
 import Link from "next/link";
+import type { Evidence } from "@/lib/domain/evidence";
 import type { RestaurantSummary } from "@/lib/restaurants/search";
 import { RestaurantCard, type DistanceOrigin } from "./RestaurantCard";
 
@@ -23,6 +24,8 @@ export type RelevanceInfo = {
   applied: boolean;
   /** Only the nearest results were re-ranked. */
   capped: boolean;
+  /** Verbatim review evidence per restaurant id (WP-05c). */
+  evidence: Record<string, Evidence>;
 };
 
 type Props = {
@@ -191,6 +194,11 @@ export function ResultList({
                 showTagCount={showTagCount}
                 distanceOrigin={distanceOrigin}
                 onLocate={() => onLocate(item.id)}
+                evidence={
+                  relevance?.applied
+                    ? (relevance.evidence[item.id] ?? null)
+                    : undefined
+                }
               />
             </li>
           ))}

@@ -224,3 +224,33 @@ test("capture relevance ordering (WP-05b)", async ({
   await page.waitForTimeout(300);
   await shot("2-relevance-list");
 });
+
+test("capture grounded evidence (WP-05c)", async ({
+  page,
+  request,
+}, testInfo) => {
+  const shot = (name: string) =>
+    page.screenshot({
+      path: `${dir}/WP-05c-${testInfo.project.name}-${name}.png`,
+    });
+  await request.post("/api/jobs/embeddings", {
+    headers: { authorization: `Bearer ${E2E_JOB_SECRET}` },
+  });
+  await page.goto("/login?next=/?z=14");
+  await signInWithMagicLink(
+    page,
+    uniqueEmail(`shot-ev-${testInfo.project.name}`),
+  );
+  await page.locator("#sheet-title").filter({ hasText: "식당" }).waitFor();
+
+  await page.goto("/?z=14&sem=" + encodeURIComponent("조용한 편이다"));
+  await page.getByRole("button", { name: "결과 목록 펼치기" }).click();
+  await page.getByTestId("evidence").first().waitFor();
+  await page.waitForTimeout(300);
+  await shot("1-evidence-list");
+
+  await page.getByTestId("evidence").first().getByRole("link").click();
+  await page.waitForURL(/#review-/);
+  await page.waitForTimeout(300);
+  await shot("2-evidence-review");
+});

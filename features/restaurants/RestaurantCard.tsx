@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { formatDate, formatDistance, formatPrice } from "@/lib/domain/format";
+import type { Evidence } from "@/lib/domain/evidence";
 import type { RestaurantSummary } from "@/lib/restaurants/search";
 
 export type DistanceOrigin = "me" | "map";
@@ -14,7 +15,44 @@ type Props = {
   showTagCount: boolean;
   distanceOrigin: DistanceOrigin;
   onLocate?: () => void;
+  /** Relevance-ordered results only: undefined = not shown, null = none. */
+  evidence?: Evidence | null;
 };
+
+/** Verbatim review excerpt supporting an AI search preference (WP-05c). */
+export function EvidenceQuote({
+  restaurantId,
+  evidence,
+}: {
+  restaurantId: string;
+  evidence: Evidence | null;
+}) {
+  if (!evidence) {
+    return (
+      <p data-testid="evidence" className="mt-2 text-sm text-zinc-500">
+        이 선호를 뒷받침하는 리뷰가 아직 없어요.
+      </p>
+    );
+  }
+  return (
+    <figure
+      data-testid="evidence"
+      className="mt-2 rounded-lg border-l-4 border-orange-400 bg-orange-50/60 py-1 pl-3 pr-2 text-sm dark:bg-orange-950/30"
+    >
+      <blockquote>
+        <Link
+          href={`/restaurants/${restaurantId}#review-${evidence.reviewId}`}
+          className="inline-flex min-h-11 items-center underline-offset-2 hover:underline"
+        >
+          &ldquo;{evidence.quote}&rdquo;
+        </Link>
+      </blockquote>
+      <figcaption className="text-xs text-zinc-500">
+        방문 {formatDate(evidence.visitedAt)} 리뷰에서 그대로 가져왔어요
+      </figcaption>
+    </figure>
+  );
+}
 
 export function RestaurantCard({
   restaurant: r,
@@ -22,6 +60,7 @@ export function RestaurantCard({
   showTagCount,
   distanceOrigin,
   onLocate,
+  evidence,
 }: Props) {
   return (
     <article
@@ -91,6 +130,9 @@ export function RestaurantCard({
         <p className="mt-2 text-sm text-zinc-500">
           아직 승인된 혼밥 리뷰가 없어요.
         </p>
+      )}
+      {evidence !== undefined && (
+        <EvidenceQuote restaurantId={r.id} evidence={evidence} />
       )}
     </article>
   );

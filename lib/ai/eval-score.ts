@@ -10,6 +10,8 @@ export type EvalExpect = {
   keyword?: string;
   place?: string;
   unsupported?: boolean;
+  /** Soft preference must be empty (e.g. negations, decision Q54). */
+  noSemantic?: boolean;
 };
 
 export type EvalCase = {
@@ -68,6 +70,9 @@ export function scoreCase(
   }
   if (expected.unsupported && parsed.unsupported.length === 0) {
     problems.push("expected an unsupported condition");
+  }
+  if (expected.noSemantic && parsed.semantic) {
+    problems.push(`unexpected semantic "${parsed.semantic}"`);
   }
   return { pass: problems.length === 0, problems };
 }

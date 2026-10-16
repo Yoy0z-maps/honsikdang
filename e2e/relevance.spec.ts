@@ -61,6 +61,44 @@ test.describe("signed in", () => {
     expect(new URL(page.url()).searchParams.has("sem")).toBe(false);
   });
 
+  test("shows a verbatim review quote as evidence, linked to the review", async ({
+    page,
+  }) => {
+    await page.goto(QUIET);
+    await page.getByRole("button", { name: "결과 목록 펼치기" }).click();
+    const first = page.getByRole("list").first().getByRole("listitem").first();
+    const quote = first.getByTestId("evidence").getByRole("link");
+    // Seed review text of "[예시] 명동 쌀국수", quoted exactly.
+    await expect(quote).toHaveText("“예시 리뷰: 조용한 편이다.”");
+    await expect(first.getByTestId("evidence")).toContainText(
+      "방문 2026.10.07 리뷰",
+    );
+    const href = await quote.getAttribute("href");
+    expect(href).toMatch(/^\/restaurants\/[0-9a-f-]{36}#review-[0-9a-f-]{36}$/);
+    const box = await quote.boundingBox();
+    expect(box?.height).toBeGreaterThanOrEqual(44);
+
+    // A restaurant whose reviews have no text never gets a made-up reason.
+    const plain = page.getByRole("listitem").filter({
+      has: page.getByRole("heading", { name: "[예시] 을지로 분식" }),
+    });
+    await expect(plain.getByTestId("evidence")).toHaveText(
+      "이 선호를 뒷받침하는 리뷰가 아직 없어요.",
+    );
+
+    await quote.click();
+    await expect(page).toHaveURL(href!);
+    const reviewId = href!.split("#")[1];
+    await expect(page.locator(`#${reviewId}`)).toContainText(
+      "예시 리뷰: 조용한 편이다.",
+    );
+    await expect(page.locator(`#${reviewId}`)).toBeInViewport({ ratio: 0.9 });
+    await expect(page.locator(`#${reviewId}`)).toHaveAttribute(
+      "data-highlighted",
+      "true",
+    );
+  });
+
   test("AI search carries a soft preference into relevance order", async ({
     page,
   }) => {

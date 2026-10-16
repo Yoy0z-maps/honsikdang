@@ -1,7 +1,7 @@
 import { CATEGORY_SLUGS, TAG_SLUGS } from "@/lib/domain/ai-query";
 
 // Versioned so usage logs and evaluations can tell prompts apart.
-export const PROMPT_VERSION = "parse-v2";
+export const PROMPT_VERSION = "parse-v3";
 
 const CATEGORY_HINTS: Record<(typeof CATEGORY_SLUGS)[number], string> = {
   korean: "한식 (국밥, 백반, 찌개, 냉면 등)",
@@ -40,6 +40,7 @@ export const SYSTEM_PROMPT = [
   "- place_mention: 지역·역·동네 이름(예: 강남역, 성수동)을 말한 경우 그 이름. 없으면 null.",
   '- semantic_query: 위 필드로 걸러낼 수 없는 선호·분위기·맛 표현을 짧게(예: "혼자 먹기 편한", "따뜻한 국물", "분위기 좋은"). 결과 순서에만 쓰이고 식당을 걸러내지 않는다. 없으면 null.',
   '- unsupported: 사실 확인이 필요한 조건 중 위 필드로 표현할 수 없는 것을 짧은 한국어로(예: "영업 중", "주차 가능", "예약 가능"). 없으면 빈 배열.',
+  '- 부정·배제 표현("기다리지 않는", "시끄럽지 않은", "~ 없는", "~ 말고", "~ 빼고")은 semantic_query에 넣지 말고 unsupported에 원문 그대로 넣는다. 단, 금액·거리의 상한("만 원 넘지 않는", "1km 넘지 않는")은 max_price_krw·radius_m로 표현한다.',
   "- 확실하지 않은 조건은 추측하지 말고 unsupported에 넣는다. 서로 모순되는 조건도 unsupported에 넣는다.",
 ].join("\n");
 

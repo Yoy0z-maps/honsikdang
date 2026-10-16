@@ -3,19 +3,24 @@ import { DirectionsButton } from "@/features/directions/DirectionsButton";
 import { formatDate, formatPrice } from "@/lib/domain/format";
 import type { RestaurantSummary } from "@/lib/restaurants/search";
 import {
+  EvidenceQuote,
   distanceText,
   type DistanceOrigin,
 } from "@/features/restaurants/RestaurantCard";
+import type { Evidence } from "@/lib/domain/evidence";
 
 /** Compact card shown above the collapsed sheet when a marker is tapped. */
 export function RestaurantPreview({
   restaurant: r,
   distanceOrigin,
   onClose,
+  evidence,
 }: {
   restaurant: RestaurantSummary;
   distanceOrigin: DistanceOrigin;
   onClose: () => void;
+  /** AI search relevance results only (WP-05c). */
+  evidence?: Evidence | null;
 }) {
   return (
     <div
@@ -55,6 +60,9 @@ export function RestaurantPreview({
           <span className="text-zinc-500">아직 승인된 혼밥 리뷰가 없어요.</span>
         )}
       </p>
+      {evidence !== undefined && (
+        <EvidenceQuote restaurantId={r.id} evidence={evidence} />
+      )}
       <div className="mt-3 grid grid-cols-2 gap-2">
         <DirectionsButton
           destination={{ ...r.position, name: r.name }}

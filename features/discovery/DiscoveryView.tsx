@@ -72,7 +72,7 @@ type Loaded =
   | { key: string; kind: "error" };
 
 type ResultPage = SearchPage &
-  Partial<Pick<RelevancePage, "ordering" | "reason" | "capped">>;
+  Partial<Pick<RelevancePage, "ordering" | "reason" | "capped" | "evidence">>;
 
 /**
  * Ordinary searches run in the browser (public RPC). Searches with an AI
@@ -311,6 +311,7 @@ export function DiscoveryView() {
                 text: filters.semantic,
                 applied: current.page.ordering === "relevance",
                 capped: current.page.capped ?? false,
+                evidence: current.page.evidence ?? {},
               }
             : undefined,
         };
@@ -341,7 +342,11 @@ export function DiscoveryView() {
           ? {
               ...prev,
               loadingMore: false,
-              page: { ...next, items: [...prev.page.items, ...next.items] },
+              page: {
+                ...next,
+                items: [...prev.page.items, ...next.items],
+                evidence: { ...prev.page.evidence, ...next.evidence },
+              },
             }
           : prev,
       );
@@ -539,6 +544,11 @@ export function DiscoveryView() {
             restaurant={selected}
             distanceOrigin={distanceOrigin}
             onClose={() => setSelectedId(null)}
+            evidence={
+              current?.kind === "ready" && current.page.ordering === "relevance"
+                ? (current.page.evidence?.[selected.id] ?? null)
+                : undefined
+            }
           />
         </div>
       )}

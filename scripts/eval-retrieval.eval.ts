@@ -22,6 +22,17 @@ import {
   ndcgAtK,
   recallAtK,
 } from "@/lib/ai/retrieval-metrics";
+import {
+  EVIDENCE_THRESHOLDS,
+  calibrateThreshold,
+  scoreEvidence,
+  type EvidenceSample,
+} from "@/lib/ai/evidence-metrics";
+import {
+  EVIDENCE_MIN_SIMILARITY,
+  isVerbatimExcerpt,
+  toQuote,
+} from "@/lib/domain/evidence";
 import { orderByRelevance } from "@/lib/domain/relevance";
 import { runEmbeddingJobs } from "@/lib/embeddings/worker";
 import type { Database } from "@/lib/supabase/database.types";
@@ -34,7 +45,12 @@ type Corpus = {
     tags: string[];
     reviews: string[];
   }[];
-  queries: { id: string; text: string; relevant: Record<string, number> }[];
+  queries: {
+    id: string;
+    text: string;
+    relevant: Record<string, number>;
+    evidence: Record<string, number[]>;
+  }[];
 };
 
 const corpus = JSON.parse(
@@ -59,18 +75,19 @@ function secretKey(): string {
 
 // Free-tier accounts are rate limited: retry 429s after a pause, embed the
 // corpus in large batches and all queries in one request.
-const embedder: Embedder | null = process.env.VOYAGE_API_KEY
-  ? new RetryingEmbedder(
-      new VoyageEmbedder(
-        process.env.VOYAGE_API_KEY,
-        process.env.VOYAGE_API_BASE,
-      ),
-      4,
-      21_000,
-    )
-  : process.env.EVAL_EMBEDDER === "fixture"
+const embedder: Embedder | null =
+  process.env.EVAL_EMBEDDER === "fixture"
     ? new FixtureEmbedder()
-    : null;
+    : process.env.VOYAGE_API_KEY
+      ? new RetryingEmbedder(
+          new VoyageEmbedder(
+            process.env.VOYAGE_API_KEY,
+            process.env.VOYAGE_API_BASE,
+          ),
+          4,
+          21_000,
+        )
+      : null;
 
 const CENTER = { lat: 37.5663, lng: 126.9779 };
 const id = (n: number) =>
@@ -176,6 +193,14 @@ describe.skipIf(!embedder || !local)("retrieval evaluation (local)", () => {
           ndcg: Scores;
           top5: string[];
         }[] = [];
+        const samples: EvidenceSample[] = [];
+        const reviewText = new Map(
+          corpus.restaurants.flatMap((r) =>
+            r.reviews.map(
+              (body, i) => [id(1000 + r.n * 10 + i), body] as const,
+            ),
+          ),
+        );
         const { vectors: queryVectors } = await embedder!.embed(
           corpus.queries.map((q) => q.text),
           "query",
@@ -197,6 +222,40 @@ describe.skipIf(!embedder || !local)("retrieval evaluation (local)", () => {
           const vectorOnly = await rank(toVectorLiteral(vectors[0]), null);
           const lexicalOnly = await rank(null, q.text);
           const baseline = toN(byDistance);
+
+          // Evidence for the fused top 10 (min_similarity -1 returns each
+          // restaurant's best review so thresholds can be swept offline).
+          const top10 = fused.slice(0, 10);
+          const { data: found, error: evidenceError } = await admin.rpc(
+            "restaurant_evidence",
+            {
+              restaurant_ids: top10.map((n) => id(Number(n))),
+              query_embedding: toVectorLiteral(vectors[0]),
+              model: embedder!.model,
+              min_similarity: -1,
+            },
+          );
+          if (evidenceError) throw evidenceError;
+          const best = new Map(found.map((row) => [row.restaurant_id, row]));
+          for (const [rank, n] of top10.entries()) {
+            const row = best.get(id(Number(n)));
+            const stored = row ? reviewText.get(row.review_id) : undefined;
+            samples.push({
+              queryId: q.id,
+              rank,
+              grade: q.relevant[n] ?? 0,
+              supporting: q.evidence[n] ?? [],
+              reviewIndex: row
+                ? (Number(row.review_id.slice(-12)) - 1000) % 10
+                : null,
+              similarity: row?.similarity ?? null,
+              verbatim:
+                !row ||
+                (stored !== undefined &&
+                  row.body === stored &&
+                  isVerbatimExcerpt(toQuote(row.body), stored)),
+            });
+          }
           const k = RETRIEVAL_THRESHOLDS.k;
           rows.push({
             id: q.id,
@@ -240,7 +299,21 @@ describe.skipIf(!embedder || !local)("retrieval evaluation (local)", () => {
             distance: mean((r) => r.ndcg.distance),
           },
           embeddingTokens: work.tokens,
+          reviewVectors: work.reviews,
           thresholds: RETRIEVAL_THRESHOLDS,
+          evidence: {
+            configured: scoreEvidence(
+              samples,
+              EVIDENCE_MIN_SIMILARITY[embedder!.model] ?? 2,
+            ),
+            calibrated: calibrateThreshold(
+              samples,
+              Array.from({ length: 13 }, (_, i) => 0.2 + i * 0.05),
+            ),
+            verbatimRate:
+              samples.filter((s) => s.verbatim).length / samples.length,
+            thresholds: EVIDENCE_THRESHOLDS,
+          },
         };
         mkdirSync("specs/evals/results", { recursive: true });
         const file =
@@ -249,7 +322,11 @@ describe.skipIf(!embedder || !local)("retrieval evaluation (local)", () => {
             : "retrieval-latest.json";
         writeFileSync(
           `specs/evals/results/${file}`,
-          JSON.stringify({ summary, queries: rows }, null, 2) + "\n",
+          JSON.stringify(
+            { summary, queries: rows, evidence: samples },
+            null,
+            2,
+          ) + "\n",
         );
         console.log(JSON.stringify(summary, null, 2));
 
@@ -260,7 +337,14 @@ describe.skipIf(!embedder || !local)("retrieval evaluation (local)", () => {
           expect(
             summary.ndcgAt10.fused - summary.ndcgAt10.distance,
           ).toBeGreaterThanOrEqual(RETRIEVAL_THRESHOLDS.ndcgGainOverDistance);
+          expect(
+            summary.evidence.configured.supportRate,
+          ).toBeGreaterThanOrEqual(EVIDENCE_THRESHOLDS.supportRate);
         }
+        // Holds for any embedder: quotes are always the stored review text.
+        expect(summary.evidence.verbatimRate).toBe(
+          EVIDENCE_THRESHOLDS.verbatimRate,
+        );
       } finally {
         psql(cleanupSql());
       }
