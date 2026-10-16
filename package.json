@@ -23,7 +23,9 @@
     "db:test": "supabase test db",
     "db:grant-admin": "node scripts/grant-admin.mjs",
     "db:types": "supabase gen types --lang typescript --local --schema public > lib/supabase/database.types.ts && prettier --write lib/supabase/database.types.ts",
-    "eval:parse": "node --env-file-if-exists=.env.local node_modules/vitest/vitest.mjs run --config vitest.eval.config.ts",
+    "embed:sync": "node --env-file-if-exists=.env.local scripts/embed-sync.mjs",
+    "eval:parse": "node --env-file-if-exists=.env.local node_modules/vitest/vitest.mjs run --config vitest.eval.config.ts scripts/eval-search-parse.eval.ts",
+    "eval:retrieval": "node --env-file-if-exists=.env.local node_modules/vitest/vitest.mjs run --config vitest.eval.config.ts scripts/eval-retrieval.eval.ts",
     "check": "npm run format:check && npm run typecheck && npm run lint && npm run test"
   },
   "dependencies": {

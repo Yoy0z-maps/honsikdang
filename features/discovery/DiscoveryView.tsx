@@ -11,6 +11,7 @@ import {
   useTransition,
 } from "react";
 import { aiSearch } from "@/app/search/actions";
+import { searchByRelevance, type RelevancePage } from "@/app/search/relevance";
 import { NaverMap } from "@/features/map/NaverMap";
 import type { DistanceOrigin } from "@/features/restaurants/RestaurantCard";
 import {
@@ -62,13 +63,36 @@ type Loaded =
   | {
       key: string;
       kind: "ready";
-      page: SearchPage;
+      page: ResultPage;
       bounds: Bounds;
       areaClamped: boolean;
       loadingMore: boolean;
       loadMoreFailed: boolean;
     }
   | { key: string; kind: "error" };
+
+type ResultPage = SearchPage &
+  Partial<Pick<RelevancePage, "ordering" | "reason" | "capped">>;
+
+/**
+ * Ordinary searches run in the browser (public RPC). Searches with an AI
+ * preference go through the server, which embeds the preference and
+ * re-ranks the hard-filtered results (WP-05b).
+ */
+function fetchResults(
+  filters: DiscoveryFilters,
+  bounds: Bounds,
+  offset: number,
+): Promise<ResultPage> {
+  if (filters.semantic) {
+    return searchByRelevance(
+      filtersToSearchParams(filters).toString(),
+      bounds,
+      offset,
+    );
+  }
+  return searchRestaurants(getBrowserSupabase(), filters, bounds, offset);
+}
 
 const MOVED_THRESHOLD_M = 100;
 const AT_MY_LOCATION_M = 50;
@@ -246,7 +270,7 @@ export function DiscoveryView() {
       rect?.height || window.innerHeight,
     );
     Promise.resolve()
-      .then(() => searchRestaurants(getBrowserSupabase(), filters, bounds, 0))
+      .then(() => fetchResults(filters, bounds, 0))
       .then((page) => {
         if (cancelled) return;
         setLoaded({
@@ -282,6 +306,13 @@ export function DiscoveryView() {
           areaClamped: current.areaClamped,
           loadingMore: current.loadingMore,
           loadMoreFailed: current.loadMoreFailed,
+          relevance: filters.semantic
+            ? {
+                text: filters.semantic,
+                applied: current.page.ordering === "relevance",
+                capped: current.page.capped ?? false,
+              }
+            : undefined,
         };
   // Derived from `current` (a stable state object) so markers do not change
   // identity on unrelated re-renders.
@@ -300,8 +331,7 @@ export function DiscoveryView() {
     const key = current.key;
     setLoaded({ ...current, loadingMore: true, loadMoreFailed: false });
     try {
-      const next = await searchRestaurants(
-        getBrowserSupabase(),
+      const next = await fetchResults(
         filters,
         current.bounds,
         current.page.items.length,
@@ -564,6 +594,7 @@ export function DiscoveryView() {
             onResetFilters={resetFilters}
             onLocate={locate}
             suggestHref={`/suggest?${suggestQuery}`}
+            onClearRelevance={() => updateFilters({ semantic: "" })}
           />
         )}
       </BottomSheet>

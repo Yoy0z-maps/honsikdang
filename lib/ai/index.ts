@@ -1,5 +1,6 @@
 import "server-only";
 import { AnthropicQueryParser } from "./anthropic";
+import { FixtureEmbedder, VoyageEmbedder, type Embedder } from "./embeddings";
 import { FixtureQueryParser } from "./fixture";
 import type { QueryParser } from "./types";
 
@@ -27,4 +28,19 @@ export function getQueryParser(): QueryParser | null {
   if (provider !== "anthropic") return null;
   const key = process.env.ANTHROPIC_API_KEY?.trim();
   return key ? new AnthropicQueryParser(key) : null;
+}
+
+/**
+ * The configured embedder, or null when semantic ranking is off (no key);
+ * results then keep distance order. Same fixture rule as the parser.
+ */
+export function getEmbedder(): Embedder | null {
+  const provider = process.env.EMBEDDING_PROVIDER?.trim() || "voyage";
+  if (provider === "fixture") {
+    return isLocalSupabase() ? new FixtureEmbedder() : null;
+  }
+  if (provider !== "voyage") return null;
+  const key = process.env.VOYAGE_API_KEY?.trim();
+  const base = process.env.VOYAGE_API_BASE?.trim();
+  return key ? new VoyageEmbedder(key, base || undefined) : null;
 }

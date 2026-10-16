@@ -35,6 +35,7 @@ const MIN_PRICE = 1000;
 const MAX_PRICE = 1_000_000;
 const MAX_TEXT = 60;
 const MAX_UNSUPPORTED = 5;
+export const MAX_SEMANTIC_LENGTH = MAX_QUERY_LENGTH;
 
 /**
  * JSON schema sent as the structured-output format. The API does not accept
@@ -55,6 +56,7 @@ export const AI_QUERY_JSON_SCHEMA = {
     radius_m: { anyOf: [{ type: "integer" }, { type: "null" }] },
     keyword: { anyOf: [{ type: "string" }, { type: "null" }] },
     place_mention: { anyOf: [{ type: "string" }, { type: "null" }] },
+    semantic_query: { anyOf: [{ type: "string" }, { type: "null" }] },
     unsupported: { type: "array", items: { type: "string" } },
   },
   required: [
@@ -64,6 +66,7 @@ export const AI_QUERY_JSON_SCHEMA = {
     "radius_m",
     "keyword",
     "place_mention",
+    "semantic_query",
     "unsupported",
   ],
   additionalProperties: false,
@@ -77,6 +80,11 @@ export type ParsedQuery = {
   keyword: string;
   /** Area named in the query; not geocoded (decision Q40). */
   placeMention: string | null;
+  /**
+   * Soft preferences ("혼자 먹기 편한") used only to re-order results, never
+   * to filter them (WP-05b, decision Q47). Empty when none.
+   */
+  semantic: string;
   /** Conditions the app cannot apply, shown to the user. */
   unsupported: string[];
 };
@@ -89,6 +97,7 @@ const rawSchema = z
     radius_m: z.number().nullable(),
     keyword: z.string().nullable(),
     place_mention: z.string().nullable(),
+    semantic_query: z.string().nullable(),
     unsupported: z.array(z.string()),
   })
   .strict();
@@ -148,6 +157,7 @@ export function parseModelOutput(raw: unknown): ParsedQuery | null {
     radius,
     keyword: cleanText(o.keyword, MAX_QUERY_LENGTH),
     placeMention: cleanText(o.place_mention, MAX_TEXT) || null,
+    semantic: cleanText(o.semantic_query, MAX_SEMANTIC_LENGTH),
     unsupported,
   };
 }
@@ -165,6 +175,7 @@ export function toFilters(
     maxPrice: parsed.maxPrice,
     tags: parsed.tags,
     query: parsed.keyword,
+    semantic: parsed.semantic,
   };
 }
 

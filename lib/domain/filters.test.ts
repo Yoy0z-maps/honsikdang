@@ -24,7 +24,7 @@ describe("parseFilters", () => {
   it("reads every filter", () => {
     expect(
       parse(
-        "lat=37.5&lng=127.01&z=17&radius=500&cat=korean,bunsik&max=10000&tags=solo_seat&q=국밥",
+        "lat=37.5&lng=127.01&z=17&radius=500&cat=korean,bunsik&max=10000&tags=solo_seat&q=국밥&sem=조용한",
       ),
     ).toEqual({
       center: { lat: 37.5, lng: 127.01 },
@@ -34,6 +34,7 @@ describe("parseFilters", () => {
       maxPrice: 10000,
       tags: ["solo_seat"],
       query: "국밥",
+      semantic: "조용한",
     });
   });
 
@@ -82,6 +83,7 @@ describe("filtersToSearchParams", () => {
       maxPrice: 15000,
       tags: ["bar_seat", "quiet"],
       query: "덮밥",
+      semantic: "혼자 먹기 편한",
     };
     expect(parseFilters(filtersToSearchParams(filters))).toEqual(filters);
   });

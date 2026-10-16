@@ -392,6 +392,22 @@ export type Database = {
         };
         Returns: number;
       };
+      embedding_jobs_claim: {
+        Args: { batch: number; model: string };
+        Returns: {
+          content: string;
+          content_hash: string;
+          restaurant_id: string;
+        }[];
+      };
+      embedding_jobs_complete: {
+        Args: { items: Json; model: string };
+        Returns: number;
+      };
+      embedding_jobs_fail: {
+        Args: { error: string; restaurant_id: string };
+        Returns: undefined;
+      };
       finish_ai_search: {
         Args: {
           input_tokens: number;
@@ -455,6 +471,20 @@ export type Database = {
           name: string;
           saved_at: string;
           status: Database["public"]["Enums"]["restaurant_status"];
+        }[];
+      };
+      rank_restaurants: {
+        Args: {
+          candidate_ids: string[];
+          model: string;
+          query_embedding: string;
+          semantic_text: string;
+        };
+        Returns: {
+          id: string;
+          lexical_rank: number;
+          score: number;
+          vector_rank: number;
         }[];
       };
       resolve_report: {

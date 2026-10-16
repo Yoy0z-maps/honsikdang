@@ -51,10 +51,11 @@ export async function searchRestaurants(
   filters: DiscoveryFilters,
   bounds: Bounds,
   offset: number,
+  limit?: number,
 ): Promise<SearchPage> {
   const { data, error } = await client.rpc(
     "search_restaurants",
-    toSearchArgs(filters, bounds, offset),
+    toSearchArgs(filters, bounds, offset, limit),
   );
   if (error) throw new SearchError(error.message);
 
