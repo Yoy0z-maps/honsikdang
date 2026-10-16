@@ -154,3 +154,38 @@ test.describe("desktop directions guidance (WP-04d)", () => {
     });
   });
 });
+
+test("capture AI search states (WP-05a)", async ({ page }, testInfo) => {
+  const shot = (name: string) =>
+    page.screenshot({
+      path: `${dir}/WP-05a-${testInfo.project.name}-${name}.png`,
+    });
+  await page.goto("/login?next=/?z=14");
+  await signInWithMagicLink(
+    page,
+    uniqueEmail(`shot-ai-${testInfo.project.name}`),
+  );
+  await page.locator("#sheet-title").filter({ hasText: "식당" }).waitFor();
+
+  await page.getByRole("button", { name: "AI로 찾기" }).click();
+  await page
+    .getByLabel("AI 검색: 원하는 식당을 문장으로 입력")
+    .fill("강남역 만 원 이하 조용한 라멘 영업 중");
+  await shot("1-ai-input");
+
+  await page.getByRole("button", { name: "검색", exact: true }).click();
+  await page
+    .getByTestId("ai-notice")
+    .getByText("AI가 이렇게 이해했어요")
+    .waitFor();
+  await page.waitForTimeout(300);
+  await shot("2-ai-interpreted");
+
+  await page
+    .getByLabel("AI 검색: 원하는 식당을 문장으로 입력")
+    .fill("오류응답 국밥");
+  await page.getByRole("button", { name: "검색", exact: true }).click();
+  await page.getByTestId("ai-notice").getByText("AI 해석에 실패해").waitFor();
+  await page.waitForTimeout(300);
+  await shot("3-ai-fallback");
+});

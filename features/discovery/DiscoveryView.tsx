@@ -2,7 +2,15 @@
 
 import Link from "next/link";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  useTransition,
+} from "react";
+import { aiSearch } from "@/app/search/actions";
 import { NaverMap } from "@/features/map/NaverMap";
 import type { DistanceOrigin } from "@/features/restaurants/RestaurantCard";
 import {
@@ -19,6 +27,7 @@ import {
 import {
   DEFAULT_CENTER,
   DEFAULT_ZOOM,
+  MAX_QUERY_LENGTH,
   activeFilterCount,
   clearFilters,
   filtersToSearchParams,
@@ -33,6 +42,8 @@ import {
   type Bounds,
   type LatLng,
 } from "@/lib/domain/geo";
+import { toFilters } from "@/lib/domain/ai-query";
+import { loginPath } from "@/lib/auth/redirect";
 import { getNaverMapKeyId } from "@/lib/env";
 import {
   fetchCatalogue,
@@ -41,6 +52,7 @@ import {
   type SearchPage,
 } from "@/lib/restaurants/search";
 import { getBrowserSupabase } from "@/lib/supabase/browser";
+import { AiSearchNotice, type AiNoticeState } from "./AiSearchNotice";
 import { BottomSheet, type SheetSnap } from "./BottomSheet";
 import { FilterPanel } from "./FilterPanel";
 import { MapTopBar } from "./MapTopBar";
@@ -115,6 +127,8 @@ export function DiscoveryView() {
   const [mapCamera, setMapCamera] = useState<Camera | null>(null);
   const [myLocation, setMyLocation] = useState<LatLng | null>(null);
   const [notice, setNotice] = useState<string | null>(null);
+  const [aiNotice, setAiNotice] = useState<AiNoticeState | null>(null);
+  const [aiPending, startAiSearch] = useTransition();
   const [focus, setFocus] = useState<{
     position: LatLng;
     nonce: number;
@@ -137,6 +151,37 @@ export function DiscoveryView() {
     (patch: Partial<DiscoveryFilters>) => {
       setSelectedId(null);
       replaceFilters({ ...filters, ...patch });
+    },
+    [filters, replaceFilters],
+  );
+
+  // Natural-language search (WP-05a): the server returns conditions, which
+  // are applied as ordinary filters; failures fall back to a keyword search.
+  const runAiSearch = useCallback(
+    (text: string) => {
+      setNotice(null);
+      setAiNotice(null);
+      startAiSearch(async () => {
+        let result: Awaited<ReturnType<typeof aiSearch>>;
+        try {
+          result = await aiSearch(text);
+        } catch {
+          result = { status: "fallback", reason: "error" };
+        }
+        if (result.status === "invalid_query") return;
+        if (result.status === "ok") {
+          setSelectedId(null);
+          replaceFilters(toFilters(result.parsed, filters));
+        } else if (result.status === "fallback") {
+          // Like a successful parse, a new AI search replaces old conditions.
+          setSelectedId(null);
+          replaceFilters({
+            ...clearFilters(filters),
+            query: text.slice(0, MAX_QUERY_LENGTH),
+          });
+        }
+        setAiNotice({ query: text, result });
+      });
     },
     [filters, replaceFilters],
   );
@@ -391,6 +436,8 @@ export function DiscoveryView() {
           setSelectedId(null);
           setSnap("collapsed");
         }}
+        onAiSearch={runAiSearch}
+        aiPending={aiPending}
       />
 
       {/* Map controls under the top bar. */}
@@ -426,7 +473,21 @@ export function DiscoveryView() {
         </div>
       </div>
 
-      {notice && (
+      {/* Above the sheet like the preview card, clear of the map controls. */}
+      {aiNotice && !selected && (
+        <div className="pointer-events-none fixed inset-x-3 bottom-[calc(var(--sheet-collapsed)+0.5rem)] z-30 md:bottom-6 md:left-[412px] md:right-auto md:w-[360px]">
+          <AiSearchNotice
+            state={aiNotice}
+            catalogue={catalogue}
+            loginHref={loginPath(
+              `${pathname}${paramsString ? `?${paramsString}` : ""}`,
+            )}
+            onClose={() => setAiNotice(null)}
+          />
+        </div>
+      )}
+
+      {notice && !aiNotice && (
         <p
           role="status"
           className="absolute inset-x-3 top-[calc(var(--overlay-top)+3.5rem)] z-10 rounded-xl bg-white/95 p-3 text-sm shadow-md md:left-[412px] md:w-[360px] dark:bg-zinc-800/95"

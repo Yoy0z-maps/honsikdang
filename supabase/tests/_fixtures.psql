@@ -37,6 +37,10 @@
 -- Start from an empty catalogue and no users so local seed data and accounts
 -- left by e2e runs cannot affect assertions. Rolled back with the rest of the
 -- test transaction.
+-- Reports and audit rows left by local e2e runs are not tied to users or
+-- restaurants by foreign keys; clear them too (rolled back with the test).
+delete from public.restaurant_reports;
+delete from public.moderation_actions;
 delete from public.restaurants;
 delete from auth.users;
 

@@ -1,0 +1,30 @@
+import "server-only";
+import { AnthropicQueryParser } from "./anthropic";
+import { FixtureQueryParser } from "./fixture";
+import type { QueryParser } from "./types";
+
+const LOCAL_HOSTS = new Set(["127.0.0.1", "localhost", "[::1]"]);
+
+function isLocalSupabase(): boolean {
+  try {
+    const url = new URL(process.env.NEXT_PUBLIC_SUPABASE_URL ?? "");
+    return LOCAL_HOSTS.has(url.hostname);
+  } catch {
+    return false;
+  }
+}
+
+/**
+ * The configured parser, or null when AI search is off (no key). The
+ * fixture is refused unless the app talks to a local Supabase, so it can
+ * never answer real users.
+ */
+export function getQueryParser(): QueryParser | null {
+  const provider = process.env.AI_PROVIDER?.trim() || "anthropic";
+  if (provider === "fixture") {
+    return isLocalSupabase() ? new FixtureQueryParser() : null;
+  }
+  if (provider !== "anthropic") return null;
+  const key = process.env.ANTHROPIC_API_KEY?.trim();
+  return key ? new AnthropicQueryParser(key) : null;
+}

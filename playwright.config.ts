@@ -4,7 +4,8 @@ const PORT = 3100;
 
 // Runs against a production build backed by the local Supabase stack and
 // supabase/seed.sql (synthetic data). The NAVER key is blanked so tests never
-// call the external map API; real map behavior is checked manually.
+// call the external map API; real map behavior is checked manually. AI
+// search uses the fixture parser (lib/ai/fixture.ts).
 // Viewports follow master plan §5A QA acceptance: 360×800 and 390×844.
 export default defineConfig({
   testDir: "e2e",
@@ -33,6 +34,9 @@ export default defineConfig({
     timeout: 240_000,
     env: {
       NEXT_PUBLIC_NAVER_MAP_CLIENT_ID: "",
+      // Rule-based test fixture instead of the model: no key, no spend.
+      AI_PROVIDER: "fixture",
+      ANTHROPIC_API_KEY: "",
       NEXT_TELEMETRY_DISABLED: "1",
     },
   },
