@@ -5,7 +5,12 @@ import { useEffect, useRef, useState } from "react";
 import type { Camera } from "@/lib/domain/camera";
 import type { LatLng } from "@/lib/domain/geo";
 
-export type MapMarker = { id: string; position: LatLng };
+export type MapMarker = {
+  id: string;
+  position: LatLng;
+  /** Short visible label, e.g. a recommendation number (text only). */
+  label?: string;
+};
 
 export type MapStatus = "no-key" | "loading" | "ready" | "failed";
 type Status = MapStatus;
@@ -29,16 +34,24 @@ type Props = {
   fallbackHint?: string;
 };
 
-function markerIcon(selected: boolean): naver.maps.HtmlIcon {
+function markerIcon(selected: boolean, label?: string): naver.maps.HtmlIcon {
   // Built as an element with no user-provided text, so restaurant names can
   // never be injected into the map's HTML. The 44 px wrapper is the touch
   // target; the dot inside is the visual marker.
   const hit = document.createElement("div");
   hit.className = "flex h-11 w-11 items-center justify-center";
   const dot = document.createElement("div");
-  dot.className = selected
-    ? "h-6 w-6 rounded-full border-[3px] border-white bg-orange-600 shadow-lg"
-    : "h-4 w-4 rounded-full border-2 border-white bg-zinc-800 shadow";
+  if (label) {
+    // textContent, never innerHTML.
+    dot.textContent = label;
+    dot.className =
+      "flex items-center justify-center rounded-full border-2 border-white bg-orange-600 font-bold text-white shadow-lg " +
+      (selected ? "h-9 w-9 text-base" : "h-7 w-7 text-sm");
+  } else {
+    dot.className = selected
+      ? "h-6 w-6 rounded-full border-[3px] border-white bg-orange-600 shadow-lg"
+      : "h-4 w-4 rounded-full border-2 border-white bg-zinc-800 shadow";
+  }
   hit.appendChild(dot);
   return { content: hit, anchor: new naver.maps.Point(22, 22) };
 }
@@ -61,6 +74,7 @@ export function NaverMap({
   const containerRef = useRef<HTMLDivElement>(null);
   const mapRef = useRef<naver.maps.Map | null>(null);
   const markersRef = useRef(new Map<string, naver.maps.Marker>());
+  const labelsRef = useRef(new Map<string, string>());
   const callbacks = useRef({ onSelect, onIdle });
   const initialCamera = useRef(camera);
 
@@ -130,18 +144,21 @@ export function NaverMap({
     const existing = markersRef.current;
     const wanted = new Set(markers.map((m) => m.id));
 
+    // A marker whose label changed is recreated.
+    const labels = new Map(markers.map((m) => [m.id, m.label ?? ""]));
     for (const [id, marker] of existing) {
-      if (!wanted.has(id)) {
+      if (!wanted.has(id) || labelsRef.current.get(id) !== labels.get(id)) {
         marker.setMap(null);
         existing.delete(id);
       }
     }
-    for (const { id, position } of markers) {
+    labelsRef.current = labels;
+    for (const { id, position, label } of markers) {
       if (existing.has(id)) continue;
       const marker = new naver.maps.Marker({
         position: new naver.maps.LatLng(position.lat, position.lng),
         map,
-        icon: markerIcon(false),
+        icon: markerIcon(false, label),
         clickable: true,
       });
       naver.maps.Event.addListener(marker, "click", () =>
@@ -155,7 +172,9 @@ export function NaverMap({
     if (status !== "ready") return;
     for (const [id, marker] of markersRef.current) {
       const selected = id === selectedId;
-      marker.setIcon(markerIcon(selected));
+      marker.setIcon(
+        markerIcon(selected, labelsRef.current.get(id) || undefined),
+      );
       marker.setZIndex(selected ? 100 : 1);
     }
   }, [selectedId, markers, status]);

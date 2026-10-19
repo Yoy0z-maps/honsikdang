@@ -16,6 +16,8 @@ type Props = {
   activeCount: number;
   onChange: (patch: Partial<DiscoveryFilters>) => void;
   onOpenFilters: () => void;
+  /** "오늘 뭐 먹지?" (WP-06). */
+  onOpenRecommend: () => void;
   onSearchFocus: () => void;
   /** Natural-language search (WP-05a). */
   onAiSearch: (text: string) => void;
@@ -29,6 +31,7 @@ export function MapTopBar({
   activeCount,
   onChange,
   onOpenFilters,
+  onOpenRecommend,
   onSearchFocus,
   onAiSearch,
   aiPending,
@@ -131,6 +134,7 @@ export function MapTopBar({
         aria-label="음식 종류"
         className="pointer-events-auto -mx-3 flex gap-2 overflow-x-auto px-3 pb-1 [scrollbar-width:none]"
       >
+        <Chip onClick={onOpenRecommend}>오늘 뭐 먹지?</Chip>
         <Chip
           pressed={activeCount > 0}
           onClick={onOpenFilters}

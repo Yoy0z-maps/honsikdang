@@ -1,8 +1,9 @@
 // Live evaluation of the natural-language parser (decision Q43).
 // Calls the real model and spends a little money (~50 short requests):
 //   npm run eval:parse
-// Needs ANTHROPIC_API_KEY in the environment (e.g. from .env.local);
-// skipped otherwise. Results: specs/evals/results/search-parse-latest.json.
+// Needs OPENAI_API_KEY (or ANTHROPIC_API_KEY with AI_PROVIDER=anthropic) in
+// .env or .env.local; skipped otherwise. Rate-limited calls (429) are
+// retried after a pause, so low-tier accounts take longer but still finish. Results: specs/evals/results/search-parse-latest.json.
 import { mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { describe, expect, it, vi } from "vitest";
 
@@ -43,8 +44,17 @@ describe.skipIf(!key)("search parse evaluation (live)", () => {
           : new OpenAIQueryParser(key!);
       const PRICE = PRICES[parser.model];
       const rows = [];
+      const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
       for (const c of cases) {
-        const result = await interpretQuery(parser, c.query);
+        let result = await interpretQuery(parser, c.query);
+        for (
+          let attempt = 1;
+          attempt <= 6 && / 429 rate_limit_exceeded/.test(result.detail ?? "");
+          attempt++
+        ) {
+          await sleep(21_000);
+          result = await interpretQuery(parser, c.query);
+        }
         const score = scoreCase(c.expect, result.parsed);
         rows.push({ ...c, ...result, ...score });
       }
@@ -103,6 +113,6 @@ describe.skipIf(!key)("search parse evaluation (live)", () => {
       );
       expect(summary.p95LatencyMs).toBeLessThan(THRESHOLDS.p95LatencyMs);
     },
-    10 * 60_000,
+    60 * 60_000,
   );
 });
