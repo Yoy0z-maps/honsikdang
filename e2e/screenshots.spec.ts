@@ -254,3 +254,32 @@ test("capture grounded evidence (WP-05c)", async ({
   await page.waitForTimeout(300);
   await shot("2-evidence-review");
 });
+
+test("capture today's recommendation (WP-06)", async ({ page }, testInfo) => {
+  const shot = (name: string, fullPage = false) =>
+    page.screenshot({
+      path: `${dir}/WP-06-${testInfo.project.name}-${name}.png`,
+      fullPage,
+    });
+  await page.goto("/?z=14");
+  await page.locator("#sheet-title").filter({ hasText: "식당" }).waitFor();
+  await page.getByRole("button", { name: "오늘 뭐 먹지?" }).click();
+  await page.getByRole("button", { name: "조용히" }).click();
+  await page.getByRole("button", { name: "10,000원 이하" }).click();
+  await page.waitForTimeout(300);
+  await shot("1-inputs");
+
+  await page.getByRole("button", { name: "3곳 추천 받기" }).click();
+  await page.getByTestId("rec-pick").first().waitFor();
+  await page.getByTestId("rec-pick").first().scrollIntoViewIfNeeded();
+  await page.waitForTimeout(300);
+  await shot("2-picks");
+
+  for (let i = 0; i < 4; i++) {
+    if ((await page.getByTestId("rec-pick").count()) === 0) break;
+    await page.getByRole("button", { name: "다른 추천 보기" }).click();
+  }
+  await page.getByTestId("rec-shortfall").scrollIntoViewIfNeeded();
+  await page.waitForTimeout(300);
+  await shot("3-shortfall");
+});
