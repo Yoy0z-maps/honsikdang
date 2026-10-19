@@ -40,6 +40,17 @@ export default function LoginPage({ searchParams }: PageProps<"/login">) {
       <Suspense fallback={null}>
         <LoginContent searchParams={searchParams} />
       </Suspense>
+      <p className="text-xs text-zinc-600 dark:text-zinc-400">
+        로그인하면{" "}
+        <Link href="/terms" className="underline underline-offset-2">
+          이용약관
+        </Link>
+        과{" "}
+        <Link href="/privacy" className="underline underline-offset-2">
+          개인정보처리방침
+        </Link>
+        에 동의하는 것으로 봐요.
+      </p>
     </main>
   );
 }

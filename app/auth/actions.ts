@@ -65,3 +65,33 @@ export async function signOut(): Promise<void> {
   await supabase.auth.signOut();
   redirect("/");
 }
+
+export type DeleteAccountState = { status: "idle" | "error"; message?: string };
+
+/**
+ * Deletes the signed-in account (decision C-73). Reviews stay as anonymous
+ * content; everything personal is removed by the database cascade.
+ */
+export async function deleteAccount(
+  _prev: DeleteAccountState,
+  formData: FormData,
+): Promise<DeleteAccountState> {
+  if (String(formData.get("confirm") ?? "").trim() !== "삭제") {
+    return {
+      status: "error",
+      message: "확인을 위해 '삭제'라고 입력해 주세요.",
+    };
+  }
+  const supabase = await createUserServerSupabase();
+  const { error } = await supabase.rpc("delete_my_account");
+  if (error) {
+    console.error("delete_my_account failed", error.code);
+    return {
+      status: "error",
+      message: "계정을 삭제하지 못했어요. 잠시 후 다시 시도해 주세요.",
+    };
+  }
+  // The user no longer exists; clear this browser's session cookies.
+  await supabase.auth.signOut({ scope: "local" });
+  redirect("/account-deleted");
+}

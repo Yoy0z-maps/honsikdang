@@ -1,6 +1,6 @@
 "use server";
 
-import { getQueryParser } from "@/lib/ai";
+import { getQueryParser, isAiSearchEnabled } from "@/lib/ai";
 import { interpretQuery } from "@/lib/ai/interpret";
 import { PROMPT_VERSION } from "@/lib/ai/prompt";
 import { normalizeAiQuery, type ParsedQuery } from "@/lib/domain/ai-query";
@@ -41,7 +41,7 @@ export async function aiSearch(input: string): Promise<AiSearchResult> {
   const supabase = await createUserServerSupabase();
   if (!(await getVerifiedUserId(supabase))) return { status: "login_required" };
 
-  const parser = getQueryParser();
+  const parser = isAiSearchEnabled() ? getQueryParser() : null;
   if (!parser) return { status: "fallback", reason: "unavailable" };
 
   const { data: usageId, error: claimError } = await supabase.rpc(

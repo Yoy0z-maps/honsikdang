@@ -21,6 +21,15 @@ function isLocalSupabase(): boolean {
  * fixture is refused unless the app talks to a local Supabase, so it can
  * never answer real users.
  */
+/**
+ * AI search launch switch (decision C-76): off unless explicitly enabled.
+ * NEXT_PUBLIC_ so the client can hide the toggle; the server action checks
+ * it too.
+ */
+export function isAiSearchEnabled(): boolean {
+  return process.env.NEXT_PUBLIC_AI_SEARCH_ENABLED === "true";
+}
+
 export function getQueryParser(): QueryParser | null {
   // OpenAI by default (decision C-59); Anthropic stays selectable.
   const provider = process.env.AI_PROVIDER?.trim() || "openai";

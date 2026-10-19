@@ -42,3 +42,6 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# Production data dumps (contain personal data; specs/ops/deploy.md §8)
+/backups/
