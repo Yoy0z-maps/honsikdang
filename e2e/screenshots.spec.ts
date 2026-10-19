@@ -255,6 +255,28 @@ test("capture grounded evidence (WP-05c)", async ({
   await shot("2-evidence-review");
 });
 
+test("capture launch pages (WP-07)", async ({ page }, testInfo) => {
+  const shot = (name: string) =>
+    page.screenshot({
+      path: `${dir}/WP-07-${testInfo.project.name}-${name}.png`,
+    });
+  await page.goto("/login");
+  await shot("1-login-consent");
+  await page.goto("/privacy");
+  await shot("2-privacy");
+  await page
+    .getByRole("heading", { name: "4. 처리 위탁과 국외 이전" })
+    .scrollIntoViewIfNeeded();
+  await shot("3-privacy-table");
+  await page.goto("/login?next=/me/account");
+  await signInWithMagicLink(
+    page,
+    uniqueEmail(`shot-acct-${testInfo.project.name}`),
+  );
+  await page.getByRole("heading", { name: "계정 삭제" }).waitFor();
+  await shot("4-account");
+});
+
 test("capture today's recommendation (WP-06)", async ({ page }, testInfo) => {
   const shot = (name: string, fullPage = false) =>
     page.screenshot({

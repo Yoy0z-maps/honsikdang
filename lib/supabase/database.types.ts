@@ -203,7 +203,7 @@ export type Database = {
           solo_order_available: boolean | null;
           status: Database["public"]["Enums"]["review_status"];
           updated_at: string;
-          user_id: string;
+          user_id: string | null;
           visited_at: string;
           wait_minutes: number | null;
         };
@@ -219,7 +219,7 @@ export type Database = {
           solo_order_available?: boolean | null;
           status?: Database["public"]["Enums"]["review_status"];
           updated_at?: string;
-          user_id?: string;
+          user_id?: string | null;
           visited_at: string;
           wait_minutes?: number | null;
         };
@@ -234,7 +234,7 @@ export type Database = {
           solo_order_available?: boolean | null;
           status?: Database["public"]["Enums"]["review_status"];
           updated_at?: string;
-          user_id?: string;
+          user_id?: string | null;
           visited_at?: string;
           wait_minutes?: number | null;
         };
@@ -392,6 +392,10 @@ export type Database = {
         };
         Returns: number;
       };
+      delete_my_account: {
+        Args: Record<PropertyKey, never>;
+        Returns: undefined;
+      };
       embedding_jobs_claim: {
         Args: { batch: number; model: string };
         Returns: {
@@ -473,6 +477,7 @@ export type Database = {
           status: Database["public"]["Enums"]["restaurant_status"];
         }[];
       };
+      purge_expired_data: { Args: Record<PropertyKey, never>; Returns: Json };
       rank_restaurants: {
         Args: {
           candidate_ids: string[];

@@ -7,6 +7,9 @@ import { MAX_QUERY_LENGTH, type DiscoveryFilters } from "@/lib/domain/filters";
 import type { Catalogue } from "@/lib/restaurants/search";
 import { Chip, toggleSlug } from "./Chip";
 
+// Launch switch (decision C-76); inlined at build time.
+const AI_SEARCH_ENABLED = process.env.NEXT_PUBLIC_AI_SEARCH_ENABLED === "true";
+
 type Props = {
   filters: DiscoveryFilters;
   catalogue: Catalogue | null;
@@ -60,19 +63,21 @@ export function MapTopBar({
           onSubmit={submit}
           className="flex min-w-0 flex-1 items-center rounded-full bg-white pl-4 shadow-md dark:bg-zinc-900"
         >
-          <button
-            type="button"
-            aria-pressed={aiMode}
-            aria-label="AI로 찾기"
-            onClick={() => setAiMode((on) => !on)}
-            className={`-ml-2 mr-1 flex h-11 shrink-0 items-center rounded-full px-3 text-xs font-bold ${
-              aiMode
-                ? "bg-orange-600 text-white"
-                : "text-orange-700 dark:text-orange-400"
-            }`}
-          >
-            AI
-          </button>
+          {AI_SEARCH_ENABLED && (
+            <button
+              type="button"
+              aria-pressed={aiMode}
+              aria-label="AI로 찾기"
+              onClick={() => setAiMode((on) => !on)}
+              className={`-ml-2 mr-1 flex h-11 shrink-0 items-center rounded-full px-3 text-xs font-bold ${
+                aiMode
+                  ? "bg-orange-600 text-white"
+                  : "text-orange-700 dark:text-orange-400"
+              }`}
+            >
+              AI
+            </button>
+          )}
           {aiMode ? (
             <>
               <label htmlFor="ai-query" className="sr-only">

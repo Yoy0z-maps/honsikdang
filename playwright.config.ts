@@ -30,6 +30,9 @@ export default defineConfig({
   fullyParallel: false,
   forbidOnly: !!process.env.CI,
   retries: process.env.CI ? 1 : 0,
+  // Production build + local Supabase with two projects in parallel: server
+  // redirects occasionally take longer than the 5 s default on dev machines.
+  expect: { timeout: 10_000 },
   reporter: process.env.CI ? [["github"], ["html", { open: "never" }]] : "list",
   use: {
     baseURL: `http://localhost:${PORT}`,
@@ -54,6 +57,7 @@ export default defineConfig({
       NEXT_PUBLIC_NAVER_MAP_CLIENT_ID: "",
       // Rule-based test fixture instead of the model: no key, no spend.
       AI_PROVIDER: "fixture",
+      NEXT_PUBLIC_AI_SEARCH_ENABLED: "true",
       ANTHROPIC_API_KEY: "",
       OPENAI_API_KEY: "",
       EMBEDDING_PROVIDER: "fixture",
