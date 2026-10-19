@@ -56,6 +56,16 @@ import { getBrowserSupabase } from "@/lib/supabase/browser";
 import { AiSearchNotice, type AiNoticeState } from "./AiSearchNotice";
 import { BottomSheet, type SheetSnap } from "./BottomSheet";
 import { FilterPanel } from "./FilterPanel";
+import {
+  RecommendPanel,
+  type RecommendState,
+} from "@/features/recommendations/RecommendPanel";
+import {
+  recommend,
+  type Candidate,
+  type RecommendInput,
+} from "@/lib/domain/recommend";
+import { fetchCandidates } from "@/lib/recommendations/candidates";
 import { MapTopBar } from "./MapTopBar";
 import { RestaurantPreview } from "./RestaurantPreview";
 
@@ -158,7 +168,18 @@ export function DiscoveryView() {
     nonce: number;
   } | null>(null);
   const [snap, setSnap] = useState<SheetSnap>("collapsed");
-  const [mode, setMode] = useState<"results" | "filters">("results");
+  const [mode, setMode] = useState<"results" | "filters" | "recommend">(
+    "results",
+  );
+  const [recState, setRecState] = useState<RecommendState>({ status: "idle" });
+  // Inputs, pool and already-shown ids of the current recommendation; kept
+  // in memory only (Q61).
+  const recSession = useRef<{
+    input: RecommendInput;
+    pool: Candidate[];
+    capped: boolean;
+    seen: Set<string>;
+  } | null>(null);
   const mapKeyId = getNaverMapKeyId();
 
   const replaceFilters = useCallback(
@@ -321,9 +342,23 @@ export function DiscoveryView() {
     () => (current?.kind === "ready" ? current.page.items : []),
     [current],
   );
+  const recPicks = useMemo(
+    () =>
+      mode === "recommend" && recState.status === "ready"
+        ? recState.result.picks.map((p) => p.candidate)
+        : null,
+    [mode, recState],
+  );
   const markers = useMemo(
-    () => items.map((item) => ({ id: item.id, position: item.position })),
-    [items],
+    () =>
+      recPicks
+        ? recPicks.map((c, i) => ({
+            id: c.id,
+            position: c.position,
+            label: String(i + 1),
+          }))
+        : items.map((item) => ({ id: item.id, position: item.position })),
+    [items, recPicks],
   );
   const selected = items.find((item) => item.id === selectedId) ?? null;
 
@@ -362,11 +397,63 @@ export function DiscoveryView() {
 
   function selectMarker(id: string) {
     setSelectedId(id);
+    if (mode === "recommend") return; // keep the numbered picks open
     setMode("results");
     setSnap("collapsed");
   }
 
+  function showRecommendation() {
+    const session = recSession.current;
+    if (!session) return;
+    const today = new Date().toLocaleDateString("sv-SE"); // local YYYY-MM-DD
+    setRecState({
+      status: "ready",
+      result: recommend(session.pool, session.input, today, session.seen),
+      capped: session.capped,
+    });
+  }
+
+  async function runRecommend(input: RecommendInput) {
+    setRecState({ status: "loading" });
+    setSelectedId(null);
+    const rect = mapAreaRef.current?.getBoundingClientRect();
+    const { bounds } = viewportBounds(
+      filters.center,
+      filters.zoom,
+      rect?.width || window.innerWidth,
+      rect?.height || window.innerHeight,
+    );
+    try {
+      const { candidates, capped } = await fetchCandidates(
+        getBrowserSupabase(),
+        filters,
+        bounds,
+        input,
+      );
+      recSession.current = { input, pool: candidates, capped, seen: new Set() };
+      showRecommendation();
+    } catch (error) {
+      console.error("recommendation candidates failed", error);
+      setRecState({ status: "error" });
+    }
+  }
+
+  function hideFromRecommendation(ids: string[]) {
+    const session = recSession.current;
+    if (!session) return;
+    for (const id of ids) session.seen.add(id);
+    setSelectedId(null);
+    showRecommendation();
+  }
+
   function locate(id: string) {
+    const pick = recPicks?.find((c) => c.id === id);
+    if (pick) {
+      setSelectedId(id);
+      setFocus({ position: pick.position, nonce: Date.now() });
+      setSnap("collapsed");
+      return;
+    }
     const item = items.find((i) => i.id === id);
     if (!item) return;
     setSelectedId(id);
@@ -467,6 +554,11 @@ export function DiscoveryView() {
           setMode("filters");
           setSnap("full");
         }}
+        onOpenRecommend={() => {
+          setSelectedId(null);
+          setMode("recommend");
+          setSnap("full");
+        }}
         onSearchFocus={() => {
           setSelectedId(null);
           setSnap("collapsed");
@@ -564,7 +656,11 @@ export function DiscoveryView() {
               aria-live="polite"
               className="text-base font-semibold"
             >
-              {mode === "filters" ? "필터" : summary}
+              {mode === "filters"
+                ? "필터"
+                : mode === "recommend"
+                  ? "오늘 뭐 먹지?"
+                  : summary}
             </h2>
             {activeCount > 0 && (
               <button
@@ -578,7 +674,26 @@ export function DiscoveryView() {
           </div>
         }
       >
-        {mode === "filters" ? (
+        {mode === "recommend" ? (
+          <RecommendPanel
+            catalogue={catalogue}
+            state={recState}
+            onRecommend={runRecommend}
+            onMore={() =>
+              hideFromRecommendation(
+                recState.status === "ready"
+                  ? recState.result.picks.map((p) => p.candidate.id)
+                  : [],
+              )
+            }
+            onPass={(id) => hideFromRecommendation([id])}
+            onLocate={locate}
+            onClose={() => {
+              setMode("results");
+              setSnap("half");
+            }}
+          />
+        ) : mode === "filters" ? (
           <FilterPanel
             filters={filters}
             catalogue={catalogue}
