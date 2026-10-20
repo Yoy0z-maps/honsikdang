@@ -36,6 +36,10 @@ export default defineConfig({
   reporter: process.env.CI ? [["github"], ["html", { open: "never" }]] : "list",
   use: {
     baseURL: `http://localhost:${PORT}`,
+    // Location granted at 서울시청 (the seed's center) so views are stable;
+    // tests about refused location opt out with permissions: [].
+    permissions: ["geolocation"],
+    geolocation: { latitude: 37.5663, longitude: 126.9779 },
     trace: "retain-on-failure",
   },
   projects: [

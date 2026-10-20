@@ -8,9 +8,11 @@ export type InitialCameraSource =
   "url" | "location" | "last-region" | "default";
 
 /**
- * Initial map camera (master plan §5A): an explicit URL position wins, then
- * the user's location if permission was already granted (never prompt on
- * load), then the last region the user explicitly chose, then the default.
+ * Initial map camera (master plan §5A, WP-08): an explicit URL position
+ * wins, then the user's location if permission is already granted, then the
+ * last region the user chose, then the fallback (서울역). When the browser
+ * still has to ask, the map opens on the fallback and the permission prompt
+ * follows (decisions C-82, C-84).
  */
 export function chooseInitialCamera(options: {
   url: Camera | null;
