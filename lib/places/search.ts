@@ -3,13 +3,14 @@ import { isLocalSupabase } from "@/lib/ai";
 import { toCandidate, type PlaceCandidate } from "@/lib/domain/place-search";
 
 /**
- * Place name search for the suggestion form (WP-08, C-83). NAVER Search API
- * "지역" (developers.naver.com); keys are server-only. Returns null when the
+ * Place name search for the suggestion form (WP-08, C-83). NAVER Search
+ * "지역" on NAVER API HUB (NCP console, C-89); keys are server-only. Returns
+ * null when the
  * search is not configured, so the form simply hides the search box.
  */
 export type PlaceSearcher = (query: string) => Promise<PlaceCandidate[]>;
 
-const NAVER_LOCAL_URL = "https://openapi.naver.com/v1/search/local.json";
+const NAVER_LOCAL_URL = "https://naverapihub.apigw.ntruss.com/search/v1/local";
 
 function naverSearcher(id: string, secret: string): PlaceSearcher {
   return async (query) => {
@@ -19,7 +20,10 @@ function naverSearcher(id: string, secret: string): PlaceSearcher {
       sort: "random",
     })}`;
     const res = await fetch(url, {
-      headers: { "X-Naver-Client-Id": id, "X-Naver-Client-Secret": secret },
+      headers: {
+        "X-NCP-APIGW-API-KEY-ID": id,
+        "X-NCP-APIGW-API-KEY": secret,
+      },
       cache: "no-store",
       signal: AbortSignal.timeout(5_000),
     });

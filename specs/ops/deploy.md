@@ -37,7 +37,7 @@
 | `CRON_SECRET` | 직접 만든 임의 문자열 32자 이상 | Vercel Cron이 매일 작업을 부를 때 사용 |
 | `AI_MONTHLY_BUDGET_USD` | `3` | AI 검색을 켤 때를 대비 |
 | `NEXT_PUBLIC_AI_SEARCH_ENABLED` | 넣지 않음(=꺼짐, C-76) | 켤 때 `true` + `OPENAI_API_KEY` 추가 후 재배포 |
-| `NAVER_SEARCH_CLIENT_ID` | developers.naver.com → Application → 검색 API | 장소 제안의 식당 검색(C-83). 지도 키(NCP)와 **다른** 키 |
+| `NAVER_SEARCH_CLIENT_ID` | NCP 콘솔 → NAVER API HUB → Application(API: NAVER 검색 > 지역) | 장소 제안의 식당 검색(C-83, C-89). 지도 키와 **다른** Application |
 | `NAVER_SEARCH_CLIENT_SECRET` | 같은 곳 | **절대 `NEXT_PUBLIC_` 붙이지 않기**. 없으면 검색 상자가 숨겨지고 직접 입력 |
 
 3. **Deploy** → 주소 확인(예: `https://honsikdang.vercel.app`). 이 주소를 Claude에게 알려 주세요.
@@ -61,7 +61,7 @@
 
 - NCP 콘솔 → Maps → Application → **Web 서비스 URL**에 `https://<vercel 주소>` 추가(경로·포트 없이)
 - 대표 계정인지 확인하고, **이용량 한도·알림** 설정
-- 식당 검색(C-83): developers.naver.com → Application 등록 → 사용 API **검색** → 환경 **WEB**에 Vercel 주소. Client ID·Secret을 위 표의 두 변수로 넣고 재배포(하루 25,000회 무료)
+- 식당 검색(C-83, C-89): NCP 콘솔 → **NAVER API HUB** → Application 등록 → API **NAVER 검색 > 지역** 추가. Client ID·Secret을 위 표의 두 변수로 넣고 재배포(하루 25,000회 무료). 호출은 `naverapihub.apigw.ntruss.com/search/v1/local`
 
 ## 6. 운영자 계정 (C4)
 
