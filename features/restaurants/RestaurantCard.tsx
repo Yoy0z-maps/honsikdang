@@ -98,6 +98,18 @@ export function RestaurantCard({
       </div>
       {r.reviewCount > 0 ? (
         <dl className="mt-2 grid grid-cols-[auto_1fr] gap-x-3 gap-y-0.5 text-sm">
+          {r.avgRating !== null && (
+            <>
+              <dt className="text-zinc-500">별점</dt>
+              <dd>
+                <span aria-hidden className="text-amber-500">
+                  ★
+                </span>{" "}
+                {r.avgRating.toFixed(1)}{" "}
+                <span className="text-zinc-500">({r.ratingCount}명)</span>
+              </dd>
+            </>
+          )}
           {r.avgSoloComfort !== null && (
             <>
               <dt className="text-zinc-500">혼밥 편안함</dt>

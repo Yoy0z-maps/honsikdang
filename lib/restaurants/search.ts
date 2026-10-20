@@ -19,6 +19,8 @@ const rowSchema = z.object({
   avg_solo_comfort: z.number().nullable(),
   median_price: z.number().nullable(),
   last_visited_at: z.string().nullable(),
+  avg_rating: z.number().nullable(),
+  rating_count: z.number(),
   tag_review_count: z.number(),
   total_count: z.number(),
   excluded_no_price_count: z.number(),
@@ -36,6 +38,9 @@ export type RestaurantSummary = {
   medianPrice: number | null;
   lastVisitedAt: string | null;
   tagReviewCount: number;
+  /** Average ★ of rated approved reviews (WP-08); null when none. */
+  avgRating: number | null;
+  ratingCount: number;
 };
 
 export type SearchPage = {
@@ -76,6 +81,8 @@ export async function searchRestaurants(
       medianPrice: row.median_price,
       lastVisitedAt: row.last_visited_at,
       tagReviewCount: row.tag_review_count,
+      avgRating: row.avg_rating,
+      ratingCount: row.rating_count,
     })),
     // An empty page carries no counts; nothing matched.
     total: first?.total_count ?? 0,

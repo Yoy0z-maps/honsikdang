@@ -196,6 +196,7 @@ export type Database = {
           body: string | null;
           created_at: string;
           id: string;
+          overall_rating: number | null;
           price_paid: number | null;
           restaurant_id: string;
           seat_type: Database["public"]["Enums"]["seat_type"];
@@ -212,6 +213,7 @@ export type Database = {
           body?: string | null;
           created_at?: string;
           id?: string;
+          overall_rating?: number | null;
           price_paid?: number | null;
           restaurant_id: string;
           seat_type: Database["public"]["Enums"]["seat_type"];
@@ -227,6 +229,7 @@ export type Database = {
           body?: string | null;
           created_at?: string;
           id?: string;
+          overall_rating?: number | null;
           price_paid?: number | null;
           restaurant_id?: string;
           seat_type?: Database["public"]["Enums"]["seat_type"];
@@ -295,6 +298,36 @@ export type Database = {
             columns: ["category_id"];
             isOneToOne: false;
             referencedRelation: "restaurant_categories";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      review_menu_items: {
+        Row: {
+          name: string;
+          position: number;
+          price: number;
+          review_id: string;
+        };
+        ComputedFields: never;
+        Insert: {
+          name: string;
+          position: number;
+          price: number;
+          review_id: string;
+        };
+        Update: {
+          name?: string;
+          position?: number;
+          price?: number;
+          review_id?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "review_menu_items_review_id_fkey";
+            columns: ["review_id"];
+            isOneToOne: false;
+            referencedRelation: "restaurant_reviews";
             referencedColumns: ["id"];
           },
         ];
@@ -449,7 +482,9 @@ export type Database = {
           body: string;
           created_at: string;
           id: string;
+          menu_items: Json;
           moderation_reason: string;
+          overall_rating: number;
           price_paid: number;
           restaurant_id: string;
           restaurant_name: string;
@@ -547,6 +582,7 @@ export type Database = {
         };
         Returns: {
           address: string;
+          avg_rating: number;
           avg_solo_comfort: number;
           category_label: string;
           category_slug: string;
@@ -558,6 +594,7 @@ export type Database = {
           lng: number;
           median_price: number;
           name: string;
+          rating_count: number;
           review_count: number;
           tag_review_count: number;
           total_count: number;
@@ -566,6 +603,8 @@ export type Database = {
       submit_review: {
         Args: {
           body?: string;
+          menu_items?: Json;
+          overall_rating: number;
           price_paid?: number;
           restaurant_id: string;
           seat_type: Database["public"]["Enums"]["seat_type"];
@@ -591,6 +630,8 @@ export type Database = {
       update_my_review: {
         Args: {
           body?: string;
+          menu_items?: Json;
+          overall_rating: number;
           price_paid?: number;
           review_id: string;
           seat_type: Database["public"]["Enums"]["seat_type"];

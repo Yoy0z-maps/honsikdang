@@ -15,6 +15,7 @@ const valid = {
   visitedAt: "2026-10-01",
   soloComfort: "4",
   seatType: "counter",
+  overallRating: "5",
   soloOrderAvailable: "yes",
   pricePaid: "9,500",
   waitMinutes: "",
@@ -31,18 +32,25 @@ describe("parseReviewForm", () => {
         visitedAt: "2026-10-01",
         soloComfort: 4,
         seatType: "counter",
+        overallRating: 5,
         soloOrderAvailable: true,
         pricePaid: 9500,
         waitMinutes: null,
         body: "좋았어요",
         tags: ["solo_seat", "quiet"],
+        menuItems: [],
       },
     });
   });
 
   it("accepts only the required fields", () => {
     const result = parseReviewForm(
-      form({ visitedAt: TODAY, soloComfort: "3", seatType: "booth" }),
+      form({
+        visitedAt: TODAY,
+        soloComfort: "3",
+        seatType: "booth",
+        overallRating: "3",
+      }),
       TODAY,
     );
     expect(result.success).toBe(true);
@@ -58,6 +66,7 @@ describe("parseReviewForm", () => {
     expect(result.success).toBe(false);
     if (!result.success) {
       expect(Object.keys(result.fieldErrors).sort()).toEqual([
+        "overallRating",
         "seatType",
         "soloComfort",
         "visitedAt",
@@ -98,14 +107,64 @@ describe("parseReviewForm", () => {
   });
 });
 
+describe("menu items (C-86)", () => {
+  const withMenu = (names: string[], prices: string[]) =>
+    parseReviewForm(
+      form({ ...valid, menuName: names, menuPrice: prices }),
+      TODAY,
+    );
+
+  it("keeps filled rows, trims names, drops empty rows", () => {
+    const result = withMenu([" 순대국밥 ", "", "수육"], ["9,000", "", "15000"]);
+    expect(result.success && result.data.menuItems).toEqual([
+      { name: "순대국밥", price: 9000 },
+      { name: "수육", price: 15000 },
+    ]);
+  });
+
+  it("rejects half-filled rows, bad prices and more than 5 items", () => {
+    for (const [names, prices] of [
+      [["국밥"], [""]],
+      [[""], ["9000"]],
+      [["국밥"], ["50"]],
+      [["가".repeat(41)], ["9000"]],
+      [
+        ["a", "b", "c", "d", "e", "f"],
+        ["1000", "1000", "1000", "1000", "1000", "1000"],
+      ],
+    ]) {
+      const result = withMenu(names, prices);
+      expect(result.success, String(names)).toBe(false);
+      if (!result.success) expect(result.fieldErrors.menuItems).toBeDefined();
+    }
+  });
+
+  it("requires a star rating from 1 to 5", () => {
+    for (const rating of ["", "0", "6", "3.5"]) {
+      const result = parseReviewForm(
+        form({ ...valid, overallRating: rating }),
+        TODAY,
+      );
+      expect(result.success, rating).toBe(false);
+    }
+  });
+});
+
 describe("toReviewRpcArgs", () => {
   it("omits null optionals so SQL defaults apply", () => {
     const parsed = parseReviewForm(
-      form({ visitedAt: TODAY, soloComfort: "3", seatType: "booth" }),
+      form({
+        visitedAt: TODAY,
+        soloComfort: "3",
+        seatType: "booth",
+        overallRating: "4",
+      }),
       TODAY,
     );
     if (!parsed.success) throw new Error("expected success");
     const args = toReviewRpcArgs(parsed.data);
+    expect(args.overall_rating).toBe(4);
+    expect(args.menu_items).toEqual([]);
     expect(args.price_paid).toBeUndefined();
     expect(args.solo_order_available).toBeUndefined();
     expect(args.body).toBeUndefined();

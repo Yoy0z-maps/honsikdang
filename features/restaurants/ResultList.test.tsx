@@ -16,6 +16,8 @@ const sample: RestaurantSummary = {
   medianPrice: 9500,
   lastVisitedAt: "2026-10-01",
   tagReviewCount: 1,
+  avgRating: 4,
+  ratingCount: 2,
 };
 
 const handlers = {

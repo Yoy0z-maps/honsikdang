@@ -1,9 +1,14 @@
 "use client";
 
-import { useActionState } from "react";
+import { useActionState, useState } from "react";
 import type { ReviewFormState, ReviewFormValues } from "@/app/reviews/actions";
 import { SEAT_TYPE_LABELS } from "@/lib/domain/format";
-import { MAX_REVIEW_BODY, SEAT_TYPES } from "@/lib/domain/review";
+import {
+  MAX_MENU_ITEMS,
+  MAX_MENU_NAME,
+  MAX_REVIEW_BODY,
+  SEAT_TYPES,
+} from "@/lib/domain/review";
 
 type Props = {
   action: (
@@ -17,6 +22,149 @@ type Props = {
 };
 
 const COMFORT_LABELS = ["", "불편", "조금 불편", "보통", "편함", "아주 편함"];
+
+const RATING_LABELS = [
+  "",
+  "별로예요",
+  "아쉬워요",
+  "보통이에요",
+  "좋아요",
+  "최고예요",
+];
+
+/** ★1–5 as a radio group: arrow keys work, each star is a 44 px target. */
+function StarRating({ initial, error }: { initial: string; error?: string }) {
+  const [rating, setRating] = useState(Number(initial) || 0);
+  return (
+    <fieldset
+      className="min-w-0 space-y-1"
+      aria-describedby={error ? "overallRating-error" : undefined}
+    >
+      <legend className="font-medium">
+        전체 만족도 <span className="text-red-700">*</span>
+      </legend>
+      <div className="flex items-center gap-1">
+        {[1, 2, 3, 4, 5].map((n) => (
+          <label
+            key={n}
+            className="flex h-11 w-11 cursor-pointer items-center justify-center rounded-md text-3xl leading-none has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-orange-500"
+          >
+            <input
+              type="radio"
+              name="overallRating"
+              value={n}
+              required
+              defaultChecked={rating === n}
+              onChange={() => setRating(n)}
+              className="sr-only"
+              aria-label={`별점 ${n}점 (${RATING_LABELS[n]})`}
+            />
+            <span
+              aria-hidden
+              className={
+                n <= rating
+                  ? "text-amber-500"
+                  : "text-zinc-300 dark:text-zinc-600"
+              }
+            >
+              ★
+            </span>
+          </label>
+        ))}
+        <span className="ml-2 text-sm text-zinc-600 dark:text-zinc-400">
+          {rating
+            ? `${rating}점 · ${RATING_LABELS[rating]}`
+            : "별을 눌러 주세요"}
+        </span>
+      </div>
+      {error && (
+        <p id="overallRating-error" className="text-sm text-red-700">
+          {error}
+        </p>
+      )}
+    </fieldset>
+  );
+}
+
+/** Optional "메뉴 + 가격" rows, up to 5 (C-86). */
+function MenuItems({
+  names,
+  prices,
+  error,
+}: {
+  names: string[];
+  prices: string[];
+  error?: string;
+}) {
+  const [rows, setRows] = useState(() =>
+    names.length > 0
+      ? names.map((name, i) => ({ key: i, name, price: prices[i] ?? "" }))
+      : [{ key: 0, name: "", price: "" }],
+  );
+  return (
+    // min-w-0: fieldsets default to min-width: min-content, which kept the
+    // input rows from shrinking and widened the page at 360 px.
+    <fieldset
+      className="min-w-0 space-y-2"
+      aria-describedby={error ? "menuItems-error" : undefined}
+    >
+      <legend className="font-medium">먹은 메뉴와 가격 (선택)</legend>
+      {rows.map((row, i) => (
+        <div key={row.key} className="flex items-center gap-2">
+          <input
+            name="menuName"
+            aria-label={`메뉴 ${i + 1} 이름`}
+            placeholder="예: 순대국밥"
+            maxLength={MAX_MENU_NAME}
+            defaultValue={row.name}
+            className="min-w-0 flex-1 rounded-md border border-zinc-300 bg-transparent px-3 py-2 dark:border-zinc-700"
+          />
+          <input
+            name="menuPrice"
+            aria-label={`메뉴 ${i + 1} 가격(원)`}
+            placeholder="가격(원)"
+            inputMode="numeric"
+            defaultValue={row.price}
+            className="w-28 rounded-md border border-zinc-300 bg-transparent px-3 py-2 dark:border-zinc-700"
+          />
+          {rows.length > 1 && (
+            <button
+              type="button"
+              aria-label={`메뉴 ${i + 1} 지우기`}
+              onClick={() => setRows((r) => r.filter((x) => x.key !== row.key))}
+              className="flex h-11 w-11 shrink-0 items-center justify-center rounded-md text-xl text-zinc-500"
+            >
+              ×
+            </button>
+          )}
+        </div>
+      ))}
+      {rows.length < MAX_MENU_ITEMS && (
+        <button
+          type="button"
+          onClick={() =>
+            setRows((r) => [
+              ...r,
+              {
+                key: Math.max(...r.map((x) => x.key)) + 1,
+                name: "",
+                price: "",
+              },
+            ])
+          }
+          className="min-h-11 text-sm underline underline-offset-2"
+        >
+          + 메뉴 추가
+        </button>
+      )}
+      {error && (
+        <p id="menuItems-error" className="text-sm text-red-700">
+          {error}
+        </p>
+      )}
+    </fieldset>
+  );
+}
 
 function FieldError({ id, message }: { id: string; message?: string }) {
   if (!message) return null;
@@ -75,6 +223,11 @@ export function ReviewForm({
         />
         <FieldError id="visitedAt-error" message={errors.visitedAt} />
       </div>
+
+      <StarRating
+        initial={value("overallRating")}
+        error={errors.overallRating}
+      />
 
       <fieldset
         className="space-y-1"
@@ -185,6 +338,12 @@ export function ReviewForm({
           <FieldError id="waitMinutes-error" message={errors.waitMinutes} />
         </div>
       </div>
+
+      <MenuItems
+        names={Array.isArray(values.menuName) ? values.menuName : []}
+        prices={Array.isArray(values.menuPrice) ? values.menuPrice : []}
+        error={errors.menuItems}
+      />
 
       <fieldset className="space-y-1">
         <legend className="font-medium">해당하는 특성</legend>

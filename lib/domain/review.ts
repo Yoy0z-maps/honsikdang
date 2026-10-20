@@ -11,6 +11,53 @@ export type SeatType = (typeof SEAT_TYPES)[number];
 
 export const MAX_REVIEW_BODY = 1000;
 export const MAX_REVIEW_TAGS = 6;
+export const MAX_MENU_ITEMS = 5;
+export const MAX_MENU_NAME = 40;
+
+export type MenuItem = { name: string; price: number };
+
+/** "메뉴 + 가격" rows (C-86): empty rows are ignored, half-filled ones are errors. */
+const menuItemsSchema = z
+  .array(z.object({ name: z.string(), price: z.string() }))
+  .transform((rows, ctx) => {
+    const items: MenuItem[] = [];
+    for (const row of rows) {
+      const name = row.name.trim();
+      const priceText = row.price.trim().replaceAll(",", "");
+      if (!name && !priceText) continue;
+      if (!name || !priceText) {
+        ctx.addIssue({
+          code: "custom",
+          message: "메뉴 이름과 가격을 함께 입력해 주세요.",
+        });
+        return z.NEVER;
+      }
+      const price = Number(priceText);
+      if (name.length > MAX_MENU_NAME) {
+        ctx.addIssue({
+          code: "custom",
+          message: `메뉴 이름은 ${MAX_MENU_NAME}자 이내로 써 주세요.`,
+        });
+        return z.NEVER;
+      }
+      if (!Number.isInteger(price) || price < 100 || price > 1_000_000) {
+        ctx.addIssue({
+          code: "custom",
+          message: "메뉴 가격은 100~1,000,000원 사이로 입력해 주세요.",
+        });
+        return z.NEVER;
+      }
+      items.push({ name, price });
+    }
+    if (items.length > MAX_MENU_ITEMS) {
+      ctx.addIssue({
+        code: "custom",
+        message: `메뉴는 ${MAX_MENU_ITEMS}개까지 적을 수 있어요.`,
+      });
+      return z.NEVER;
+    }
+    return items;
+  });
 
 /** Today's date in Korea (YYYY-MM-DD); the DB rejects later visit dates. */
 export function todayInKorea(now: Date = new Date()): string {
@@ -49,6 +96,11 @@ export function reviewInputSchema(today: string = todayInKorea()) {
       .min(1, "혼밥 편안함을 골라 주세요.")
       .max(5, "혼밥 편안함을 골라 주세요."),
     seatType: z.enum(SEAT_TYPES, { message: "좌석 유형을 골라 주세요." }),
+    overallRating: z.coerce
+      .number({ message: "별점을 골라 주세요." })
+      .int()
+      .min(1, "별점을 골라 주세요.")
+      .max(5, "별점을 골라 주세요."),
     soloOrderAvailable: z
       .enum(["yes", "no", ""])
       .transform((v) => (v === "" ? null : v === "yes")),
@@ -65,6 +117,7 @@ export function reviewInputSchema(today: string = todayInKorea()) {
       .array(z.string().regex(/^[a-z][a-z0-9_]*$/))
       .max(MAX_REVIEW_TAGS)
       .transform((tags) => [...new Set(tags)]),
+    menuItems: menuItemsSchema,
   });
 }
 
@@ -81,11 +134,17 @@ export function parseReviewForm(
     visitedAt: String(formData.get("visitedAt") ?? ""),
     soloComfort: formData.get("soloComfort") ?? "",
     seatType: formData.get("seatType") ?? "",
+    overallRating: formData.get("overallRating") ?? "",
     soloOrderAvailable: String(formData.get("soloOrderAvailable") ?? ""),
     pricePaid: String(formData.get("pricePaid") ?? ""),
     waitMinutes: String(formData.get("waitMinutes") ?? ""),
     body: String(formData.get("body") ?? ""),
     tags: formData.getAll("tags").map(String),
+    menuItems: (() => {
+      const names = formData.getAll("menuName").map(String);
+      const prices = formData.getAll("menuPrice").map(String);
+      return names.map((name, i) => ({ name, price: prices[i] ?? "" }));
+    })(),
   });
   if (result.success) return { success: true, data: result.data };
 
@@ -103,6 +162,8 @@ export function toReviewRpcArgs(input: ReviewInput) {
     visited_at: input.visitedAt,
     solo_comfort: input.soloComfort,
     seat_type: input.seatType,
+    overall_rating: input.overallRating,
+    menu_items: input.menuItems,
     solo_order_available: input.soloOrderAvailable ?? undefined,
     price_paid: input.pricePaid ?? undefined,
     wait_minutes: input.waitMinutes ?? undefined,

@@ -15,6 +15,19 @@ const SOURCE_LABELS: Record<RestaurantDetail["source_type"], string> = {
   user_submitted: "사용자 제보 (검수 완료)",
 };
 
+/** "★★★★☆" plus an accessible "별점 4점". */
+function Stars({ value }: { value: number }) {
+  const full = Math.round(value);
+  return (
+    <span role="img" aria-label={`별점 ${value}점`} className="text-amber-500">
+      {"★".repeat(full)}
+      <span className="text-zinc-300 dark:text-zinc-600">
+        {"★".repeat(5 - full)}
+      </span>
+    </span>
+  );
+}
+
 function soloOrderLabel(value: boolean | null): string {
   if (value === null) return "응답 없음";
   return value ? "1인 주문 가능" : "1인 주문 불가";
@@ -40,6 +53,11 @@ function Review({
           {edited && " (수정됨)"}
         </p>
       </header>
+      {review.overall_rating !== null && (
+        <p className="mt-1">
+          <Stars value={review.overall_rating} />
+        </p>
+      )}
       <dl className="mt-2 grid grid-cols-[auto_1fr] gap-x-3 gap-y-0.5 text-sm">
         <dt className="text-zinc-500">혼밥 편안함</dt>
         <dd>{review.solo_comfort}/5</dd>
@@ -60,6 +78,18 @@ function Review({
           </>
         )}
       </dl>
+      {review.menu_items.length > 0 && (
+        <ul className="mt-2 space-y-0.5 text-sm" aria-label="먹은 메뉴">
+          {review.menu_items.map((m) => (
+            <li key={m.name} className="flex justify-between gap-3">
+              <span>{m.name}</span>
+              <span className="text-zinc-600 dark:text-zinc-400">
+                {formatPrice(m.price)}
+              </span>
+            </li>
+          ))}
+        </ul>
+      )}
       {review.tags.length > 0 && (
         <ul className="mt-2 flex flex-wrap gap-1" aria-label="특성">
           {review.tags.map((tag) => (
@@ -153,6 +183,15 @@ export function RestaurantDetailView({
               승인된 리뷰 {s.review_count}개 기준이며, 개인의 주관적인
               경험이에요.
             </p>
+            {s.avg_rating !== null && (
+              <p className="mt-2 flex items-center gap-2">
+                <Stars value={s.avg_rating} />
+                <span className="font-semibold">{s.avg_rating.toFixed(1)}</span>
+                <span className="text-sm text-zinc-500">
+                  별점 {s.rating_count}명
+                </span>
+              </p>
+            )}
             <dl className="mt-2 grid grid-cols-[auto_1fr] gap-x-3 gap-y-1 text-sm">
               {s.avg_solo_comfort !== null && (
                 <>
@@ -201,6 +240,33 @@ export function RestaurantDetailView({
           </>
         )}
       </section>
+
+      {detail.menu_prices.length > 0 && (
+        <section aria-labelledby="menu-heading">
+          <h2 id="menu-heading" className="text-lg font-semibold">
+            메뉴 가격
+          </h2>
+          <p className="mt-1 text-xs text-zinc-500">
+            리뷰에 적힌 방문 당시 가격이에요. 지금은 다를 수 있어요.
+          </p>
+          <ul className="mt-2 divide-y divide-zinc-200 text-sm dark:divide-zinc-800">
+            {detail.menu_prices.map((m) => (
+              <li
+                key={m.name}
+                className="flex items-baseline justify-between gap-3 py-1.5"
+              >
+                <span>{m.name}</span>
+                <span>
+                  {formatPrice(m.price)}{" "}
+                  <span className="text-xs text-zinc-500">
+                    ({formatDate(m.visited_at)})
+                  </span>
+                </span>
+              </li>
+            ))}
+          </ul>
+        </section>
+      )}
 
       <section aria-labelledby="reviews-heading">
         <div className="flex items-center justify-between gap-2">

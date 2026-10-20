@@ -83,6 +83,10 @@ test("suggest → moderate → publish → report → remove, with reasons shown
     }
     await expect(created).toBeVisible();
     await author.getByRole("link", { name: "이 식당 리뷰도 남기기" }).click();
+    await author
+      .locator("label")
+      .filter({ has: author.getByLabel("별점 5점 (최고예요)") })
+      .click();
     await author.getByLabel("4 편함").check();
     await author.getByLabel("바/카운터석").check();
     await author.getByLabel("한 줄 후기 (선택)").fill("검수 e2e 리뷰");

@@ -14,6 +14,9 @@ const reviewSchema = z.object({
   wait_minutes: z.number().nullable(),
   body: z.string().nullable(),
   tags: z.array(z.string()),
+  /** Null for reviews written before ratings existed. */
+  overall_rating: z.number().nullable(),
+  menu_items: z.array(z.object({ name: z.string(), price: z.number() })),
 });
 
 export const restaurantDetailSchema = z.object({
@@ -29,6 +32,8 @@ export const restaurantDetailSchema = z.object({
   summary: z.object({
     review_count: z.number(),
     avg_solo_comfort: z.number().nullable(),
+    avg_rating: z.number().nullable(),
+    rating_count: z.number(),
     median_price: z.number().nullable(),
     price_sample_count: z.number(),
     median_wait_minutes: z.number().nullable(),
@@ -41,6 +46,9 @@ export const restaurantDetailSchema = z.object({
     z.object({ slug: z.string(), label: z.string(), review_count: z.number() }),
   ),
   reviews: z.array(reviewSchema),
+  menu_prices: z.array(
+    z.object({ name: z.string(), price: z.number(), visited_at: z.string() }),
+  ),
 });
 
 export type RestaurantDetail = z.infer<typeof restaurantDetailSchema>;

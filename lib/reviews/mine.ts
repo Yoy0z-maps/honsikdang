@@ -21,6 +21,9 @@ const myReviewSchema = z.object({
   updated_at: z.string(),
   /** Moderator's reason, only for the author's rejected/removed reviews (Q32). */
   moderation_reason: z.string().nullable(),
+  /** Null for reviews written before ratings existed (Q74). */
+  overall_rating: z.number().int().min(1).max(5).nullable(),
+  menu_items: z.array(z.object({ name: z.string(), price: z.number() })),
 });
 
 export type MyReview = z.infer<typeof myReviewSchema>;
@@ -49,6 +52,10 @@ export function toFormValues(review: MyReview): ReviewFormValues {
     visitedAt: review.visited_at,
     soloComfort: String(review.solo_comfort),
     seatType: review.seat_type,
+    overallRating:
+      review.overall_rating === null ? "" : String(review.overall_rating),
+    menuName: review.menu_items.map((m) => m.name),
+    menuPrice: review.menu_items.map((m) => String(m.price)),
     soloOrderAvailable:
       review.solo_order_available === null
         ? ""
