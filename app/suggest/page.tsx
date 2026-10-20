@@ -3,6 +3,7 @@ import { redirect } from "next/navigation";
 import { Suspense } from "react";
 import { SuggestForm } from "@/features/places/SuggestForm";
 import { loginPath } from "@/lib/auth/redirect";
+import { getPlaceSearcher } from "@/lib/places/search";
 import { parseFilters } from "@/lib/domain/filters";
 import {
   createUserServerSupabase,
@@ -43,6 +44,7 @@ async function SuggestContent({
     <SuggestForm
       initial={{ center, zoom: Math.max(zoom, 17) }}
       categories={categories ?? []}
+      searchEnabled={getPlaceSearcher() !== null}
     />
   );
 }

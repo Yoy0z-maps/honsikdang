@@ -36,6 +36,10 @@ export default defineConfig({
   reporter: process.env.CI ? [["github"], ["html", { open: "never" }]] : "list",
   use: {
     baseURL: `http://localhost:${PORT}`,
+    // Location granted at 서울시청 (the seed's center) so views are stable;
+    // tests about refused location opt out with permissions: [].
+    permissions: ["geolocation"],
+    geolocation: { latitude: 37.5663, longitude: 126.9779 },
     trace: "retain-on-failure",
   },
   projects: [
@@ -57,6 +61,9 @@ export default defineConfig({
       NEXT_PUBLIC_NAVER_MAP_CLIENT_ID: "",
       // Rule-based test fixture instead of the model: no key, no spend.
       AI_PROVIDER: "fixture",
+      PLACE_SEARCH_PROVIDER: "fixture",
+      NAVER_SEARCH_CLIENT_ID: "",
+      NAVER_SEARCH_CLIENT_SECRET: "",
       NEXT_PUBLIC_AI_SEARCH_ENABLED: "true",
       ANTHROPIC_API_KEY: "",
       OPENAI_API_KEY: "",

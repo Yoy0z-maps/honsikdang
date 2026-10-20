@@ -4,6 +4,7 @@ import Script from "next/script";
 import { useCallback, useEffect, useRef, useState } from "react";
 import type { Camera } from "@/lib/domain/camera";
 import type { LatLng } from "@/lib/domain/geo";
+import type { LivePosition } from "@/features/discovery/useLiveLocation";
 
 export type MapMarker = {
   id: string;
@@ -28,11 +29,25 @@ type Props = {
   onIdle: (camera: Camera) => void;
   /** Reports SDK state, e.g. to explain a fallback position. */
   onStatusChange?: (status: MapStatus) => void;
+  /** The user's live position: a blue dot with an accuracy ring (WP-08). */
+  myPosition?: LivePosition | null;
+  /** Keep the map centered on myPosition as it moves. */
+  follow?: boolean;
+  /** The user started dragging the map (turns off "follow me"). */
+  onUserDrag?: () => void;
   /** Accessible name of the map region (context-specific). */
   label?: string;
   /** What to do instead when the map cannot load (context-specific). */
   fallbackHint?: string;
 };
+
+function myLocationIcon(): naver.maps.HtmlIcon {
+  const dot = document.createElement("div");
+  dot.className =
+    "h-4 w-4 rounded-full border-[3px] border-white bg-blue-600 shadow-[0_0_0_2px_rgba(37,99,235,0.35)]";
+  dot.setAttribute("aria-hidden", "true");
+  return { content: dot, anchor: new naver.maps.Point(8, 8) };
+}
 
 function markerIcon(selected: boolean, label?: string): naver.maps.HtmlIcon {
   // Built as an element with no user-provided text, so restaurant names can
@@ -67,6 +82,9 @@ export function NaverMap({
   onSelect,
   onIdle,
   onStatusChange,
+  myPosition = null,
+  follow = false,
+  onUserDrag,
   label = "식당 지도. 같은 결과를 결과 목록에서도 볼 수 있습니다.",
   fallbackHint = "아래 결과 목록에서 식당을 확인해 주세요.",
 }: Props) {
@@ -75,11 +93,13 @@ export function NaverMap({
   const mapRef = useRef<naver.maps.Map | null>(null);
   const markersRef = useRef(new Map<string, naver.maps.Marker>());
   const labelsRef = useRef(new Map<string, string>());
-  const callbacks = useRef({ onSelect, onIdle });
+  const callbacks = useRef({ onSelect, onIdle, onUserDrag });
+  const myMarkerRef = useRef<naver.maps.Marker | null>(null);
+  const myCircleRef = useRef<naver.maps.Circle | null>(null);
   const initialCamera = useRef(camera);
 
   useEffect(() => {
-    callbacks.current = { onSelect, onIdle };
+    callbacks.current = { onSelect, onIdle, onUserDrag };
   });
 
   useEffect(() => {
@@ -101,6 +121,8 @@ export function NaverMap({
     }
     existing.clear();
     mapRef.current = null;
+    myMarkerRef.current = null;
+    myCircleRef.current = null;
     setStatus("failed");
   }, []);
 
@@ -138,6 +160,9 @@ export function NaverMap({
         center: new naver.maps.LatLng(center.lat, center.lng),
         zoom,
       });
+      naver.maps.Event.addListener(map, "dragstart", () =>
+        callbacks.current.onUserDrag?.(),
+      );
       naver.maps.Event.addListener(map, "idle", () => {
         const c = map.getCenter();
         callbacks.current.onIdle({
@@ -175,6 +200,48 @@ export function NaverMap({
       map.panTo(new naver.maps.LatLng(focus.position.lat, focus.position.lng)),
     );
   }, [focus, status, withMap]);
+
+  // My location: created once, then moved as the position updates.
+  useEffect(() => {
+    if (status !== "ready") return;
+    withMap((map) => {
+      if (!myPosition) {
+        myMarkerRef.current?.setMap(null);
+        myCircleRef.current?.setMap(null);
+        myMarkerRef.current = null;
+        myCircleRef.current = null;
+        return;
+      }
+      const at = new naver.maps.LatLng(myPosition.lat, myPosition.lng);
+      // Cap the ring so a coarse fix does not cover the whole map.
+      const radius = Math.min(Math.max(myPosition.accuracy, 5), 500);
+      if (!myMarkerRef.current) {
+        myCircleRef.current = new naver.maps.Circle({
+          map,
+          center: at,
+          radius,
+          fillColor: "#2563eb",
+          fillOpacity: 0.12,
+          strokeColor: "#2563eb",
+          strokeOpacity: 0.35,
+          strokeWeight: 1,
+          clickable: false,
+        });
+        myMarkerRef.current = new naver.maps.Marker({
+          position: at,
+          map,
+          icon: myLocationIcon(),
+          clickable: false,
+          zIndex: 200,
+        });
+      } else {
+        myMarkerRef.current.setPosition(at);
+        myCircleRef.current?.setCenter(at);
+        myCircleRef.current?.setRadius(radius);
+      }
+      if (follow) map.panTo(at);
+    });
+  }, [myPosition, follow, status, withMap]);
 
   // Sync markers with the loaded results.
   useEffect(() => {

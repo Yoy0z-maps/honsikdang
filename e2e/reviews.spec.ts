@@ -41,8 +41,24 @@ test.describe("review contribution (mobile)", () => {
     });
 
     await test.step("submits a structured review", async () => {
+      await page
+        .locator("label")
+        .filter({ has: page.getByLabel("별점 4점 (좋아요)") })
+        .click();
+      await expect(page.getByText("4점 · 좋아요")).toBeVisible();
       await page.getByLabel("4 편함").check();
       await page.getByLabel("바/카운터석").check();
+      await page.getByLabel("메뉴 1 이름").fill("순대국밥");
+      await page.getByLabel("메뉴 1 가격(원)").fill("9,000");
+      await page.getByRole("button", { name: "+ 메뉴 추가" }).click();
+      await page.getByLabel("메뉴 2 이름").fill("수육");
+      await page.getByLabel("메뉴 2 가격(원)").fill("15000");
+      // Regression: a fieldset's min-content width once widened the page.
+      expect(
+        await page.evaluate(
+          () => document.documentElement.scrollWidth - window.innerWidth,
+        ),
+      ).toBeLessThanOrEqual(0);
       await page.getByLabel("가능").check();
       await page.getByLabel("1인 지출(원)").fill("8000");
       await page.getByLabel("1인석").check();
@@ -68,6 +84,9 @@ test.describe("review contribution (mobile)", () => {
       await expect(page).toHaveURL(/\/me\/reviews\/[0-9a-f-]+\/edit$/);
       await expect(page.getByLabel("1인 지출(원)")).toHaveValue("8000");
       await expect(page.getByLabel("1인석")).toBeChecked();
+      await expect(page.getByLabel("별점 4점 (좋아요)")).toBeChecked();
+      await expect(page.getByLabel("메뉴 1 이름")).toHaveValue("순대국밥");
+      await expect(page.getByLabel("메뉴 2 가격(원)")).toHaveValue("15000");
     });
 
     await test.step("edits the review", async () => {
@@ -100,9 +119,14 @@ test.describe("review contribution (mobile)", () => {
     await signInWithMagicLink(page, uniqueEmail("e2e-validate"));
     await expect(page).toHaveURL(`/restaurants/${RESTAURANT_ID}/review`);
 
+    await page
+      .locator("label")
+      .filter({ has: page.getByLabel("별점 3점 (보통이에요)") })
+      .click();
     await page.getByLabel("3 보통").check();
     await page.getByLabel("칸막이석").check();
     await page.getByLabel("1인 지출(원)").fill("-500");
+    await page.getByLabel("메뉴 1 이름").fill("라멘");
     await page.getByRole("button", { name: "리뷰 등록" }).click();
 
     await expect(
@@ -110,5 +134,29 @@ test.describe("review contribution (mobile)", () => {
     ).toBeVisible();
     await expect(page.getByLabel("1인 지출(원)")).toHaveValue("-500");
     await expect(page.getByLabel("칸막이석")).toBeChecked();
+    // Menu rows are validated on the server too and keep what was typed.
+    await expect(
+      page.getByText("메뉴 이름과 가격을 함께 입력해 주세요."),
+    ).toBeVisible();
+    await expect(page.getByLabel("메뉴 1 이름")).toHaveValue("라멘");
+    await expect(page.getByLabel("별점 3점 (보통이에요)")).toBeChecked();
+  });
+
+  test("detail shows the average rating, per-review stars and menu prices (C-85~87)", async ({
+    page,
+  }) => {
+    // Seed: "[예시] 시청 국밥" has two rated reviews (5, 4) with menus.
+    await page.goto("/restaurants/5eed1000-0000-4000-8000-000000000001");
+    await expect(page.getByRole("img", { name: "별점 4.5점" })).toBeVisible();
+    await expect(page.getByText("별점 2명")).toBeVisible();
+    const menu = page.getByRole("region", { name: "메뉴 가격" });
+    // The latest visit wins per menu name.
+    await expect(
+      menu.getByRole("listitem").filter({ hasText: "순대국밥" }),
+    ).toContainText("9,000원");
+    await expect(menu.getByRole("listitem")).toHaveCount(2);
+    await expect(
+      page.getByRole("list", { name: "먹은 메뉴" }).first(),
+    ).toBeVisible();
   });
 });

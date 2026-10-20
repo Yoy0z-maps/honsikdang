@@ -5,7 +5,7 @@ select plan(22);
 
 -- privileges ---------------------------------------------------------------
 select ok(not has_function_privilege('anon',
-  'public.submit_review(uuid, date, smallint, public.seat_type, boolean, integer, integer, text, text[])',
+  'public.submit_review(uuid, date, smallint, public.seat_type, smallint, boolean, integer, integer, text, text[], jsonb)',
   'execute'), 'anon cannot submit reviews');
 select ok(not has_function_privilege('anon', 'public.my_reviews(uuid)', 'execute'),
   'anon cannot call my_reviews');
@@ -13,7 +13,7 @@ select ok(not has_function_privilege('anon', 'public.my_reviews(uuid)', 'execute
 -- submit_review ------------------------------------------------------------
 :as_owner
 select ok(
-  public.submit_review(:'r_approved_admin', '2026-10-01', 4::smallint, 'counter',
+  public.submit_review(:'r_approved_admin', '2026-10-01', 4::smallint, 'counter', 4::smallint,
     true, 9000, 5, '  맛있음  ', array['solo_seat', 'bar_seat']) is not null,
   'owner can submit a review with tags'
 );
@@ -27,13 +27,13 @@ select results_eq(
 
 select throws_ok(
   $$ select public.submit_review('a0000000-0000-4000-8000-000000000002', '2026-10-01',
-       3::smallint, 'booth') $$,
+       3::smallint, 'booth', 4::smallint) $$,
   '23505', null, 'second review of the same restaurant is rejected'
 );
 
 select throws_ok(
   $$ select public.submit_review('a0000000-0000-4000-8000-000000000003', '2026-10-01',
-       3::smallint, 'booth', tag_slugs => array['no_such_tag']) $$,
+       3::smallint, 'booth', 4::smallint, tag_slugs => array['no_such_tag']) $$,
   '22023', null, 'unknown tag is rejected'
 );
 
@@ -46,13 +46,13 @@ select is_empty(
 
 select throws_ok(
   $$ select public.submit_review('a0000000-0000-4000-8000-000000000004', '2026-10-01',
-       3::smallint, 'booth') $$,
+       3::smallint, 'booth', 4::smallint) $$,
   '42501', null, 'cannot review a restaurant the user cannot see'
 );
 
 select throws_ok(
   $$ select public.submit_review('a0000000-0000-4000-8000-000000000003', current_date + 10,
-       3::smallint, 'booth') $$,
+       3::smallint, 'booth', 4::smallint) $$,
   '23514', null, 'future visit date is rejected'
 );
 
@@ -79,7 +79,7 @@ select throws_ok(
 :as_owner
 select lives_ok(
   $$ select public.update_my_review('b0000000-0000-4000-8000-000000000002', '2026-10-02',
-       2::smallint, 'booth', false, 12000, null, '수정', array['quiet']) $$,
+       2::smallint, 'booth', 4::smallint, false, 12000, null, '수정', array['quiet']) $$,
   'owner can update their approved review'
 );
 
@@ -91,14 +91,14 @@ select results_eq(
 
 select throws_ok(
   $$ select public.update_my_review('b0000000-0000-4000-8000-000000000001', '2026-10-02',
-       1::smallint, 'booth') $$,
+       1::smallint, 'booth', 4::smallint) $$,
   'P0002', null, 'owner cannot update another user''s review'
 );
 
 :as_admin
 select throws_ok(
   $$ select public.update_my_review('b0000000-0000-4000-8000-000000000001', '2026-10-02',
-       1::smallint, 'booth') $$,
+       1::smallint, 'booth', 4::smallint) $$,
   'P0002', null, 'update_my_review is owner-only, even for admins'
 );
 
@@ -109,7 +109,7 @@ update public.restaurant_reviews set status = 'removed' where id = :'v_approved_
 :as_owner
 select throws_ok(
   $$ select public.update_my_review('b0000000-0000-4000-8000-000000000002', '2026-10-02',
-       5::smallint, 'counter') $$,
+       5::smallint, 'counter', 4::smallint) $$,
   '42501', null, 'author cannot edit a removed review'
 );
 
@@ -139,14 +139,14 @@ from generate_series(1, 10) as g;
 -- The owner already submitted 1 review in this transaction; 9 more reach 10.
 select lives_ok(
   $$ select count(public.submit_review(('e0000000-0000-4000-8000-0000000000' || lpad(g::text, 2, '0'))::uuid,
-       '2026-10-01', 3::smallint, 'counter'))
+       '2026-10-01', 3::smallint, 'counter', 4::smallint))
      from generate_series(1, 9) as g $$,
   'owner can submit up to 10 reviews in 24 hours'
 );
 
 select throws_ok(
   $$ select public.submit_review('e0000000-0000-4000-8000-000000000010', '2026-10-01',
-       3::smallint, 'counter') $$,
+       3::smallint, 'counter', 4::smallint) $$,
   'HS429', null, 'the 11th review within 24 hours is rejected'
 );
 

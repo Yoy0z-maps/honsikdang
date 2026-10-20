@@ -30,6 +30,7 @@ function formValues(formData: FormData): ReviewFormValues {
     "visitedAt",
     "soloComfort",
     "seatType",
+    "overallRating",
     "soloOrderAvailable",
     "pricePaid",
     "waitMinutes",
@@ -38,6 +39,8 @@ function formValues(formData: FormData): ReviewFormValues {
     values[key] = String(formData.get(key) ?? "");
   }
   values.tags = formData.getAll("tags").map(String);
+  values.menuName = formData.getAll("menuName").map(String);
+  values.menuPrice = formData.getAll("menuPrice").map(String);
   return values;
 }
 

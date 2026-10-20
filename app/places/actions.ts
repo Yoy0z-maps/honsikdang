@@ -8,6 +8,8 @@ import {
   type PlaceFieldErrors,
   type PlaceMatch,
 } from "@/lib/domain/place";
+import type { PlaceCandidate } from "@/lib/domain/place-search";
+import { getPlaceSearcher } from "@/lib/places/search";
 import {
   createUserServerSupabase,
   getVerifiedUserId,
@@ -100,5 +102,38 @@ export async function suggestPlace(
         values,
         outcome: { kind: "needs_confirmation", matches: result.data.matches },
       };
+  }
+}
+
+export type PlaceSearchResult =
+  { ok: true; candidates: PlaceCandidate[] } | { ok: false; message: string };
+
+/** Restaurant name search that prefills the form (WP-08, C-83). */
+export async function searchPlaces(query: string): Promise<PlaceSearchResult> {
+  const supabase = await createUserServerSupabase();
+  if (!(await getVerifiedUserId(supabase))) {
+    return { ok: false, message: "로그인이 필요해요." };
+  }
+  const q = String(query ?? "")
+    .trim()
+    .slice(0, 50);
+  if (q.length < 2) {
+    return { ok: false, message: "두 글자 이상 입력해 주세요." };
+  }
+  const search = getPlaceSearcher();
+  if (!search) {
+    return {
+      ok: false,
+      message: "지금은 식당 검색을 쓸 수 없어요. 직접 입력해 주세요.",
+    };
+  }
+  try {
+    return { ok: true, candidates: await search(q) };
+  } catch (e) {
+    console.error("place search failed", e instanceof Error ? e.message : e);
+    return {
+      ok: false,
+      message: "검색하지 못했어요. 잠시 후 다시 시도하거나 직접 입력해 주세요.",
+    };
   }
 }

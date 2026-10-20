@@ -136,7 +136,7 @@ test.describe("map-first home (§5A)", () => {
     await expect(
       preview.getByRole("heading", { name: "[예시] 시청 국밥" }),
     ).toBeVisible();
-    await expect(preview).toContainText("지도 중심에서");
+    await expect(preview).toContainText(/(지도 중심|내 위치)에서/);
     await preview.getByRole("button", { name: "미리보기 닫기" }).click();
     await expect(preview).toHaveCount(0);
 
@@ -170,11 +170,15 @@ test.describe("map-first home (§5A)", () => {
     await expect(sheetTitle(page)).toHaveText("식당 8곳");
   });
 
-  test("works without location permission", async ({ page }) => {
-    await page.goto(Z14);
-    await page.getByRole("button", { name: "현재 위치로 검색" }).click();
-    await expect(page.getByText(/지도를 움직여 지역을/)).toBeVisible();
-    await expect(sheetTitle(page)).toHaveText("식당 8곳");
+  test.describe("without location permission", () => {
+    test.use({ permissions: [] });
+
+    test("still works and explains how to pick an area", async ({ page }) => {
+      await page.goto("/?lat=37.56630&lng=126.97790&z=14");
+      await page.getByRole("button", { name: "현재 위치로 검색" }).click();
+      await expect(page.getByText(/지도를 움직여 지역을/)).toBeVisible();
+      await expect(sheetTitle(page)).toHaveText("식당 8곳");
+    });
   });
 
   test("unknown or unpublished restaurants show not found", async ({
@@ -212,14 +216,35 @@ test.describe("initial camera (§5A)", () => {
     await context.close();
   });
 
-  test("falls back to the last chosen region", async ({ page }) => {
-    await page.addInitScript(() => {
-      window.localStorage.setItem(
-        "honsikdang:last-region",
-        JSON.stringify({ center: { lat: 37.5715, lng: 126.9768 }, zoom: 16 }),
-      );
-    });
+  test("follows my location from the start when it is granted", async ({
+    page,
+  }) => {
     await page.goto("/");
-    await expect(page).toHaveURL(/lat=37\.57150&lng=126\.97680&z=16/);
+    await expect(
+      page.getByRole("button", { name: "현재 위치로 검색" }),
+    ).toHaveAttribute("aria-pressed", "true");
+  });
+
+  test.describe("location refused", () => {
+    test.use({ permissions: [] });
+
+    test("opens at 서울역 (C-82)", async ({ page }) => {
+      await page.goto("/");
+      await expect(page).toHaveURL(/lat=37\.55470&lng=126\.97070/);
+      await expect(
+        page.getByRole("button", { name: "현재 위치로 검색" }),
+      ).toHaveAttribute("aria-pressed", "false");
+    });
+
+    test("prefers the last chosen region over 서울역", async ({ page }) => {
+      await page.addInitScript(() => {
+        window.localStorage.setItem(
+          "honsikdang:last-region",
+          JSON.stringify({ center: { lat: 37.5715, lng: 126.9768 }, zoom: 16 }),
+        );
+      });
+      await page.goto("/");
+      await expect(page).toHaveURL(/lat=37\.57150&lng=126\.97680&z=16/);
+    });
   });
 });

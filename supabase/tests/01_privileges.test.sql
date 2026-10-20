@@ -36,7 +36,8 @@ select set_eq(
       where table_schema = 'public'
         and grantee = 'anon'
         and privilege_type = 'SELECT' $$,
-  array['restaurant_categories', 'restaurants', 'restaurant_reviews', 'tags', 'review_tags'],
+  array['restaurant_categories', 'restaurants', 'restaurant_reviews', 'tags', 'review_tags',
+        'review_menu_items'],
   'anon can read only the public catalogue tables'
 );
 

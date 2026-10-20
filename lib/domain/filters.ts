@@ -5,6 +5,12 @@ import type { Bounds, LatLng } from "./geo";
 // area is decided (D-01).
 export const DEFAULT_CENTER: LatLng = { lat: 37.5663, lng: 126.9779 };
 export const DEFAULT_ZOOM = 15;
+/**
+ * Where the map opens when location is refused or unavailable and no area
+ * was viewed before: 서울역 (decision C-82). DEFAULT_CENTER stays the URL
+ * baseline so existing links keep their meaning.
+ */
+export const FALLBACK_CENTER: LatLng = { lat: 37.5547, lng: 126.9707 };
 export const MIN_ZOOM = 6;
 export const MAX_ZOOM = 21;
 export const RADIUS_OPTIONS = [300, 500, 1000, 3000, 5000] as const;

@@ -26,8 +26,7 @@ import {
   type Camera,
 } from "@/lib/domain/camera";
 import {
-  DEFAULT_CENTER,
-  DEFAULT_ZOOM,
+  FALLBACK_CENTER,
   MAX_QUERY_LENGTH,
   activeFilterCount,
   clearFilters,
@@ -56,6 +55,7 @@ import { getBrowserSupabase } from "@/lib/supabase/browser";
 import { AiSearchNotice, type AiNoticeState } from "./AiSearchNotice";
 import { BottomSheet, type SheetSnap } from "./BottomSheet";
 import { FilterPanel } from "./FilterPanel";
+import { useLiveLocation } from "./useLiveLocation";
 import {
   RecommendPanel,
   type RecommendState,
@@ -125,20 +125,22 @@ function currentPosition(timeout: number): Promise<LatLng> {
   });
 }
 
-/** Location only if permission was already granted; never prompts. */
-async function grantedLocation(): Promise<LatLng | null> {
+type LocationPermission = "granted" | "prompt" | "denied" | "unsupported";
+
+/** Current permission state without prompting. */
+async function locationPermission(): Promise<LocationPermission> {
+  if (!("geolocation" in navigator)) return "unsupported";
   try {
-    if (!("geolocation" in navigator) || !navigator.permissions) return null;
+    if (!navigator.permissions) return "prompt";
     // Some embedded/in-app browsers never settle this query; without a cap
     // the first search would never start.
     const status = await Promise.race([
       navigator.permissions.query({ name: "geolocation" }),
       new Promise<null>((resolve) => setTimeout(() => resolve(null), 1_500)),
     ]);
-    if (status?.state !== "granted") return null;
-    return await currentPosition(5_000);
+    return status?.state ?? "prompt";
   } catch {
-    return null;
+    return "prompt";
   }
 }
 
@@ -165,6 +167,16 @@ export function DiscoveryView() {
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [mapCamera, setMapCamera] = useState<Camera | null>(null);
   const [myLocation, setMyLocation] = useState<LatLng | null>(null);
+  // Live position (C-84): watched once permission is known to be granted;
+  // "following" keeps the map on it until the user drags the map.
+  const [tracking, setTracking] = useState(false);
+  const [following, setFollowing] = useState(false);
+  const live = useLiveLocation(tracking);
+  const userMovedRef = useRef(false);
+  const filtersRef = useRef(filters);
+  useEffect(() => {
+    filtersRef.current = filters;
+  });
   const [notice, setNotice] = useState<string | null>(null);
   const [aiNotice, setAiNotice] = useState<AiNoticeState | null>(null);
   const [aiPending, startAiSearch] = useTransition();
@@ -242,7 +254,12 @@ export function DiscoveryView() {
   useEffect(() => {
     if (explicitCenter || initialRun.current) return;
     let cancelled = false;
-    grantedLocation().then((location) => {
+    (async () => {
+      const permission = await locationPermission();
+      const location =
+        permission === "granted"
+          ? await currentPosition(5_000).catch(() => null)
+          : null;
       if (cancelled) return;
       // Marked here, not before the await: a cancelled run (React strict
       // mode runs effects twice in development) must not block the next one.
@@ -251,9 +268,28 @@ export function DiscoveryView() {
         url: null,
         grantedLocation: location,
         lastRegion: readLastRegion(safeLocalStorage()),
-        fallback: { center: DEFAULT_CENTER, zoom: DEFAULT_ZOOM },
+        fallback: { center: FALLBACK_CENTER, zoom: filters.zoom },
       });
-      if (source === "location") setMyLocation(camera.center);
+      if (source === "location") {
+        setMyLocation(camera.center);
+        setTracking(true);
+        setFollowing(true);
+      } else if (permission === "prompt") {
+        // Ask now (C-82); the map is already showing the fallback area.
+        currentPosition(30_000)
+          .then((found) => {
+            if (cancelled) return;
+            const center = roundLatLng(found);
+            setMyLocation(center);
+            setTracking(true);
+            if (userMovedRef.current) return; // do not yank the map away
+            setFollowing(true);
+            replaceFilters({ ...filtersRef.current, center });
+          })
+          .catch(() => {
+            // Refused or unavailable: stay on the fallback area.
+          });
+      }
       const next = {
         ...filters,
         center: roundLatLng(camera.center),
@@ -264,7 +300,7 @@ export function DiscoveryView() {
       } else {
         setInitialCameraDone(true);
       }
-    });
+    })();
     return () => {
       cancelled = true;
     };
@@ -490,6 +526,8 @@ export function DiscoveryView() {
       // Used only as the search center; never stored on the server.
       const location = roundLatLng(await currentPosition(10_000));
       setMyLocation(location);
+      setTracking(true);
+      setFollowing(true);
       setNotice(null);
       writeLastRegion(safeLocalStorage(), {
         center: location,
@@ -514,9 +552,9 @@ export function DiscoveryView() {
       MOVED_THRESHOLD_M ||
       mapCamera.zoom !== filters.zoom);
   const activeCount = activeFilterCount(filters);
+  const myPoint = live.position ?? myLocation;
   const distanceOrigin: DistanceOrigin =
-    myLocation &&
-    approxDistanceMeters(myLocation, filters.center) < AT_MY_LOCATION_M
+    myPoint && approxDistanceMeters(myPoint, filters.center) < AT_MY_LOCATION_M
       ? "me"
       : "map";
   const summary = resultSummary(state);
@@ -548,6 +586,12 @@ export function DiscoveryView() {
           focus={focus}
           onSelect={selectMarker}
           onIdle={setMapCamera}
+          myPosition={live.position}
+          follow={following}
+          onUserDrag={() => {
+            userMovedRef.current = true;
+            setFollowing(false);
+          }}
         />
       </div>
 
@@ -592,6 +636,7 @@ export function DiscoveryView() {
           <button
             type="button"
             onClick={useCurrentLocation}
+            aria-pressed={following}
             aria-label="현재 위치로 검색"
             className="pointer-events-auto flex h-11 w-11 items-center justify-center rounded-full bg-white text-lg shadow-md dark:bg-zinc-800"
           >

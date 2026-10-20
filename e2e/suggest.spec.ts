@@ -85,6 +85,49 @@ test.describe("place suggestion (mobile)", () => {
     });
   });
 
+  test("searching a restaurant fills the form and moves the pin (C-83)", async ({
+    page,
+  }) => {
+    await page.goto(AT_SICHEONG);
+    await signInWithMagicLink(page, uniqueEmail("e2e-suggest-search"));
+    const search = page.getByLabel("식당 검색어");
+    await expect(search).toBeVisible();
+
+    await test.step("no results and failures fall back to typing", async () => {
+      await search.fill("없는식당이름");
+      await search.press("Enter");
+      await expect(page.getByText("검색 결과가 없어요.")).toBeVisible();
+      await search.fill("오류검색");
+      await page.getByRole("button", { name: "검색", exact: true }).click();
+      await expect(page.getByText("검색하지 못했어요.")).toBeVisible();
+    });
+
+    await test.step("picking a result fills name, address, type and pin", async () => {
+      await search.fill("혼밥테스트");
+      await search.press("Enter");
+      const results = page.getByRole("list", { name: "검색 결과" });
+      await expect(results.getByRole("button")).toHaveCount(2);
+      await results.getByRole("button", { name: /혼밥테스트라멘/ }).click();
+      await expect(page.getByLabel("식당 이름")).toHaveValue("혼밥테스트라멘");
+      await expect(page.getByLabel("주소")).toHaveValue(
+        "서울특별시 중구 을지로 30",
+      );
+      await expect(page.getByLabel("음식 종류")).toHaveValue("japanese");
+      await expect(page.locator('input[name="lat"]')).toHaveValue("37.5658");
+      await expect(page.locator('input[name="lng"]')).toHaveValue("126.9812");
+      await expect(
+        page.getByRole("status").filter({ hasText: "정보로 채웠어요" }),
+      ).toBeVisible();
+    });
+
+    await test.step("the filled fields stay editable", async () => {
+      await page.getByLabel("식당 이름").fill("혼밥테스트라멘 2호점");
+      await expect(page.getByLabel("식당 이름")).toHaveValue(
+        "혼밥테스트라멘 2호점",
+      );
+    });
+  });
+
   test("suggest page is touch-friendly without horizontal overflow", async ({
     page,
   }) => {

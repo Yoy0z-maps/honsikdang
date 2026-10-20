@@ -52,6 +52,28 @@ declare namespace naver.maps {
     setMap(map: Map | null): void;
     setIcon(icon: HtmlIcon): void;
     setZIndex(zIndex: number): void;
+    setPosition(position: LatLng): void;
+  }
+
+  // Circle: NAVER Maps v3 reference (WP-08 my-location accuracy ring).
+  interface CircleOptions {
+    map?: Map | null;
+    center: LatLng;
+    radius: number;
+    fillColor?: string;
+    fillOpacity?: number;
+    strokeColor?: string;
+    strokeOpacity?: number;
+    strokeWeight?: number;
+    clickable?: boolean;
+    zIndex?: number;
+  }
+
+  class Circle {
+    constructor(options: CircleOptions);
+    setMap(map: Map | null): void;
+    setCenter(center: LatLng): void;
+    setRadius(radius: number): void;
   }
 
   interface MapEventListener {
