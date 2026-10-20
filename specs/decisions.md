@@ -959,6 +959,27 @@ B-01, B-02 해소.
 | K-57 | 🤖 병합 후 운영 DB에 새 마이그레이션 적용(`npx supabase db push`, 사용자 승인 후) |
 | K-58 | 실기기에서 따라가기·검색 자동 입력 확인(`specs/ops/device-check.md` 2·2a·2b) |
 
+## 25. 운영 배포 기록
+
+| 항목 | 상태 (2026-10-20) |
+|---|---|
+| Supabase | 프로젝트 `toutyfovuifqeyegvupf`(서울, ap-northeast-2), 마이그레이션 17개 적용(WP-08 `20261020000000` 포함, 사용자 승인). 시드 없음 |
+| Vercel | https://honsikdang.vercel.app, `main` 자동 배포, PR #15 병합 후 `/`·`/login`·`/privacy`·`/suggest` 응답 200 |
+| 지도 | NCP 서비스 URL 등록 후 정상. 인증 실패 시에도 화면 유지(PR #14) |
+| 로그인 메일 | Gmail SMTP(앱 비밀번호) 정상, 디자인 템플릿 적용 |
+| 운영자 | work.johnhan@gmail.com에 admin 부여(`specs/ops/grant-admin.md` 절차) |
+| K-57 | 해소 — 운영 DB에 WP-08 마이그레이션 적용 |
+| K-56 | **미해소** — 등록된 검색 키가 NCP 형식(ID 10자·Secret 40자)이라 `openapi.naver.com`이 401(코드 024) 반환. developers.naver.com 키는 ID 20자·Secret 10자. 그동안 검색 상자는 보이지만 "검색하지 못했어요" 후 직접 입력 |
+
+### 25.1 남은 일 (사용자)
+
+| ID | 내용 |
+|---|---|
+| K-56 | developers.naver.com → Application 등록(검색 API)에서 받은 키로 `.env`·Vercel의 `NAVER_SEARCH_CLIENT_ID`·`NAVER_SEARCH_CLIENT_SECRET` 교체 후 재배포 |
+| K-59 | Vercel → Cron Jobs에서 `/api/jobs/daily` 한 번 수동 실행해 성공 확인 |
+| K-60 | 번들에 노출됐던 NCP 지도 Client Secret 재발급 여부 확인 |
+| K-55·K-58 | 실기기 점검(`specs/ops/device-check.md`) |
+
 ---
 
 ## 변경 이력
@@ -984,3 +1005,4 @@ B-01, B-02 해소.
 | 2026-10-19 | WP-06: Q56–Q62(C-66~C-72), 결정적 추천·다양성·데이터 없음 처리, 단위 150건, e2e 78건, W6-01~05, K-49~51, WP-06 관문 통과 | Claude (WP-06) |
 | 2026-10-19 | WP-07(코드): C-73~C-80, D-01·D-03·D-11 해소, 계정 삭제·익명화, 보관 기간, 정책 문서, AI 출시 스위치, 매일 작업, 배포 절차서, pgTAP 295건, e2e 80건, W7-01~05, K-52~55 | Claude (WP-07) |
 | 2026-10-20 | WP-08: Q69–Q75(C-81~C-88), 식당 검색 자동 입력, 시작 위치·서울역 대체, 내 위치 따라가기, 리뷰 별점·메뉴 가격, pgTAP 311건, 단위 167건, K-56~58 | Claude (WP-08) |
+| 2026-10-20 | 운영 배포 기록(§25): WP-08 마이그레이션 적용, 운영자 지정, K-57 해소, 검색 키 형식 문제(K-56), K-59~60 | Claude |
