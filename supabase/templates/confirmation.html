@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="color-scheme" content="light only" />
+    <title>혼식당에 오신 걸 환영해요</title>
+  </head>
+  <!--
+    First sign-in email (Supabase "Confirm signup"): sent when an address
+    logs in for the first time. Same link format as magic_link.html.
+  -->
+  <body style="margin:0;padding:0;background-color:#f4f4f5;">
+    <div style="display:none;max-height:0;overflow:hidden;opacity:0;">
+      버튼을 누르면 가입이 끝나고 바로 로그인돼요.
+    </div>
+    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color:#f4f4f5;">
+      <tr>
+        <td align="center" style="padding:32px 16px;">
+          <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="max-width:480px;background-color:#ffffff;border-radius:16px;">
+            <tr>
+              <td style="padding:32px 28px 8px 28px;font-family:'Apple SD Gothic Neo','Malgun Gothic','Noto Sans KR',Arial,sans-serif;">
+                <p style="margin:0 0 20px 0;font-size:15px;font-weight:700;color:#ea580c;letter-spacing:-0.2px;">🍚 혼식당</p>
+                <h1 style="margin:0 0 12px 0;font-size:22px;line-height:1.4;font-weight:700;color:#18181b;">혼식당에 오신 걸 환영해요</h1>
+                <p style="margin:0 0 24px 0;font-size:15px;line-height:1.7;color:#3f3f46;">아래 버튼을 누르면 가입이 끝나고 바로 로그인돼요. 혼자 먹기 편했던 곳을 리뷰로 남기면, 다음 사람의 한 끼가 쉬워져요.</p>
+              </td>
+            </tr>
+            <tr>
+              <td align="center" style="padding:0 28px 8px 28px;">
+                <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%">
+                  <tr>
+                    <td align="center" bgcolor="#ea580c" style="border-radius:10px;">
+                      <a href="{{ .RedirectTo }}&token_hash={{ .TokenHash }}&type=email" style="display:block;padding:15px 20px;font-family:'Apple SD Gothic Neo','Malgun Gothic','Noto Sans KR',Arial,sans-serif;font-size:16px;font-weight:700;color:#ffffff;text-decoration:none;border-radius:10px;">가입하고 시작하기</a>
+                    </td>
+                  </tr>
+                </table>
+              </td>
+            </tr>
+            <tr>
+              <td style="padding:16px 28px 28px 28px;font-family:'Apple SD Gothic Neo','Malgun Gothic','Noto Sans KR',Arial,sans-serif;">
+                <p style="margin:0 0 16px 0;font-size:13px;line-height:1.6;color:#71717a;">링크는 <strong style="color:#3f3f46;">1시간 동안 한 번만</strong> 쓸 수 있어요. 가입하면 <a href="{{ .SiteURL }}/terms" style="color:#3f3f46;">이용약관</a>과 <a href="{{ .SiteURL }}/privacy" style="color:#3f3f46;">개인정보처리방침</a>에 동의하는 것으로 봐요.</p>
+                <p style="margin:0;font-size:13px;line-height:1.6;color:#71717a;">가입을 요청하지 않았다면 이 메일은 무시해도 괜찮아요. 버튼을 누르지 않으면 계정이 만들어지지 않아요.</p>
+              </td>
+            </tr>
+          </table>
+          <p style="margin:16px 0 0 0;font-family:'Apple SD Gothic Neo','Malgun Gothic','Noto Sans KR',Arial,sans-serif;font-size:12px;line-height:1.6;color:#a1a1aa;">혼자 먹기 편한 식당 지도, 혼식당<br />이 메일은 가입 요청에 따라 자동으로 보내졌어요.</p>
+        </td>
+      </tr>
+    </table>
+  </body>
+</html>

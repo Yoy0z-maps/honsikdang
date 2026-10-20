@@ -258,8 +258,8 @@ subject = "혼식당 로그인 링크"
 content_path = "./supabase/templates/magic_link.html"
 
 [auth.email.template.confirmation]
-subject = "혼식당 로그인 링크"
-content_path = "./supabase/templates/magic_link.html"
+subject = "혼식당에 오신 걸 환영해요"
+content_path = "./supabase/templates/confirmation.html"
 
 # Uncomment to customize email template
 # [auth.email.template.invite]

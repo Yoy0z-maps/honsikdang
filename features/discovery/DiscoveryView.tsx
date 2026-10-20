@@ -129,8 +129,13 @@ function currentPosition(timeout: number): Promise<LatLng> {
 async function grantedLocation(): Promise<LatLng | null> {
   try {
     if (!("geolocation" in navigator) || !navigator.permissions) return null;
-    const status = await navigator.permissions.query({ name: "geolocation" });
-    if (status.state !== "granted") return null;
+    // Some embedded/in-app browsers never settle this query; without a cap
+    // the first search would never start.
+    const status = await Promise.race([
+      navigator.permissions.query({ name: "geolocation" }),
+      new Promise<null>((resolve) => setTimeout(() => resolve(null), 1_500)),
+    ]);
+    if (status?.state !== "granted") return null;
     return await currentPosition(5_000);
   } catch {
     return null;
@@ -236,10 +241,12 @@ export function DiscoveryView() {
   const initialRun = useRef(false);
   useEffect(() => {
     if (explicitCenter || initialRun.current) return;
-    initialRun.current = true;
     let cancelled = false;
     grantedLocation().then((location) => {
       if (cancelled) return;
+      // Marked here, not before the await: a cancelled run (React strict
+      // mode runs effects twice in development) must not block the next one.
+      initialRun.current = true;
       const { camera, source } = chooseInitialCamera({
         url: null,
         grantedLocation: location,
