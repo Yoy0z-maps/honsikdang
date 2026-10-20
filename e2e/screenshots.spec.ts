@@ -305,3 +305,46 @@ test("capture today's recommendation (WP-06)", async ({ page }, testInfo) => {
   await page.waitForTimeout(300);
   await shot("3-shortfall");
 });
+
+test("capture WP-08 upgrades", async ({ page }, testInfo) => {
+  const shot = (name: string, fullPage = false) =>
+    page.screenshot({
+      path: `${dir}/WP-08-${testInfo.project.name}-${name}.png`,
+      fullPage,
+    });
+  // Location is granted in the config: the map opens at my position.
+  await page.goto("/");
+  await page.locator("#sheet-title").filter({ hasText: "식당" }).waitFor();
+  await page.waitForTimeout(300);
+  await shot("1-start-at-my-location");
+
+  await page.goto("/restaurants/5eed1000-0000-4000-8000-000000000001");
+  await page.getByRole("heading", { name: "메뉴 가격" }).waitFor();
+  await shot("2-detail-rating-menu", true);
+
+  await page.goto("/restaurants/5eed1000-0000-4000-8000-000000000010/review");
+  await signInWithMagicLink(
+    page,
+    uniqueEmail(`shot-rating-${testInfo.project.name}`),
+  );
+  await page
+    .locator("label")
+    .filter({ has: page.getByLabel("별점 4점 (좋아요)") })
+    .click();
+  await page.getByLabel("메뉴 1 이름").fill("연어 샐러드");
+  await page.getByLabel("메뉴 1 가격(원)").fill("12900");
+  await page.getByLabel("메뉴 1 이름").scrollIntoViewIfNeeded();
+  await shot("3-review-rating-menu");
+
+  await page.goto("/suggest?lat=37.56700&lng=126.97900&z=17");
+  await page.getByLabel("식당 검색어").fill("혼밥테스트");
+  await page.getByLabel("식당 검색어").press("Enter");
+  await page.getByRole("list", { name: "검색 결과" }).waitFor();
+  await shot("4-suggest-search-results");
+  await page
+    .getByRole("list", { name: "검색 결과" })
+    .getByRole("button", { name: /혼밥테스트라멘/ })
+    .click();
+  await page.getByLabel("음식 종류").scrollIntoViewIfNeeded();
+  await shot("5-suggest-filled");
+});

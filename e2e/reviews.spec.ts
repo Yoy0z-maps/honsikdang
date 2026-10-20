@@ -141,4 +141,22 @@ test.describe("review contribution (mobile)", () => {
     await expect(page.getByLabel("메뉴 1 이름")).toHaveValue("라멘");
     await expect(page.getByLabel("별점 3점 (보통이에요)")).toBeChecked();
   });
+
+  test("detail shows the average rating, per-review stars and menu prices (C-85~87)", async ({
+    page,
+  }) => {
+    // Seed: "[예시] 시청 국밥" has two rated reviews (5, 4) with menus.
+    await page.goto("/restaurants/5eed1000-0000-4000-8000-000000000001");
+    await expect(page.getByRole("img", { name: "별점 4.5점" })).toBeVisible();
+    await expect(page.getByText("별점 2명")).toBeVisible();
+    const menu = page.getByRole("region", { name: "메뉴 가격" });
+    // The latest visit wins per menu name.
+    await expect(
+      menu.getByRole("listitem").filter({ hasText: "순대국밥" }),
+    ).toContainText("9,000원");
+    await expect(menu.getByRole("listitem")).toHaveCount(2);
+    await expect(
+      page.getByRole("list", { name: "먹은 메뉴" }).first(),
+    ).toBeVisible();
+  });
 });

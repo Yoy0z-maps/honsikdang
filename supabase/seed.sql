@@ -85,6 +85,28 @@ from (values
 ) as v (review_id, slug)
 join public.tags t on t.slug = v.slug;
 
+-- Ratings and menu prices (WP-08). Review ...004 stays unrated, like a
+-- review written before ratings existed (Q74).
+update public.restaurant_reviews r
+   set overall_rating = v.rating
+  from (values
+    ('5eed2000-0000-4000-8000-000000000001'::uuid, 5::smallint),
+    ('5eed2000-0000-4000-8000-000000000002', 4),
+    ('5eed2000-0000-4000-8000-000000000003', 5),
+    ('5eed2000-0000-4000-8000-000000000005', 4),
+    ('5eed2000-0000-4000-8000-000000000006', 4),
+    ('5eed2000-0000-4000-8000-000000000007', 3),
+    ('5eed2000-0000-4000-8000-000000000008', 3),
+    ('5eed2000-0000-4000-8000-000000000009', 2)
+  ) as v (id, rating)
+ where r.id = v.id;
+
+insert into public.review_menu_items (review_id, position, name, price) values
+  ('5eed2000-0000-4000-8000-000000000001', 1, '순대국밥', 9000),
+  ('5eed2000-0000-4000-8000-000000000001', 2, '수육 반접시', 12000),
+  ('5eed2000-0000-4000-8000-000000000002', 1, '순대국밥', 10000),
+  ('5eed2000-0000-4000-8000-000000000003', 1, '돈코츠 라멘', 11000);
+
 -- Local/CI-only moderators (decision Q30): seed-user-3@example.invalid and
 -- seed-admin-2@example.invalid sign in through Mailpit and use /admin. Never seed admins in production;
 -- see specs/ops/grant-admin.md.

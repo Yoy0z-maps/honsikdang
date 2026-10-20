@@ -7,7 +7,7 @@ import type { QueryParser } from "./types";
 
 const LOCAL_HOSTS = new Set(["127.0.0.1", "localhost", "[::1]"]);
 
-function isLocalSupabase(): boolean {
+export function isLocalSupabase(): boolean {
   try {
     const url = new URL(process.env.NEXT_PUBLIC_SUPABASE_URL ?? "");
     return LOCAL_HOSTS.has(url.hostname);

@@ -12,9 +12,12 @@ import { getNaverMapKeyId } from "@/lib/env";
  */
 export function PinPicker({
   initial,
+  moveTo = null,
   onChange,
 }: {
   initial: Camera;
+  /** Pans the map under the pin, e.g. to a picked search result. */
+  moveTo?: { position: LatLng; nonce: number } | null;
   onChange: (position: LatLng) => void;
 }) {
   const keyId = getNaverMapKeyId();
@@ -29,7 +32,7 @@ export function PinPicker({
           camera={initial}
           markers={[]}
           selectedId={null}
-          focus={null}
+          focus={moveTo}
           onSelect={() => {}}
           onIdle={(camera) => onChange(camera.center)}
           onStatusChange={setStatus}
