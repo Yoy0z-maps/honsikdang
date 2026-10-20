@@ -7,3 +7,7 @@ supabase/.branches
 # Hand-maintained specs; keep their formatting stable for diffs.
 HONSIKDANG_MASTER_PLAN.md
 specs/
+
+# Email templates: pasted into the Supabase dashboard as-is; reformatting
+# can add visible spaces inside buttons and links.
+supabase/templates/

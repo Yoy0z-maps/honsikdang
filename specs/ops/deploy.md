@@ -46,8 +46,10 @@
 
 1. Authentication → **URL Configuration**
    - Site URL: `https://<vercel 주소>`
-   - Redirect URLs: `https://<vercel 주소>/auth/confirm**`
-2. Authentication → **Emails → Templates**: "Magic Link"와 "Confirm signup" 둘 다 본문을 [`supabase/templates/magic_link.html`](../../supabase/templates/magic_link.html) 내용으로 바꾸기 (링크 형식이 `/auth/confirm?…token_hash=…`여야 로그인이 됩니다)
+   - Redirect URLs: `https://<vercel 주소>/auth/confirm**` (`**`는 링크 뒤에 붙는 `?next=…`까지 허용하기 위해 필요)
+2. Authentication → **Emails → Templates** (링크 형식이 `/auth/confirm?…token_hash=…`여야 로그인이 됩니다)
+   - **Magic Link**: 제목 `혼식당 로그인 링크`, 본문은 [`supabase/templates/magic_link.html`](../../supabase/templates/magic_link.html) 전체
+   - **Confirm signup**: 제목 `혼식당에 오신 걸 환영해요`, 본문은 [`supabase/templates/confirmation.html`](../../supabase/templates/confirmation.html) 전체 (처음 로그인하는 주소에 보내짐)
 3. Authentication → **Emails → SMTP Settings** → Enable custom SMTP
    - Sender email: 발신용 Gmail 주소, Sender name: `혼식당`
    - Host `smtp.gmail.com`, Port `587`, Username: Gmail 주소, Password: 0단계의 **앱 비밀번호**
