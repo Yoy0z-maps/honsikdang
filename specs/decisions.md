@@ -969,13 +969,16 @@ B-01, B-02 해소.
 | 로그인 메일 | Gmail SMTP(앱 비밀번호) 정상, 디자인 템플릿 적용 |
 | 운영자 | work.johnhan@gmail.com에 admin 부여(`specs/ops/grant-admin.md` 절차) |
 | K-57 | 해소 — 운영 DB에 WP-08 마이그레이션 적용 |
-| K-56 | **미해소** — 등록된 검색 키가 NCP 형식(ID 10자·Secret 40자)이라 `openapi.naver.com`이 401(코드 024) 반환. developers.naver.com 키는 ID 20자·Secret 10자. 그동안 검색 상자는 보이지만 "검색하지 못했어요" 후 직접 입력 |
+| K-56 | 해소 — 원인은 키가 아니라 호출 주소. NAVER 검색 API가 NCP의 NAVER API HUB로 옮겨져, 등록한 키는 `naverapihub.apigw.ntruss.com`에서 정상(C-89) |
+
+| ID | 결정 | 이유 |
+|---|---|---|
+| C-89 | 식당 검색은 NAVER API HUB(`GET naverapihub.apigw.ntruss.com/search/v1/local`, 헤더 `X-NCP-APIGW-API-KEY-ID`·`X-NCP-APIGW-API-KEY`)로 호출. 변수 이름은 그대로 | developers.naver.com 검색 API가 NCP로 이관(공식 API 가이드 `naver-api-hub-search-local`). 실측: 시청 국밥·을지로 라멘·강남역 카페 각 5건, 좌표는 C-88대로 WGS84×10⁷ |
 
 ### 25.1 남은 일 (사용자)
 
 | ID | 내용 |
 |---|---|
-| K-56 | developers.naver.com → Application 등록(검색 API)에서 받은 키로 `.env`·Vercel의 `NAVER_SEARCH_CLIENT_ID`·`NAVER_SEARCH_CLIENT_SECRET` 교체 후 재배포 |
 | K-59 | Vercel → Cron Jobs에서 `/api/jobs/daily` 한 번 수동 실행해 성공 확인 |
 | K-60 | 번들에 노출됐던 NCP 지도 Client Secret 재발급 여부 확인 |
 | K-55·K-58 | 실기기 점검(`specs/ops/device-check.md`) |
@@ -1006,3 +1009,4 @@ B-01, B-02 해소.
 | 2026-10-19 | WP-07(코드): C-73~C-80, D-01·D-03·D-11 해소, 계정 삭제·익명화, 보관 기간, 정책 문서, AI 출시 스위치, 매일 작업, 배포 절차서, pgTAP 295건, e2e 80건, W7-01~05, K-52~55 | Claude (WP-07) |
 | 2026-10-20 | WP-08: Q69–Q75(C-81~C-88), 식당 검색 자동 입력, 시작 위치·서울역 대체, 내 위치 따라가기, 리뷰 별점·메뉴 가격, pgTAP 311건, 단위 167건, K-56~58 | Claude (WP-08) |
 | 2026-10-20 | 운영 배포 기록(§25): WP-08 마이그레이션 적용, 운영자 지정, K-57 해소, 검색 키 형식 문제(K-56), K-59~60 | Claude |
+| 2026-10-20 | C-89: 식당 검색을 NAVER API HUB 주소로 변경, 실측 확인, K-56 해소 | Claude |
